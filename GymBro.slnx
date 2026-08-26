@@ -1,0 +1,24 @@
+<Solution>
+  <Folder Name="/GymBro.IA/">
+    <File Path="GymBro.IA/01_Analisis_y_Depuracion_Datasets.ipynb" />
+    <File Path="GymBro.IA/arquitectura_final_datasets.png" />
+    <File Path="GymBro.IA/etl_calidad_metrica.png" />
+    <File Path="GymBro.IA/etl_feature_pam.png" />
+    <File Path="GymBro.IA/etl_homologacion_duracion.png" />
+    <File Path="GymBro.IA/etl_volumen_registros.png" />
+    <File Path="GymBro.IA/grafico_depurado_correlacion.png" />
+    <File Path="GymBro.IA/grafico_depurado_presion.png" />
+    <File Path="GymBro.IA/grafico_final_actividades.png" />
+    <File Path="GymBro.IA/grafico_final_calorias.png" />
+    <File Path="GymBro.IA/grafico_metricas_fisiologicas.png" />
+    <File Path="GymBro.IA/grafico_musculos.png" />
+    <File Path="GymBro.IA/grafico_objetivos.png" />
+    <File Path="GymBro.IA/grafico_salud.png" />
+    <File Path="GymBro.IA/main.py" />
+    <File Path="GymBro.IA/traducir_dataset.py" />
+  </Folder>
+  <Project Path="GymBro.Api/GymBro.Api.csproj" Id="e0ca9b9d-0fd2-4596-afa9-979ad8eaaf5f" />
+  <Project Path="GymBro.Application/GymBro.Application.csproj" Id="1906642f-7cec-47f1-bea5-a24c0989bb68" />
+  <Project Path="GymBro.Domain/GymBro.Domain.csproj" Id="24d0f85a-e44d-48da-8bce-9e08cb8e4158" />
+  <Project Path="GymBro.Infrastructure/GymBro.Infrastructure.csproj" Id="06b8db05-2407-41e5-857f-86a6124ee840" />
+</Solution>

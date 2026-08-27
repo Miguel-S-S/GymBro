@@ -5,7 +5,7 @@ app = FastAPI(title="GymBro AI Microservice")
 
 @app.get("/")
 def health_check():
-    return {"status": "El microservicion de IA de GymBro esta corriendo exitosamente"}
+    return {"status": "El microservicio de IA de GymBro esta corriendo exitosamente"}
 
 @app.post("/generar-embedding/")
 def generar_embedding(texto: str):

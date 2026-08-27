@@ -4,7 +4,7 @@ namespace GymBro.Domain.Entities
 {
     public class Socio : EntidadAuditable
     {
-        public Guid Id { get; set; } = Guid.NewGuid();
+        public Guid Id { get; set; }
         public string Nombre { get; set; } = string.Empty;
         public string Apellido { get; set; } = string.Empty;
         public string Email { get; set; } = string.Empty;
@@ -15,15 +15,9 @@ namespace GymBro.Domain.Entities
         public NivelExperiencia Nivel { get; set; }
 
         public ICollection<MedicionFisica> HistorialFisico { get; set; } = new List<MedicionFisica>();
-        public ICollection<SesionEntrenamiento> Sesiones { get; set; }
-          = new List<SesionEntrenamiento>();
-
+        public ICollection<SesionEntrenamiento> Sesiones { get; set; } = new List<SesionEntrenamiento>();
         public string NombreCompleto =>
            $"{Nombre} {Apellido}";
-
-        public MedicionFisica? UltimaMedicion =>
-            HistorialFisico
-                .OrderByDescending(m => m.FechaAlta)
-                .FirstOrDefault();
+        public MedicionFisica? UltimaMedicion => HistorialFisico.OrderByDescending(m => m.FechaAlta).FirstOrDefault();
     }
 }

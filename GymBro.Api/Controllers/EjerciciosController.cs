@@ -1,10 +1,5 @@
-﻿using GymBro.Application.DTOs;
-using GymBro.Application.Services;
-using GymBro.Infrastructure.Persistence;
+﻿using GymBro.Application.Services;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using Pgvector;
-using Pgvector.EntityFrameworkCore; 
 
 namespace GymBro.Api.Controllers
 {
@@ -12,13 +7,12 @@ namespace GymBro.Api.Controllers
     [ApiController]
     public class EjerciciosController : ControllerBase
     {
-        private readonly GymBroDbContext _context;
-        private readonly IIaService _iaService;
+        // Solo inyectamos la abstracción de la capa de Aplicación
+        private readonly IBuscadorSemanticoService _buscadorSemantico;
 
-        public EjerciciosController(GymBroDbContext context, IIaService iaService)
+        public EjerciciosController(IBuscadorSemanticoService buscadorSemantico)
         {
-            _context = context;
-            _iaService = iaService;
+            _buscadorSemantico = buscadorSemantico;
         }
 
         [HttpGet("busqueda-inteligente")]
@@ -27,22 +21,10 @@ namespace GymBro.Api.Controllers
             if (string.IsNullOrWhiteSpace(consulta))
                 return BadRequest("La consulta no puede estar vacía.");
 
-            // 1. Convertimos la frase del usuario a un vector usando Ollama (Python)
-            var vectorConsultaArray = await _iaService.GenerarEmbeddingAsync(consulta);
-            var vectorBuscado = new Vector(vectorConsultaArray);
+            var resultados = await _buscadorSemantico.BuscarEjerciciosSimilaresAsync(consulta, cantidad);
 
-            // 2. Buscamos en PostgreSQL los ejercicios matemáticamente más cercanos (Distancia de Cosenos)
-            var resultados = await _context.Ejercicios
-                .OrderBy(e => e.Embedding!.CosineDistance(vectorBuscado))
-                .Take(cantidad)
-                .Select(e => new EjercicioBuscadoDto
-                {
-                    Id = e.Id,
-                    Nombre = e.Nombre,
-                    GrupoMuscular = e.GrupoMuscular,
-                    Equipamiento = e.Equipamiento
-                })
-                .ToListAsync();
+            if (resultados == null || !resultados.Any())
+                return NotFound("No se encontraron ejercicios que coincidan con la búsqueda.");
 
             return Ok(resultados);
         }

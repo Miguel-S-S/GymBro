@@ -24,21 +24,12 @@ namespace GymBro.Infrastructure.Migrations
             NpgsqlModelBuilderExtensions.HasPostgresExtension(modelBuilder, "vector");
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
 
-            modelBuilder.Entity("GymBro.Domain.Entities.Ejercicio", b =>
+            modelBuilder.Entity("GymBro.Domain.Entities.DosificacionVolumetrica", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid")
                         .HasColumnName("id");
-
-                    b.Property<Vector>("Embedding")
-                        .HasColumnType("vector")
-                        .HasColumnName("embedding");
-
-                    b.Property<string>("Equipamiento")
-                        .IsRequired()
-                        .HasColumnType("text")
-                        .HasColumnName("equipamiento");
 
                     b.Property<DateTime>("FechaAlta")
                         .HasColumnType("timestamp with time zone")
@@ -52,15 +43,31 @@ namespace GymBro.Infrastructure.Migrations
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("fecha_modificacion");
 
-                    b.Property<string>("GrupoMuscular")
+                    b.Property<string>("ParteCuerpo")
                         .IsRequired()
                         .HasColumnType("text")
-                        .HasColumnName("grupo_muscular");
+                        .HasColumnName("parte_cuerpo");
 
-                    b.Property<string>("Nombre")
+                    b.Property<int>("RepeticionesMaximas")
+                        .HasColumnType("integer")
+                        .HasColumnName("repeticiones_maximas");
+
+                    b.Property<int>("RepeticionesMinimas")
+                        .HasColumnType("integer")
+                        .HasColumnName("repeticiones_minimas");
+
+                    b.Property<int>("SeriesMaximas")
+                        .HasColumnType("integer")
+                        .HasColumnName("series_maximas");
+
+                    b.Property<int>("SeriesMinimas")
+                        .HasColumnType("integer")
+                        .HasColumnName("series_minimas");
+
+                    b.Property<string>("SubzonaObjetivo")
                         .IsRequired()
                         .HasColumnType("text")
-                        .HasColumnName("nombre");
+                        .HasColumnName("subzona_objetivo");
 
                     b.Property<int>("UsuarioAlta")
                         .HasColumnType("integer")
@@ -73,6 +80,96 @@ namespace GymBro.Infrastructure.Migrations
                     b.Property<int?>("UsuarioModificacion")
                         .HasColumnType("integer")
                         .HasColumnName("usuario_modificacion");
+
+                    b.Property<string>("ZonaObjetivo")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("zona_objetivo");
+
+                    b.HasKey("Id")
+                        .HasName("pk_dosificaciones");
+
+                    b.ToTable("dosificaciones", (string)null);
+                });
+
+            modelBuilder.Entity("GymBro.Domain.Entities.Ejercicio", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<int>("Dificultad")
+                        .HasColumnType("integer")
+                        .HasColumnName("dificultad");
+
+                    b.Property<string>("Ejecucion")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("ejecucion");
+
+                    b.Property<Vector>("Embedding")
+                        .HasColumnType("vector(768)")
+                        .HasColumnName("embedding");
+
+                    b.Property<string>("Equipamiento")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("equipamiento");
+
+                    b.Property<string>("Estabilizadores")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("estabilizadores");
+
+                    b.Property<DateTime>("FechaAlta")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("fecha_alta");
+
+                    b.Property<DateTime?>("FechaBaja")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("fecha_baja");
+
+                    b.Property<DateTime?>("FechaModificacion")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("fecha_modificacion");
+
+                    b.Property<string>("MusculoPrincipal")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("musculo_principal");
+
+                    b.Property<string>("Nombre")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("nombre");
+
+                    b.Property<string>("Preparacion")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("preparacion");
+
+                    b.Property<string>("Sinergistas")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("sinergistas");
+
+                    b.Property<int>("UsuarioAlta")
+                        .HasColumnType("integer")
+                        .HasColumnName("usuario_alta");
+
+                    b.Property<int?>("UsuarioBaja")
+                        .HasColumnType("integer")
+                        .HasColumnName("usuario_baja");
+
+                    b.Property<int?>("UsuarioModificacion")
+                        .HasColumnType("integer")
+                        .HasColumnName("usuario_modificacion");
+
+                    b.Property<string>("ZonaObjetivo")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("zona_objetivo");
 
                     b.HasKey("Id")
                         .HasName("pk_ejercicios");
@@ -97,6 +194,38 @@ namespace GymBro.Infrastructure.Migrations
                         .HasColumnType("boolean")
                         .HasColumnName("aplica_hipertension");
 
+                    b.Property<string>("CategoriaIMC")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("categoria_imc");
+
+                    b.Property<string>("CategoriaRutina")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("categoria_rutina");
+
+                    b.Property<int>("Edad")
+                        .HasColumnType("integer")
+                        .HasColumnName("edad");
+
+                    b.Property<DateTime>("FechaAlta")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("fecha_alta");
+
+                    b.Property<DateTime?>("FechaBaja")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("fecha_baja");
+
+                    b.Property<DateTime?>("FechaModificacion")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("fecha_modificacion");
+
+                    b.Property<string>("Genero")
+                        .IsRequired()
+                        .HasMaxLength(1)
+                        .HasColumnType("character varying(1)")
+                        .HasColumnName("genero");
+
                     b.Property<string>("Objetivo")
                         .IsRequired()
                         .HasColumnType("text")
@@ -112,10 +241,17 @@ namespace GymBro.Infrastructure.Migrations
                         .HasColumnType("text")
                         .HasColumnName("sugerencia_dieta");
 
-                    b.Property<string>("TipoEntrenamiento")
-                        .IsRequired()
-                        .HasColumnType("text")
-                        .HasColumnName("tipo_entrenamiento");
+                    b.Property<int>("UsuarioAlta")
+                        .HasColumnType("integer")
+                        .HasColumnName("usuario_alta");
+
+                    b.Property<int?>("UsuarioBaja")
+                        .HasColumnType("integer")
+                        .HasColumnName("usuario_baja");
+
+                    b.Property<int?>("UsuarioModificacion")
+                        .HasColumnType("integer")
+                        .HasColumnName("usuario_modificacion");
 
                     b.HasKey("Id")
                         .HasName("pk_matrices_recomendacion");
@@ -134,6 +270,11 @@ namespace GymBro.Infrastructure.Migrations
                         .HasColumnType("numeric")
                         .HasColumnName("altura_cm");
 
+                    b.Property<string>("CondicionMedica")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("condicion_medica");
+
                     b.Property<DateTime>("FechaAlta")
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("fecha_alta");
@@ -150,9 +291,25 @@ namespace GymBro.Infrastructure.Migrations
                         .HasColumnType("integer")
                         .HasColumnName("frecuencia_cardiaca_reposo");
 
+                    b.Property<int>("FrecuenciaEntrenamientoDias")
+                        .HasColumnType("integer")
+                        .HasColumnName("frecuencia_entrenamiento_dias");
+
                     b.Property<decimal>("HorasSuenoUltimaNoche")
                         .HasColumnType("numeric")
                         .HasColumnName("horas_sueno_ultima_noche");
+
+                    b.Property<decimal>("IMC")
+                        .HasColumnType("numeric")
+                        .HasColumnName("imc");
+
+                    b.Property<decimal>("IngestaAguaLitros")
+                        .HasColumnType("numeric")
+                        .HasColumnName("ingesta_agua_litros");
+
+                    b.Property<int>("NivelEstres")
+                        .HasColumnType("integer")
+                        .HasColumnName("nivel_estres");
 
                     b.Property<decimal>("PesoKg")
                         .HasColumnType("numeric")
@@ -162,25 +319,26 @@ namespace GymBro.Infrastructure.Migrations
                         .HasColumnType("numeric")
                         .HasColumnName("porcentaje_grasa");
 
-                    b.Property<int>("PresionArterialDiastolica")
-                        .HasColumnType("integer")
+                    b.Property<decimal>("PresionArterialDiastolica")
+                        .HasColumnType("numeric")
                         .HasColumnName("presion_arterial_diastolica");
 
-                    b.Property<int>("PresionArterialSistolica")
-                        .HasColumnType("integer")
+                    b.Property<decimal>("PresionArterialMedia")
+                        .HasColumnType("numeric")
+                        .HasColumnName("presion_arterial_media");
+
+                    b.Property<decimal>("PresionArterialSistolica")
+                        .HasColumnType("numeric")
                         .HasColumnName("presion_arterial_sistolica");
 
                     b.Property<Guid>("SocioId")
                         .HasColumnType("uuid")
                         .HasColumnName("socio_id");
 
-                    b.Property<bool>("TieneDiabetes")
-                        .HasColumnType("boolean")
-                        .HasColumnName("tiene_diabetes");
-
-                    b.Property<bool>("TieneHipertension")
-                        .HasColumnType("boolean")
-                        .HasColumnName("tiene_hipertension");
+                    b.Property<string>("TipoEntrenamiento")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("tipo_entrenamiento");
 
                     b.Property<int>("UsuarioAlta")
                         .HasColumnType("integer")

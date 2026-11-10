@@ -1,4 +1,4 @@
-Age,Gender,Weight_kg,Height_cm,Max_BPM,Avg_BPM,Resting_BPM,Calories_Burned,Workout_Type,Fat_Percentage,Water_Intake_Liters,Workout_Frequency_Days,Experience_Level,BMI,Duration_Minutes,Calories_Per_Min,Birth_Date,BP_Systolic,BP_Diastolic,MAP_mmHg,health_condition,stress_level,sleep_hours
+Edad,Genero,Peso_kg,Altura_cm,PPM_Max,PPM_Prom,PPM_Reposo,Calorias_Quemadas,Tipo_Entrenamiento,Porcentaje_Grasa,Ingesta_Agua_Litros,Frecuencia_Entrenamiento_Dias,Nivel_Experiencia,IMC,Minutos_Duracion,Calorias_Por_Minuto,Fecha_Nacimiento,PA_Sistolica,PA_Diastolica,PAM_mmHg,Condicion_Salud,Nivel_Stress,Horas_Sueño
 18,F,52.3,174.0,187,165,58,990.0,Cardio,29.4,2.2,2,1,17.27,72,13.75,2008-01-01,113.3,88.4,96.7,Sin Patología Declarada,6,6.8
 18,F,54.8,168.0,176,158,71,1003.0,Fuerza,32.0,2.2,4,2,19.42,76,13.2,2008-01-01,113.3,88.4,96.7,Sin Patología Declarada,3,9.1
 18,F,63.9,159.0,185,125,50,1169.0,Fuerza,16.4,2.7,4,3,25.28,112,10.44,2008-01-01,113.3,88.4,96.7,Sin Patología Declarada,4,7.8

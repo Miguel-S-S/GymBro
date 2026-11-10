@@ -1,4 +1,4 @@
-Age,Gender,Weight_kg,Height_cm,Max_BPM,Avg_BPM,Resting_BPM,Calories_Burned,Workout_Type,Fat_Percentage,Water_Intake_Liters,Workout_Frequency_Days,Experience_Level,BMI,Duration_Minutes,Calories_Per_Min,Birth_Date
+Edad,Genero,Peso_kg,Altura_cm,PPP_Max,PPM_Prom,PPM_Reposo,Calorias_Quemadas,Tipo_Entrenamiento,Porcentaje_Grasa,Ingesta_Agua_Litros,Frecuencia_Entrenamiento_Dias,Nivel_Experiencia,IMC,Minutos_Duracion,Calorias_Por_Minuto,Fecha_Nacimiento
 46,F,74.9,153.0,179,151,66,883.0,HIIT,33.9,2.1,4,2,32.0,78,11.32,1980-01-01
 32,F,68.1,166.0,167,122,54,677.0,Cardio,33.4,2.3,4,2,24.71,67,10.1,1994-01-01
 25,M,53.2,170.0,190,164,56,532.0,Fuerza,28.8,2.1,3,1,18.41,35,15.2,2001-01-01

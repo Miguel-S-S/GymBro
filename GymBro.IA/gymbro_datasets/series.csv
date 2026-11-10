@@ -1,53 +1,53 @@
-Body_Part,Target_Subzone,Exercise_Name,Min_Sets,Max_Sets,Min_Reps,Max_Reps,Target_Zone
-Chest,Upper Chest,Incline dumbbell press,3,4,8,12,Chest
-Chest,Upper Chest,Incline cable crossovers,3,4,10,15,Chest
-Chest,Upper Chest,Incline dumbbell flyes,3,4,10,15,Chest
-Chest,Lower Chest,Decline dumbbell press,3,4,8,12,Chest
-Chest,Lower Chest,Decline cable crossovers,3,4,10,15,Chest
-Chest,Lower Chest,Decline dumbbell flyes,3,4,10,15,Chest
-Chest,Chest Isolation,Chest flyes,3,4,10,15,Chest
-Chest,Chest Isolation,Cable crossovers,3,4,10,15,Chest
-Chest,Chest Isolation,Dumbbell flyes,3,4,10,15,Chest
-Back,Upper,Pull-ups,3,4,8,12,Back
-Back,Upper,Barbell rows,3,4,8,12,Back
-Back,Upper,Dumbbell rows,3,4,8,12,Back
-Back,Upper,Seated cable rows,3,4,8,12,Back
-Back,Lower,Bent-over rows,3,4,8,12,Back
-Back,Lower,Hyperextensions,3,4,10,15,Back
-Back,Lower,Bird dog,3,10,10,16,Back
-Arms,Biceps,Barbell curls,3,4,8,12,Arms
-Arms,Biceps,Dumbbell curls,3,4,8,12,Arms
-Arms,Biceps,Preacher curls,3,4,8,12,Arms
-Arms,Biceps,Hammer curls,3,4,8,12,Arms
-Arms,Biceps,Concentration curls,3,4,8,12,Arms
-Arms,Triceps,Close-grip bench press,3,4,8,12,Arms
-Arms,Triceps,Overhead triceps extensions,3,4,8,12,Arms
-Arms,Triceps,Triceps pushdowns,3,4,8,12,Arms
-Arms,Triceps,Skull crushers,3,4,8,12,Arms
-Arms,Triceps,Triceps dips,3,5,8,13,Arms
-Legs,Quadriceps,Barbell squats,3,4,8,12,Legs
-Legs,Quadriceps,Leg press,3,4,8,12,Legs
-Legs,Quadriceps,Leg extensions,3,4,10,15,Legs
-Legs,Hamstrings,Romanian deadlifts,3,4,8,12,Legs
-Legs,Hamstrings,Leg curls,3,4,10,15,Legs
-Legs,Glutes,Barbell hip thrusts,3,4,8,12,Legs
-Legs,Glutes,Donkey kicks,3,10,10,15,Legs
-Legs,Calves,Standing calf raises,3,15,15,20,Legs
-Legs,Calves,Seated calf raises,3,15,15,21,Legs
-Shoulders,Anterior,Dumbbell front raises,3,4,8,12,Shoulders
-Shoulders,Anterior,Military press,3,4,8,12,Shoulders
-Shoulders,Lateral,Lateral raises,3,4,10,15,Shoulders
-Shoulders,Posterior,Bent-over lateral raises,3,4,10,15,Shoulders
-Shoulders,Posterior,Face pulls,3,4,10,15,Shoulders
-Abs,Upper,Crunches,3,4,10,15,Legs
-Abs,Upper,Leg raises,3,4,10,15,Legs
-Abs,Middle,Bicycle crunches,3,4,10,15,Legs
-Abs,Middle,Russian twists,3,4,10,15,Legs
-Abs,Lower,Hanging leg raises,3,4,10,15,Legs
-Abs,Lower,Plank,30,60,1,1,Legs
-Forearms,Wrist Flexors,Wrist curl,3,4,10,15,Forearms
-Forearms,Wrist Extensors,Wrist extension,3,4,10,15,Forearms
-Forearms,Grip Strength,Plate pinch,3,4,15,20,Forearms
-Forearms,Grip Strength,Towel pull-up,3,4,10,15,Forearms
-Forearms,Grip Strength,Fat grip dumbbell curl,3,4,10,15,Forearms
-Forearms,Grip Strength,Hammer curl,3,4,10,15,Forearms
+Parte_Cuerpo,Subzona_Objetivo,Nombre_Ejercicio,Series_Min,Series_Max,Reps_Min,Reps_Max,Zona_Objetivo
+Pecho,Parte superior del pecho,Press inclinado con mancuernas,3,4,8,12,Pecho
+Pecho,Parte superior del pecho,Cruces de cables inclinados,3,4,10,15,Pecho
+Pecho,Parte superior del pecho,Volantes inclinados con mancuernas,3,4,10,15,Pecho
+Pecho,Pecho inferior,Press declinado con mancuernas,3,4,8,12,Pecho
+Pecho,Pecho inferior,Rechazar cruces de cables,3,4,10,15,Pecho
+Pecho,Pecho inferior,Declinar aperturas con mancuernas,3,4,10,15,Pecho
+Pecho,Aislamiento del tórax,Moscas en el pecho,3,4,10,15,Pecho
+Pecho,Aislamiento del tórax,Cruces de cables,3,4,10,15,Pecho
+Pecho,Aislamiento del tórax,Aperturas con mancuernas,3,4,10,15,Pecho
+Atrás,Superior,Dominadas,3,4,8,12,Atrás
+Atrás,Superior,Remo con barra,3,4,8,12,Atrás
+Atrás,Superior,Remo con mancuernas,3,4,8,12,Atrás
+Atrás,Superior,Filas de cables sentados,3,4,8,12,Atrás
+Atrás,Más bajo,Filas inclinadas,3,4,8,12,Atrás
+Atrás,Más bajo,hiperextensiones,3,4,10,15,Atrás
+Atrás,Más bajo,perro pájaro,3,10,10,16,Atrás
+Brazos,Bíceps,Curl con barra,3,4,8,12,Brazos
+Brazos,Bíceps,Curl con mancuernas,3,4,8,12,Brazos
+Brazos,Bíceps,Rizos de predicador,3,4,8,12,Brazos
+Brazos,Bíceps,Rizos de martillo,3,4,8,12,Brazos
+Brazos,Bíceps,Rizos de concentración,3,4,8,12,Brazos
+Brazos,Tríceps,Press de banca con agarre cerrado,3,4,8,12,Brazos
+Brazos,Tríceps,Extensiones de tríceps por encima de la cabeza,3,4,8,12,Brazos
+Brazos,Tríceps,Flexiones de tríceps,3,4,8,12,Brazos
+Brazos,Tríceps,Trituradoras de calaveras,3,4,8,12,Brazos
+Brazos,Tríceps,Inmersiones de tríceps,3,5,8,13,Brazos
+Piernas,Cuadríceps,sentadillas con barra,3,4,8,12,Piernas
+Piernas,Cuadríceps,prensa de piernas,3,4,8,12,Piernas
+Piernas,Cuadríceps,extensiones de piernas,3,4,10,15,Piernas
+Piernas,Isquiotibiales,peso muerto rumano,3,4,8,12,Piernas
+Piernas,Isquiotibiales,flexiones de piernas,3,4,10,15,Piernas
+Piernas,Glúteos,Empujes de cadera con barra,3,4,8,12,Piernas
+Piernas,Glúteos,patadas de burro,3,10,10,15,Piernas
+Piernas,Terneros,Elevaciones de pantorrillas de pie,3,15,15,20,Piernas
+Piernas,Terneros,Elevaciones de pantorrillas sentado,3,15,15,21,Piernas
+Espalda,Anterior,Elevaciones frontales con mancuernas,3,4,8,12,Espalda
+Espalda,Anterior,prensa militar,3,4,8,12,Espalda
+Espalda,Lateral,Elevaciones laterales,3,4,10,15,Espalda
+Espalda,Posterior,Elevaciones laterales inclinadas,3,4,10,15,Espalda
+Espalda,Posterior,tirones de cara,3,4,10,15,Espalda
+abdominales,Superior,abdominales,3,4,10,15,Piernas
+abdominales,Superior,Elevaciones de piernas,3,4,10,15,Piernas
+abdominales,Medio,abdominales en bicicleta,3,4,10,15,Piernas
+abdominales,Medio,giros rusos,3,4,10,15,Piernas
+abdominales,Más bajo,Elevaciones de piernas colgantes,3,4,10,15,Piernas
+abdominales,Más bajo,Tablón,30,60,1,1,Piernas
+antebrazos,Flexores de muñeca,Curl de muñeca,3,4,10,15,antebrazos
+antebrazos,Extensores de muñeca,extensión de muñeca,3,4,10,15,antebrazos
+antebrazos,Fuerza de agarre,Pellizco de placa,3,4,15,20,antebrazos
+antebrazos,Fuerza de agarre,Levantamiento de toalla,3,4,10,15,antebrazos
+antebrazos,Fuerza de agarre,Curl con mancuernas con agarre gordo,3,4,10,15,antebrazos
+antebrazos,Fuerza de agarre,Curl de martillo,3,4,10,15,antebrazos

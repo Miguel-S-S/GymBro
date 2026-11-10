@@ -1,4 +1,4 @@
-﻿using GymBro.Domain.Entities;
+using GymBro.Domain.Entities;
 using Microsoft.EntityFrameworkCore;
 
 namespace GymBro.Infrastructure.Persistence
@@ -14,6 +14,9 @@ namespace GymBro.Infrastructure.Persistence
         public DbSet<SesionEjercicio> SesionesEjercicios { get; set; }
         public DbSet<MatrizRecomendacion> MatricesRecomendacion { get; set; }
         public DbSet<DosificacionVolumetrica> Dosificaciones { get; set; }
+        public DbSet<PrescripcionEntrenamiento> PrescripcionesEntrenamiento { get; set; }
+        public DbSet<PrescripcionEjercicio> PrescripcionesEjercicios { get; set; }
+        public DbSet<SerieRealizada> SeriesRealizadas { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -42,22 +45,88 @@ namespace GymBro.Infrastructure.Persistence
                 .HasForeignKey(m => m.SocioId)
                 .OnDelete(DeleteBehavior.Restrict);
 
-            // 4. Configuración de la tabla intermedia SesionEjercicio
-            modelBuilder.Entity<SesionEjercicio>()
-                .HasKey(se => new { se.SesionId, se.EjercicioId });
-
+            // 4. Configuración de SesionEjercicio
             modelBuilder.Entity<SesionEjercicio>()
                 .HasOne(se => se.Sesion)
                 .WithMany(s => s.EjerciciosEjecutados)
-                .HasForeignKey(se => se.SesionId);
+                .HasForeignKey(se => se.SesionId)
+                .OnDelete(DeleteBehavior.Cascade);
 
             modelBuilder.Entity<SesionEjercicio>()
                 .HasOne(se => se.Ejercicio)
                 .WithMany()
-                .HasForeignKey(se => se.EjercicioId);
+                .HasForeignKey(se => se.EjercicioId)
+                .OnDelete(DeleteBehavior.Restrict);
 
-            // Se extiende el filtro lógico a la tabla intermedia para evitar advertencias de integridad
-            modelBuilder.Entity<SesionEjercicio>().HasQueryFilter(se => se.Ejercicio.FechaBaja == null && se.Sesion.FechaBaja == null);
+            modelBuilder.Entity<SesionEjercicio>().HasQueryFilter(se => se.FechaBaja == null);
+            modelBuilder.Entity<SesionEjercicio>().Property(se => se.Observaciones).HasMaxLength(500);
+            modelBuilder.Entity<SesionEjercicio>().ToTable(t => t.HasCheckConstraint("CK_SesionEjercicio_Orden", "orden > 0"));
+
+            // Configuración de SerieRealizada
+            modelBuilder.Entity<SerieRealizada>().HasQueryFilter(sr => sr.FechaBaja == null);
+
+            modelBuilder.Entity<SerieRealizada>()
+                .HasOne(sr => sr.SesionEjercicio)
+                .WithMany(se => se.SeriesRealizadas)
+                .HasForeignKey(sr => sr.SesionEjercicioId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<SerieRealizada>()
+                .ToTable(t => {
+                    t.HasCheckConstraint("CK_SerieRealizada_OrdenSerie", "orden_serie > 0");
+                    t.HasCheckConstraint("CK_SerieRealizada_PesoLevantadoKg", "peso_levantado_kg >= 0");
+                    t.HasCheckConstraint("CK_SerieRealizada_Repeticiones", "repeticiones > 0");
+                    t.HasCheckConstraint("CK_SerieRealizada_RIR", "rir IS NULL OR (rir >= 0 AND rir <= 5)");
+                    t.HasCheckConstraint("CK_SerieRealizada_TiempoDescansoSegundos", "tiempo_descanso_segundos IS NULL OR tiempo_descanso_segundos >= 0");
+                });
+
+            modelBuilder.Entity<PrescripcionEntrenamiento>().HasQueryFilter(p => p.FechaBaja == null);
+            modelBuilder.Entity<PrescripcionEjercicio>().HasQueryFilter(p => p.FechaBaja == null);
+
+            modelBuilder.Entity<PrescripcionEntrenamiento>()
+                .Property(p => p.OrigenGeneracion).HasMaxLength(50);
+            modelBuilder.Entity<PrescripcionEntrenamiento>()
+                .Property(p => p.Observaciones).HasMaxLength(500);
+            modelBuilder.Entity<PrescripcionEjercicio>()
+                .Property(p => p.Observaciones).HasMaxLength(500);
+
+            modelBuilder.Entity<Socio>()
+                .HasMany(s => s.Prescripciones)
+                .WithOne(p => p.Socio)
+                .HasForeignKey(p => p.SocioId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<PrescripcionEntrenamiento>()
+                .HasMany(p => p.Sesiones)
+                .WithOne(s => s.PrescripcionEntrenamiento)
+                .HasForeignKey(s => s.PrescripcionEntrenamientoId)
+                .OnDelete(DeleteBehavior.SetNull);
+
+            modelBuilder.Entity<PrescripcionEntrenamiento>()
+                .HasMany(p => p.EjerciciosPrescritos)
+                .WithOne(pe => pe.PrescripcionEntrenamiento)
+                .HasForeignKey(pe => pe.PrescripcionEntrenamientoId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<PrescripcionEjercicio>()
+                .HasOne(pe => pe.Ejercicio)
+                .WithMany()
+                .HasForeignKey(pe => pe.EjercicioId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<PrescripcionEjercicio>()
+                .HasIndex(pe => new { pe.PrescripcionEntrenamientoId, pe.Orden })
+                .IsUnique();
+
+            modelBuilder.Entity<PrescripcionEjercicio>()
+                .ToTable(t => {
+                    t.HasCheckConstraint("CK_PrescripcionEjercicio_SeriesObjetivo", "series_objetivo > 0");
+                    t.HasCheckConstraint("CK_PrescripcionEjercicio_RepeticionesMinimas", "repeticiones_minimas > 0");
+                    t.HasCheckConstraint("CK_PrescripcionEjercicio_RepeticionesMaximas", "repeticiones_maximas >= repeticiones_minimas");
+                    t.HasCheckConstraint("CK_PrescripcionEjercicio_RIRObjetivo", "rir_objetivo IS NULL OR (rir_objetivo >= 0 AND rir_objetivo <= 5)");
+                    t.HasCheckConstraint("CK_PrescripcionEjercicio_DescansoObjetivoSegundos", "descanso_objetivo_segundos > 0");
+                    t.HasCheckConstraint("CK_PrescripcionEjercicio_Orden", "orden > 0");
+                });
 
             // 5. Conversión de Enums a texto puro en la base de datos
             // Conversiones de Enums a texto puro
@@ -66,6 +135,7 @@ namespace GymBro.Infrastructure.Persistence
             modelBuilder.Entity<MatrizRecomendacion>().Property(m => m.Objetivo).HasConversion<string>();
             modelBuilder.Entity<MatrizRecomendacion>().Property(m => m.CategoriaIMC).HasConversion<string>();
             modelBuilder.Entity<MedicionFisica>().Property(m => m.TipoEntrenamiento).HasConversion<string>();
+            modelBuilder.Entity<PrescripcionEntrenamiento>().Property(p => p.Estado).HasConversion<string>();
         }
 
     }

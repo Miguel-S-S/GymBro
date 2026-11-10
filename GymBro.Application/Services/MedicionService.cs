@@ -4,7 +4,7 @@ using GymBro.Application.DTOs;
 
 namespace GymBro.Application.Services
 {
-    public class MedicionService: IMedicionService
+    public class MedicionService : IMedicionService
     {
         private readonly IMedicionRepository _repository;
 
@@ -17,11 +17,42 @@ namespace GymBro.Application.Services
         {
             var medicion = new MedicionFisica
             {
-                SocioId = dto.SocioId,     
+                SocioId = dto.SocioId,
                 PesoKg = dto.PesoKg,
-                AlturaCm = dto.AlturaCm               
+                AlturaCm = dto.AlturaCm
             };
             await _repository.AddAsync(medicion);
         }
+
+        public async Task<IEnumerable<MedicionResponseDto>> GetBySocioIdAsync(Guid socioId)
+        {
+            var mediciones = await _repository.GetBySocioIdAsync(socioId);
+            return mediciones.Select(MapToDto);
+        }
+
+        private static MedicionResponseDto MapToDto(MedicionFisica m) => new()
+        {
+            Id = m.Id,
+            SocioId = m.SocioId,
+            FechaAlta = m.FechaAlta,
+
+            PesoKg = m.PesoKg,
+            AlturaCm = m.AlturaCm,
+            PorcentajeGrasa = m.PorcentajeGrasa,
+            IMC = m.IMC,
+
+            FrecuenciaEntrenamientoDias = m.FrecuenciaEntrenamientoDias,
+            TipoEntrenamiento = m.TipoEntrenamiento.ToString(),
+            IngestaAguaLitros = m.IngestaAguaLitros,
+
+            FrecuenciaCardiacaReposo = m.FrecuenciaCardiacaReposo,
+            PresionArterialSistolica = m.PresionArterialSistolica,
+            PresionArterialDiastolica = m.PresionArterialDiastolica,
+            PresionArterialMedia = m.PresionArterialMedia,
+
+            CondicionMedica = m.CondicionMedica,
+            NivelEstres = m.NivelEstres,
+            HorasSuenoUltimaNoche = m.HorasSuenoUltimaNoche
+        };
     }
 }

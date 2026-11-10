@@ -32,12 +32,24 @@ namespace GymBro.Api.Controllers
             return Ok(socios);
         }
 
+        [HttpGet("{id:guid}")]
+        public async Task<IActionResult> GetById(Guid id)
+        {
+            var socio = await _socioService.GetSocioByIdAsync(id);
+            if (socio == null)
+            {
+                return NotFound();
+            }
+
+            return Ok(socio);
+        }
+
         [HttpPost]
         public async Task<IActionResult> Post([FromBody] SocioCreateDto socio)
         {
             //var nuevoSocio = await _repository.AddAsync(socio);
             var nuevoSocio = await _socioService.CreateSocioAsync(socio);
-            return CreatedAtAction(nameof(Get), new { id = nuevoSocio.Id }, nuevoSocio);
+            return CreatedAtAction(nameof(GetById), new { id = nuevoSocio.Id }, nuevoSocio);
         }
     }
 }

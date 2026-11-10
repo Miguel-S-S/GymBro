@@ -1,4 +1,4 @@
-participant_id,date,Age,Gender,Height_cm,Weight_kg,BMI,Activity_Type,Duration_Minutes,intensity,Calories_Burned,daily_steps,Avg_BPM,Resting_BPM,BP_Systolic,BP_Diastolic,endurance_level,sleep_hours,stress_level,hydration_level,smoking_status,health_condition,fitness_level,MAP_mmHg,Birth_Date
+id_participante,Fecha,Edad,Genero,Altura_cm,Peso_kg,PPP,Tipo_Actividad,Duracion_Minutos,Intensidad,Calorias_Quemadas,Pasos_Diarios,PPP_Prom,PPP_Reposo,PA_Sistolica,PA_Diastolica,Nivel_Resistencia,Horas_Sue�o,Nivel_Stress,Nivel_Hidratacion,Estado_Fumador,Condicion_Salud,Nivel_Fisico,PA_Prom_mmHg,Fecha_Nacimiento
 1,2024/1/7,56,F,165.3,52.23,19.12,Entrenamiento de Fuerza,23.5,Medium,10.7,11120,141,69.5,110.7,72.9,5.44,7.2,4,2.6,Never,Sin Patología Declarada,0.21,85.5,1970-01-01
 1,2024/1/10,56,F,165.3,55.56,20.33,HIIT(Entrenamiento Interválico de Alta Intensidad),86.5,Medium,6.8,10202,121,69.5,110.7,72.9,5.49,7.5,8,2.2,Never,Sin Patología Declarada,0.37,85.5,1970-01-01
 1,2024/1/11,56,F,165.3,53.89,19.72,Entrenamiento de Fuerza,24.4,High,12.4,5912,145,69.5,110.7,72.9,5.52,6.6,7,2.8,Never,Sin Patología Declarada,0.51,85.5,1970-01-01

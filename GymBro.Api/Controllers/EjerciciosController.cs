@@ -7,12 +7,51 @@ namespace GymBro.Api.Controllers
     [ApiController]
     public class EjerciciosController : ControllerBase
     {
-        // Solo inyectamos la abstracción de la capa de Aplicación
+        // Solo inyectamos abstracciones de la capa de Aplicación
         private readonly IBuscadorSemanticoService _buscadorSemantico;
+        private readonly IEjercicioCatalogoService _catalogo;
 
-        public EjerciciosController(IBuscadorSemanticoService buscadorSemantico)
+        public EjerciciosController(IBuscadorSemanticoService buscadorSemantico, IEjercicioCatalogoService catalogo)
         {
             _buscadorSemantico = buscadorSemantico;
+            _catalogo = catalogo;
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> GetCatalogo(
+            [FromQuery] string? texto,
+            [FromQuery] string? zona,
+            [FromQuery] int pagina = 1,
+            [FromQuery] int tamanioPagina = 20)
+        {
+            try
+            {
+                var resultado = await _catalogo.GetCatalogoAsync(texto, zona, pagina, tamanioPagina);
+                return Ok(resultado);
+            }
+            catch (ArgumentException ex)
+            {
+                return BadRequest(new { Error = ex.Message });
+            }
+        }
+
+        [HttpGet("{id:guid}")]
+        public async Task<IActionResult> GetById(Guid id)
+        {
+            var ejercicio = await _catalogo.GetByIdAsync(id);
+            if (ejercicio == null)
+            {
+                return NotFound();
+            }
+
+            return Ok(ejercicio);
+        }
+
+        [HttpGet("zonas")]
+        public async Task<IActionResult> GetZonas()
+        {
+            var zonas = await _catalogo.GetZonasObjetivoAsync();
+            return Ok(zonas);
         }
 
         [HttpGet("busqueda-inteligente")]

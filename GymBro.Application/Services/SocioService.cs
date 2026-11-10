@@ -47,5 +47,19 @@ namespace GymBro.Application.Services
                 FechaAlta = nuevoSocio.FechaAlta
             };
         }
+
+        public async Task<SocioResponseDto?> GetSocioByIdAsync(Guid id)
+        {
+            var socio = await _repository.GetByIdAsync(id);
+            if (socio == null) return null;
+
+            return new SocioResponseDto
+            {
+                Id = socio.Id,
+                NombreCompleto = socio.NombreCompleto,
+                Email = socio.Email,
+                FechaAlta = socio.FechaAlta
+            };
+        }
     }
 }

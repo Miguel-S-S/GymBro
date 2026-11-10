@@ -1,4 +1,4 @@
-﻿using GymBro.Domain.Enums;
+using GymBro.Domain.Enums;
 
 namespace GymBro.Domain.Entities
 {
@@ -15,6 +15,7 @@ namespace GymBro.Domain.Entities
         public NivelExperiencia Nivel { get; set; }
 
         public ICollection<MedicionFisica> HistorialFisico { get; set; } = new List<MedicionFisica>();
+        public ICollection<PrescripcionEntrenamiento> Prescripciones { get; set; } = new List<PrescripcionEntrenamiento>();
         public ICollection<SesionEntrenamiento> Sesiones { get; set; } = new List<SesionEntrenamiento>();
         public string NombreCompleto =>
            $"{Nombre} {Apellido}";

@@ -15,6 +15,18 @@ namespace GymBro.Api.Controllers
             _medicionService = medicionService;
         }
 
+        [HttpGet]
+        public async Task<IActionResult> GetBySocioId([FromQuery] Guid socioId)
+        {
+            if (socioId == Guid.Empty)
+            {
+                return BadRequest("Debe especificar un socioId válido.");
+            }
+
+            var mediciones = await _medicionService.GetBySocioIdAsync(socioId);
+            return Ok(mediciones);
+        }
+
         [HttpPost]
         public async Task<IActionResult> Post([FromBody] MedicionCreateDto dto)
         {
@@ -23,4 +35,3 @@ namespace GymBro.Api.Controllers
         }
     }
 }
-

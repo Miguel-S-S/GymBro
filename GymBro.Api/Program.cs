@@ -25,6 +25,11 @@ builder.Services.AddScoped<ISocioRepository, SocioRepository>();
 builder.Services.AddScoped<ISocioService, SocioService>();
 builder.Services.AddScoped<IMedicionRepository, MedicionRepository>();
 builder.Services.AddScoped<IMedicionService, MedicionService>();
+builder.Services.AddScoped<IEjercicioRepository, EjercicioRepository>();
+builder.Services.AddScoped<IEjercicioCatalogoService, EjercicioCatalogoService>();
+builder.Services.AddScoped<IPrescripcionEntrenamientoRepository, PrescripcionEntrenamientoRepository>();
+builder.Services.AddScoped<ISesionEntrenamientoRepository, SesionEntrenamientoRepository>();
+builder.Services.AddScoped<ISesionEntrenamientoService, SesionEntrenamientoService>();
 builder.Services.AddScoped<IBuscadorSemanticoService, GymBro.Infrastructure.Services.BuscadorSemanticoService>();
 
 builder.Services.AddControllers();

@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using GymBro.Application.Abstractions;
 using GymBro.Application.DTOs;
 using GymBro.Application.DTOs.Comparacion;
 using GymBro.Domain.Entities;
@@ -15,13 +16,16 @@ namespace GymBro.Application.Services
         private readonly ISocioRepository _socioRepo;
         private readonly IEjercicioRepository _ejercicioRepo;
         private readonly IPrescripcionEntrenamientoRepository _prescripcionRepo;
+        private readonly ISocioAccessService _acceso;
 
         public SesionEntrenamientoService(
             ISesionEntrenamientoRepository sesionRepo,
             ISocioRepository socioRepo,
             IEjercicioRepository ejercicioRepo,
-            IPrescripcionEntrenamientoRepository prescripcionRepo)
+            IPrescripcionEntrenamientoRepository prescripcionRepo,
+            ISocioAccessService acceso)
         {
+            _acceso = acceso;
             _sesionRepo = sesionRepo;
             _socioRepo = socioRepo;
             _ejercicioRepo = ejercicioRepo;
@@ -30,6 +34,7 @@ namespace GymBro.Application.Services
 
         public async Task<SesionEntrenamientoResponseDto> RegistrarSesionAsync(RegistrarSesionEntrenamientoRequest request)
         {
+            await _acceso.AsegurarAccesoAsync(request.SocioId);
             if (!await _socioRepo.ExistsAsync(request.SocioId))
                 throw new ArgumentException("El SocioId especificado no existe.");
 
@@ -96,12 +101,14 @@ namespace GymBro.Application.Services
         {
             var sesion = await _sesionRepo.GetByIdAsync(id);
             if (sesion == null) return null;
+            await _acceso.AsegurarAccesoAsync(sesion.SocioId);
 
             return MapToResponseDto(sesion);
         }
 
         public async Task<IEnumerable<SesionEntrenamientoResponseDto>> GetAllBySocioIdAsync(Guid socioId)
         {
+            await _acceso.AsegurarAccesoAsync(socioId);
             var sesiones = await _sesionRepo.GetAllBySocioIdAsync(socioId);
             return sesiones.Select(MapToResponseDto);
         }
@@ -110,6 +117,7 @@ namespace GymBro.Application.Services
         {
             var sesion = await _sesionRepo.GetByIdAsync(sesionId);
             if (sesion == null) return null;
+            await _acceso.AsegurarAccesoAsync(sesion.SocioId);
 
             PrescripcionEntrenamiento? prescripcion = null;
             if (sesion.PrescripcionEntrenamientoId.HasValue)

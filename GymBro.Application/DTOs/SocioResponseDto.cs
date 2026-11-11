@@ -11,5 +11,6 @@ namespace GymBro.Application.DTOs
         public string NombreCompleto { get; set; } = string.Empty;
         public string Email { get; set; } = string.Empty;
         public DateTime FechaAlta { get; set; }
+        public Guid? GimnasioId { get; set; }
     }
 }

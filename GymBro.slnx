@@ -17,6 +17,13 @@
     <File Path="GymBro.IA/main.py" />
     <File Path="GymBro.IA/traducir_dataset.py" />
   </Folder>
+<Folder Name="/GymBro.Web/">
+    <File Path="GymBro.Web/angular.json" />
+    <File Path="GymBro.Web/package.json" />
+    <File Path="GymBro.Web/tsconfig.json" />
+    <File Path="GymBro.Web/proxy.conf.json" />
+    <File Path="GymBro.Web/src/" />
+  </Folder>
   <Project Path="GymBro.Api/GymBro.Api.csproj" Id="e0ca9b9d-0fd2-4596-afa9-979ad8eaaf5f" />
   <Project Path="GymBro.Application/GymBro.Application.csproj" Id="1906642f-7cec-47f1-bea5-a24c0989bb68" />
   <Project Path="GymBro.Domain/GymBro.Domain.csproj" Id="24d0f85a-e44d-48da-8bce-9e08cb8e4158" />

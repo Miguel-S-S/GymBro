@@ -1,11 +1,26 @@
 using GymBro.Domain.Entities;
+using GymBro.Domain.Enums;
+using GymBro.Domain.Security;
 using Microsoft.EntityFrameworkCore;
 
 namespace GymBro.Infrastructure.Persistence
 {
     public class GymBroDbContext : DbContext
     {
-        public GymBroDbContext(DbContextOptions<GymBroDbContext> options) : base(options) { }
+        // Identidad del request: la leen los filtros globales de consulta (aislamiento multi-tenant).
+        private readonly IUsuarioActual _actual;
+
+        public GymBroDbContext(DbContextOptions<GymBroDbContext> options, IUsuarioActual actual) : base(options)
+        {
+            _actual = actual;
+        }
+
+        public DbSet<Gimnasio> Gimnasios { get; set; }
+        public DbSet<Usuario> Usuarios { get; set; }
+        public DbSet<AsignacionEntrenadorSocio> Asignaciones { get; set; }
+        public DbSet<SolicitudVinculacion> SolicitudesVinculacion { get; set; }
+        public DbSet<RevisionPrescripcion> RevisionesPrescripcion { get; set; }
+        public DbSet<AuditLog> AuditLogs { get; set; }
 
         public DbSet<Socio> Socios { get; set; }
         public DbSet<MedicionFisica> MedicionesFisicas { get; set; }
@@ -28,20 +43,32 @@ namespace GymBro.Infrastructure.Persistence
                 .HasMaxLength(1);
             modelBuilder.Entity<MatrizRecomendacion>().Property(m => m.Genero).HasMaxLength(1);
 
+            // Aislamiento multi-tenant: un usuario de gimnasio solo ve los socios de su gimnasio; un socio solo se ve a sí mismo.
+            modelBuilder.Entity<Socio>().HasQueryFilter(s => s.FechaBaja == null && (
+                _actual.EsProcesoDeSistema
+                || (_actual.GimnasioId != null && s.GimnasioId == _actual.GimnasioId)
+                || (_actual.SocioId != null && s.Id == _actual.SocioId)));
 
-            //para no mostrar los registros que tienen fecha de baja, se aplica un filtro global a las entidades
-            modelBuilder.Entity<Socio>().HasQueryFilter(s => s.FechaBaja == null);
-            modelBuilder.Entity<MedicionFisica>().HasQueryFilter(m => m.FechaBaja == null);
+            modelBuilder.Entity<MedicionFisica>().HasQueryFilter(m => m.FechaBaja == null && ( // using correct mapping below
+                _actual.EsProcesoDeSistema
+                || (_actual.GimnasioId != null && m.Socio.GimnasioId == _actual.GimnasioId)
+                || (_actual.SocioId != null && m.SocioId == _actual.SocioId)));
+
             modelBuilder.Entity<Ejercicio>().HasQueryFilter(e => e.FechaBaja == null);
             modelBuilder.Entity<Ejercicio>().Property(e => e.Embedding).HasColumnType("vector(768)");
-            modelBuilder.Entity<SesionEntrenamiento>().HasQueryFilter(se => se.FechaBaja == null);
+
+            modelBuilder.Entity<SesionEntrenamiento>().HasQueryFilter(se => se.FechaBaja == null && (
+                _actual.EsProcesoDeSistema
+                || (_actual.GimnasioId != null && se.Socio.GimnasioId == _actual.GimnasioId)
+                || (_actual.SocioId != null && se.SocioId == _actual.SocioId)));
+
             modelBuilder.Entity<MatrizRecomendacion>().HasQueryFilter(m => m.FechaBaja == null);
             modelBuilder.Entity<DosificacionVolumetrica>().HasQueryFilter(d => d.FechaBaja == null);
 
             // 3. Relación Socio -> MedicionFisica (Restricción de borrado)
             modelBuilder.Entity<Socio>()
-                .HasMany(s => s.HistorialFisico) // Nombre de la colección en la entidad Socio
-                .WithOne(m => m.Socio)           // Propiedad de navegación en MedicionFisica
+                .HasMany(s => s.HistorialFisico)
+                .WithOne(m => m.Socio)
                 .HasForeignKey(m => m.SocioId)
                 .OnDelete(DeleteBehavior.Restrict);
 
@@ -80,7 +107,11 @@ namespace GymBro.Infrastructure.Persistence
                     t.HasCheckConstraint("CK_SerieRealizada_TiempoDescansoSegundos", "tiempo_descanso_segundos IS NULL OR tiempo_descanso_segundos >= 0");
                 });
 
-            modelBuilder.Entity<PrescripcionEntrenamiento>().HasQueryFilter(p => p.FechaBaja == null);
+            modelBuilder.Entity<PrescripcionEntrenamiento>().HasQueryFilter(p => p.FechaBaja == null && (
+                _actual.EsProcesoDeSistema
+                || (_actual.GimnasioId != null && p.Socio.GimnasioId == _actual.GimnasioId)
+                || (_actual.SocioId != null && p.SocioId == _actual.SocioId)));
+
             modelBuilder.Entity<PrescripcionEjercicio>().HasQueryFilter(p => p.FechaBaja == null);
 
             modelBuilder.Entity<PrescripcionEntrenamiento>()
@@ -128,8 +159,9 @@ namespace GymBro.Infrastructure.Persistence
                     t.HasCheckConstraint("CK_PrescripcionEjercicio_Orden", "orden > 0");
                 });
 
+            ConfigurarAccesoYTenants(modelBuilder);
+
             // 5. Conversión de Enums a texto puro en la base de datos
-            // Conversiones de Enums a texto puro
             modelBuilder.Entity<Socio>().Property(s => s.Objetivo).HasConversion<string>();
             modelBuilder.Entity<Socio>().Property(s => s.Nivel).HasConversion<string>();
             modelBuilder.Entity<MatrizRecomendacion>().Property(m => m.Objetivo).HasConversion<string>();
@@ -138,5 +170,105 @@ namespace GymBro.Infrastructure.Persistence
             modelBuilder.Entity<PrescripcionEntrenamiento>().Property(p => p.Estado).HasConversion<string>();
         }
 
+        /// <summary>Modelo de acceso (roles), multi-tenant, vinculación, asignación, revisión de rutinas y auditoría.</summary>
+        private void ConfigurarAccesoYTenants(ModelBuilder modelBuilder)
+        {
+            // Gimnasio (tenant)
+            modelBuilder.Entity<Gimnasio>(e =>
+            {
+                e.HasQueryFilter(g => g.FechaBaja == null && (
+                    _actual.EsProcesoDeSistema
+                    || _actual.Rol == RolUsuario.SuperAdministrador
+                    || (_actual.GimnasioId != null && g.Id == _actual.GimnasioId)));
+                e.Property(g => g.Nombre).HasMaxLength(150).IsRequired();
+                e.Property(g => g.Codigo).HasMaxLength(12).IsRequired();
+                e.HasIndex(g => g.Codigo).IsUnique();
+            });
+
+            modelBuilder.Entity<Socio>(e =>
+            {
+                e.Property(s => s.Dni).HasMaxLength(9);
+                e.HasIndex(s => s.Dni).IsUnique(); // PostgreSQL permite múltiples NULL en un índice único
+                e.HasOne(s => s.Gimnasio).WithMany(g => g.Socios)
+                    .HasForeignKey(s => s.GimnasioId).OnDelete(DeleteBehavior.Restrict);
+                e.HasIndex(s => s.GimnasioId);
+            });
+
+            // Usuario (cuenta de acceso)
+            modelBuilder.Entity<Usuario>(e =>
+            {
+                e.HasQueryFilter(u => u.FechaBaja == null && (
+                    _actual.EsProcesoDeSistema
+                    || _actual.Rol == RolUsuario.SuperAdministrador
+                    || u.Id == _actual.UsuarioId
+                    || (_actual.GimnasioId != null && u.GimnasioId == _actual.GimnasioId)));
+                e.Property(u => u.Email).HasMaxLength(254).IsRequired();
+                e.HasIndex(u => u.Email).IsUnique();
+                e.Property(u => u.PasswordHash).HasMaxLength(256).IsRequired();
+                e.Property(u => u.NombreCompleto).HasMaxLength(200).IsRequired();
+                e.Property(u => u.Rol).HasConversion<string>().HasMaxLength(30);
+                e.HasOne(u => u.Gimnasio).WithMany().HasForeignKey(u => u.GimnasioId).OnDelete(DeleteBehavior.Restrict);
+                e.HasOne(u => u.Socio).WithMany().HasForeignKey(u => u.SocioId).OnDelete(DeleteBehavior.Restrict);
+                e.HasIndex(u => u.SocioId).IsUnique();
+                e.HasIndex(u => u.GimnasioId);
+                // Coherencia rol/tenant: el dueño y el trainer pertenecen a un gimnasio; el socio tiene ficha; el super no tiene gimnasio.
+                e.ToTable(t => t.HasCheckConstraint("CK_Usuario_Rol_Alcance",
+                    "(rol = 'SuperAdministrador' AND gimnasio_id IS NULL AND socio_id IS NULL) " +
+                    "OR (rol IN ('AdministradorGimnasio','Entrenador') AND gimnasio_id IS NOT NULL AND socio_id IS NULL) " +
+                    "OR (rol = 'Socio' AND socio_id IS NOT NULL AND gimnasio_id IS NULL)"));
+            });
+
+            // Asignación entrenador <-> socio
+            modelBuilder.Entity<AsignacionEntrenadorSocio>(e =>
+            {
+                e.HasQueryFilter(a => a.FechaBaja == null && (
+                    _actual.EsProcesoDeSistema
+                    || (_actual.GimnasioId != null && a.GimnasioId == _actual.GimnasioId)));
+                e.HasOne<Gimnasio>().WithMany().HasForeignKey(a => a.GimnasioId).OnDelete(DeleteBehavior.Restrict);
+                e.HasOne(a => a.EntrenadorUsuario).WithMany().HasForeignKey(a => a.EntrenadorUsuarioId).OnDelete(DeleteBehavior.Restrict);
+                e.HasOne(a => a.Socio).WithMany().HasForeignKey(a => a.SocioId).OnDelete(DeleteBehavior.Restrict);
+                e.HasIndex(a => new { a.EntrenadorUsuarioId, a.SocioId }).IsUnique();
+            });
+
+            // Solicitud de vinculación socio -> gimnasio
+            modelBuilder.Entity<SolicitudVinculacion>(e =>
+            {
+                e.HasQueryFilter(s => s.FechaBaja == null && (
+                    _actual.EsProcesoDeSistema
+                    || (_actual.GimnasioId != null && s.GimnasioId == _actual.GimnasioId)
+                    || (_actual.SocioId != null && s.SocioId == _actual.SocioId)));
+                e.Property(s => s.Estado).HasConversion<string>().HasMaxLength(20);
+                e.Property(s => s.DniDeclarado).HasMaxLength(9).IsRequired();
+                e.Property(s => s.NombreSocio).HasMaxLength(200).IsRequired();
+                e.Property(s => s.Motivo).HasMaxLength(500);
+                e.HasOne(s => s.Socio).WithMany().HasForeignKey(s => s.SocioId).OnDelete(DeleteBehavior.Restrict);
+                e.HasOne(s => s.Gimnasio).WithMany().HasForeignKey(s => s.GimnasioId).OnDelete(DeleteBehavior.Restrict);
+                e.HasIndex(s => new { s.GimnasioId, s.Estado });
+                // Un socio no puede tener dos solicitudes pendientes al mismo gimnasio.
+                e.HasIndex(s => new { s.SocioId, s.GimnasioId }).IsUnique().HasFilter("estado = 'Pendiente'");
+            });
+
+            // Traza de revisión humana de rutinas
+            modelBuilder.Entity<RevisionPrescripcion>(e =>
+            {
+                e.Property(r => r.Decision).HasConversion<string>().HasMaxLength(20);
+                e.Property(r => r.Comentario).HasMaxLength(500);
+                e.HasOne(r => r.PrescripcionEntrenamiento).WithMany(p => p.Revisiones)
+                    .HasForeignKey(r => r.PrescripcionEntrenamientoId).OnDelete(DeleteBehavior.Cascade);
+                e.HasIndex(r => r.PrescripcionEntrenamientoId);
+            });
+
+            // Auditoría (append-only)
+            modelBuilder.Entity<AuditLog>(e =>
+            {
+                e.Property(a => a.Rol).HasMaxLength(30);
+                e.Property(a => a.Accion).HasMaxLength(60).IsRequired();
+                e.Property(a => a.Entidad).HasMaxLength(60).IsRequired();
+                e.Property(a => a.EntidadId).HasMaxLength(64);
+                e.Property(a => a.Detalle).HasMaxLength(500);
+                e.HasIndex(a => a.Fecha);
+                e.HasIndex(a => a.GimnasioId);
+            });
+        }
     }
 }

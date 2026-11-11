@@ -2,12 +2,15 @@
 using System.Threading.Tasks;
 using GymBro.Application.DTOs;
 using GymBro.Application.Services;
+using GymBro.Domain.Enums;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace GymBro.Api.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
+    [Authorize(Roles = Roles.AdministradorGimnasio + "," + Roles.Entrenador + "," + Roles.Socio)]
     public class SesionesController : ControllerBase
     {
         private readonly ISesionEntrenamientoService _sesionService;

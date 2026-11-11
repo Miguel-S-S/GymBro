@@ -1,20 +1,24 @@
 ﻿using GymBro.Domain.Entities;
 using GymBro.Domain.Repositories;
 using GymBro.Application.DTOs;
+using GymBro.Application.Abstractions;
 
 namespace GymBro.Application.Services
 {
     public class MedicionService : IMedicionService
     {
         private readonly IMedicionRepository _repository;
+        private readonly ISocioAccessService _acceso;
 
-        public MedicionService(IMedicionRepository repository)
+        public MedicionService(IMedicionRepository repository, ISocioAccessService acceso)
         {
             _repository = repository;
+            _acceso = acceso;
         }
 
         public async Task RegistrarMedicionAsync(MedicionCreateDto dto)
         {
+            await _acceso.AsegurarAccesoAsync(dto.SocioId);
             var medicion = new MedicionFisica
             {
                 SocioId = dto.SocioId,
@@ -26,6 +30,7 @@ namespace GymBro.Application.Services
 
         public async Task<IEnumerable<MedicionResponseDto>> GetBySocioIdAsync(Guid socioId)
         {
+            await _acceso.AsegurarAccesoAsync(socioId);
             var mediciones = await _repository.GetBySocioIdAsync(socioId);
             return mediciones.Select(MapToDto);
         }

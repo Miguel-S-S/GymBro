@@ -4,6 +4,7 @@ namespace GymBro.Domain.Entities
     {
         public Guid Id { get; set; }
         public Guid SocioId { get; set; }
+        public Socio Socio { get; set; } = null!;
         public DateTime Inicio { get; set; }
         public DateTime? Fin { get; set; }
 

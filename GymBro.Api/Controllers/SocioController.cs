@@ -3,12 +3,15 @@ using GymBro.Application.DTOs;
 using GymBro.Application.Services;
 using GymBro.Domain.Entities;
 using GymBro.Domain.Repositories;
+using GymBro.Domain.Enums;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace GymBro.Api.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [Authorize(Roles = Roles.AdministradorGimnasio + "," + Roles.Entrenador + "," + Roles.Socio)]
     public class SocioController : ControllerBase
     {
         //private readonly ISocioRepository _repository;
@@ -45,6 +48,7 @@ namespace GymBro.Api.Controllers
         }
 
         [HttpPost]
+        [Authorize(Roles = Roles.AdministradorGimnasio)]
         public async Task<IActionResult> Post([FromBody] SocioCreateDto socio)
         {
             //var nuevoSocio = await _repository.AddAsync(socio);

@@ -4,6 +4,7 @@ export interface SocioResumen {
   nombreCompleto: string;
   email: string;
   fechaAlta: string;
+  gimnasioId?: string | null;
 }
 
 /** GymBro.Application.DTOs.SocioDetalleDto */
@@ -25,6 +26,8 @@ export interface SocioCreate {
   nombre: string;
   apellido: string;
   email: string;
+  /** Opcional: necesario para que el socio pueda vincularse al gimnasio por DNI. */
+  dni?: string;
 }
 
 export const OBJETIVO_ETIQUETA: Record<NonNullable<SocioDetalle['objetivo']>, string> = {

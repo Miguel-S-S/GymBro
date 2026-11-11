@@ -28,6 +28,11 @@ import { mensajeDeError } from '../../core/util/api-error';
             @if (form.controls.apellido.hasError('required')) { <mat-error>Ingresá el apellido.</mat-error> }
           </mat-form-field>
           <mat-form-field>
+            <mat-label>DNI (opcional)</mat-label>
+            <input matInput formControlName="dni" inputmode="numeric" maxlength="9" />
+            @if (form.controls.dni.hasError('pattern')) { <mat-error>El DNI debe tener entre 7 y 9 dígitos.</mat-error> }
+          </mat-form-field>
+          <mat-form-field>
             <mat-label>Email</mat-label>
             <input matInput type="email" formControlName="email" autocomplete="email" />
             @if (form.controls.email.hasError('required')) { <mat-error>Ingresá el email.</mat-error> }
@@ -35,7 +40,7 @@ import { mensajeDeError } from '../../core/util/api-error';
           </mat-form-field>
         </div>
         <p class="nota">
-          La API registra por ahora nombre, apellido y email. Género, fecha de nacimiento, objetivo y nivel
+          La API registra por ahora nombre, apellido, DNI y email. Género, fecha de nacimiento, objetivo y nivel
           existen en el dominio pero todavía no se pueden cargar desde el alta.
         </p>
         @if (error()) { <p class="error">{{ error() }}</p> }
@@ -60,6 +65,7 @@ export class SocioAltaDialog {
   readonly form = inject(NonNullableFormBuilder).group({
     nombre: ['', [Validators.required, Validators.maxLength(100)]],
     apellido: ['', [Validators.required, Validators.maxLength(100)]],
+    dni: ['', [Validators.pattern(/^\d{7,9}$/)]],
     email: ['', [Validators.required, Validators.email]],
   });
   readonly guardando = signal(false);
@@ -73,7 +79,7 @@ export class SocioAltaDialog {
     const v = this.form.getRawValue();
     this.guardando.set(true);
     this.error.set(null);
-    this.api.crear({ nombre: v.nombre.trim(), apellido: v.apellido.trim(), email: v.email.trim() }).subscribe({
+    this.api.crear({ nombre: v.nombre.trim(), apellido: v.apellido.trim(), email: v.email.trim(), dni: v.dni.trim() || undefined }).subscribe({
       next: (creado) => this.ref.close(creado),
       error: (e) => {
         this.error.set(mensajeDeError(e, 'No se pudo registrar el socio.'));

@@ -37,5 +37,24 @@ namespace GymBro.Infrastructure.Repositories
         {
             return await _context.Socios.AnyAsync(s => s.Id == id);
         }
+
+        public async Task<IEnumerable<Socio>> GetByEntrenadorAsync(Guid entrenadorUsuarioId)
+        {
+            return await _context.Socios.AsNoTracking()
+                .Where(s => _context.Asignaciones.Any(a => a.SocioId == s.Id && a.EntrenadorUsuarioId == entrenadorUsuarioId))
+                .OrderBy(s => s.Apellido).ThenBy(s => s.Nombre)
+                .ToListAsync();
+        }
+
+        // El DNI es único en toda la plataforma, por eso se consulta sin filtro de tenant.
+        public Task<bool> ExisteDniAsync(string dni) =>
+            _context.Socios.IgnoreQueryFilters().AnyAsync(s => s.Dni == dni && s.FechaBaja == null);
+
+        // Se usa al resolver una vinculación: el socio todavía no es del gimnasio. La autorización
+        // se verifica antes, a través de la solicitud (que sí está filtrada por gimnasio).
+        public Task<Socio?> GetForUpdateAsync(Guid id) =>
+            _context.Socios.IgnoreQueryFilters().FirstOrDefaultAsync(s => s.Id == id && s.FechaBaja == null);
+
+        public Task SaveChangesAsync() => _context.SaveChangesAsync();
     }
 }

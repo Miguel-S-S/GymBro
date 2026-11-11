@@ -1,11 +1,14 @@
 ﻿using GymBro.Application.Services;
 using GymBro.Application.DTOs;
+using GymBro.Domain.Enums;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace GymBro.Api.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [Authorize(Roles = Roles.AdministradorGimnasio + "," + Roles.Entrenador + "," + Roles.Socio)]
     public class MedicionController : ControllerBase
     {
         private readonly IMedicionService _medicionService;

@@ -2,13 +2,12 @@
 using GymBro.Domain.Entities;
 using GymBro.Domain.Repositories;
 using GymBro.Domain.Security;
-
 namespace GymBro.Application.Services
 {
     public interface IAuditService
     {
         Task RegistrarAsync(string accion, string entidad, string? entidadId = null, string? detalle = null);
-        Task<IEnumerable<AuditLogDto>> ConsultarAsync(int cantidad, Guid? gimnasioId);
+        Task<IEnumerable<AuditLogDto>> ConsultarAsync(int cantidad, Guid? gimnasioId, DateTime? desdeUtc = null, DateTime? hastaUtc = null, string? accion = null, string? entidad = null);
     }
 
     public class AuditService : IAuditService
@@ -34,10 +33,11 @@ namespace GymBro.Application.Services
                 Detalle = detalle
             });
 
-        public async Task<IEnumerable<AuditLogDto>> ConsultarAsync(int cantidad, Guid? gimnasioId)
+        public async Task<IEnumerable<AuditLogDto>> ConsultarAsync(int cantidad, Guid? gimnasioId,
+            DateTime? desdeUtc = null, DateTime? hastaUtc = null, string? accion = null, string? entidad = null)
         {
             cantidad = Math.Clamp(cantidad, 1, 500);
-            var items = await _repo.GetRecientesAsync(cantidad, gimnasioId);
+            var items = await _repo.GetRecientesAsync(cantidad, gimnasioId, desdeUtc, hastaUtc, accion, entidad);
             return items.Select(a => new AuditLogDto
             {
                 Id = a.Id,

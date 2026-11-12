@@ -3,8 +3,7 @@ import { HttpErrorResponse } from '@angular/common/http';
 /**
  * Traduce las respuestas de error de GymBro.Api a un texto para mostrar.
  * Formatos que devuelve hoy la API:
- *  - `{ error: "..." }`           (SesionesController / EjerciciosController ante ArgumentException)
- *  - `"texto plano"`              (BadRequest/NotFound con string)
+ *  - ProblemDetails con `detail`  (ManejadorExcepciones: reglas de negocio, 401, 403, 404)
  *  - ValidationProblemDetails     (validación automática de [ApiController])
  */
 export function mensajeDeError(err: unknown, porDefecto = 'Ocurrió un error inesperado.'): string {
@@ -18,6 +17,7 @@ export function mensajeDeError(err: unknown, porDefecto = 'Ocurrió un error ine
   if (typeof cuerpo === 'string' && cuerpo.trim()) return cuerpo;
 
   if (cuerpo && typeof cuerpo === 'object') {
+    if (typeof cuerpo.detail === 'string' && cuerpo.detail.trim()) return cuerpo.detail;
     if (typeof cuerpo.error === 'string') return cuerpo.error;
     if (cuerpo.errors && typeof cuerpo.errors === 'object') {
       const mensajes = Object.values(cuerpo.errors as Record<string, string[]>).flat();
@@ -26,6 +26,7 @@ export function mensajeDeError(err: unknown, porDefecto = 'Ocurrió un error ine
     if (typeof cuerpo.title === 'string') return cuerpo.title;
   }
 
+  if (err.status === 403) return 'No tenés permisos para realizar esta acción.';
   if (err.status === 404) return 'No se encontró el recurso solicitado.';
   if (err.status >= 500) return 'Error interno de GymBro.Api.';
   return porDefecto;

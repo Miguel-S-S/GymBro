@@ -5,7 +5,6 @@ using GymBro.Domain.Enums;
 using GymBro.Domain.Exceptions;
 using GymBro.Domain.Repositories;
 using GymBro.Domain.Security;
-
 namespace GymBro.Application.Services
 {
     public interface IGimnasioService
@@ -14,6 +13,8 @@ namespace GymBro.Application.Services
         Task<IEnumerable<GimnasioResponseDto>> ListarAsync();
         Task<GimnasioResponseDto> ObtenerPropioAsync();
         Task<GimnasioResponseDto> ActualizarPoliticaRevisionAsync(bool requiereAprobacion);
+        /// <summary>Habilita o deshabilita una institución (solo SuperAdministrador). Un gimnasio deshabilitado no permite iniciar sesión a su personal.</summary>
+        Task<GimnasioResponseDto> CambiarEstadoAsync(Guid id, bool activo);
     }
 
     public class GimnasioService : IGimnasioService
@@ -83,6 +84,17 @@ namespace GymBro.Application.Services
             gimnasio.FechaModificacion = DateTime.UtcNow;
             await _gimnasios.SaveChangesAsync();
             await _audit.RegistrarAsync("POLITICA_REVISION", nameof(Gimnasio), gimnasio.Id.ToString(), $"RequiereAprobacion={requiereAprobacion}");
+            return Mapear(gimnasio);
+        }
+
+        public async Task<GimnasioResponseDto> CambiarEstadoAsync(Guid id, bool activo)
+        {
+            var gimnasio = await _gimnasios.GetByIdAsync(id)
+                ?? throw new RecursoNoEncontradoException("Gimnasio no encontrado.");
+            gimnasio.Activo = activo;
+            gimnasio.FechaModificacion = DateTime.UtcNow;
+            await _gimnasios.SaveChangesAsync();
+            await _audit.RegistrarAsync(activo ? "ACTIVAR_GIMNASIO" : "DESACTIVAR_GIMNASIO", nameof(Gimnasio), gimnasio.Id.ToString(), gimnasio.Nombre);
             return Mapear(gimnasio);
         }
 

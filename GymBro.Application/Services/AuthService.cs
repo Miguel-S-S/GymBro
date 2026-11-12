@@ -5,7 +5,6 @@ using GymBro.Domain.Entities;
 using GymBro.Domain.Enums;
 using GymBro.Domain.Exceptions;
 using GymBro.Domain.Repositories;
-
 namespace GymBro.Application.Services
 {
     public interface IAuthService
@@ -22,10 +21,12 @@ namespace GymBro.Application.Services
         private readonly IHasheadorContrasena _hasheador;
         private readonly IGeneradorToken _tokens;
         private readonly IAuditService _audit;
+        private readonly IGimnasioRepository _gimnasios;
 
         public AuthService(IUsuarioRepository usuarios, ISocioRepository socios, IHasheadorContrasena hasheador,
-            IGeneradorToken tokens, IAuditService audit)
+            IGeneradorToken tokens, IAuditService audit, IGimnasioRepository gimnasios)
         {
+            _gimnasios = gimnasios;
             _usuarios = usuarios;
             _socios = socios;
             _hasheador = hasheador;
@@ -42,6 +43,15 @@ namespace GymBro.Application.Services
             if (usuario is null || !usuario.Activo || !_hasheador.Verificar(usuario.PasswordHash, request.Password ?? string.Empty))
             {
                 await _audit.RegistrarAsync("LOGIN_FALLIDO", nameof(Usuario), null, email);
+                throw new NoAutenticadoException();
+            }
+
+            // Personal de un gimnasio deshabilitado por el Administrador de la Plataforma: se trata como credenciales inválidas.
+            if (usuario.Rol is RolUsuario.AdministradorGimnasio or RolUsuario.Entrenador
+                && usuario.GimnasioId is Guid gimnasioId
+                && !await _gimnasios.EstaActivoAsync(gimnasioId))
+            {
+                await _audit.RegistrarAsync("LOGIN_GIMNASIO_INACTIVO", nameof(Usuario), usuario.Id.ToString(), email);
                 throw new NoAutenticadoException();
             }
 

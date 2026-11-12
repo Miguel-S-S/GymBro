@@ -1,8 +1,10 @@
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
 import { Observable } from 'rxjs';
 import {
   AuditLog,
+  FiltrosAuditoria,
+  paramsAuditoria,
   Entrenador,
   EntrenadorCreate,
   Gimnasio,
@@ -26,8 +28,11 @@ export class AccesoApi {
   crearGimnasio(dto: GimnasioCreate): Observable<Gimnasio> {
     return this.http.post<Gimnasio>(`${this.base}/gimnasios`, dto);
   }
-  auditoria(cantidad = 100): Observable<AuditLog[]> {
-    return this.http.get<AuditLog[]>(`${this.base}/auditoria`, { params: { cantidad } });
+  cambiarEstadoGimnasio(id: string, activo: boolean): Observable<Gimnasio> {
+    return this.http.put<Gimnasio>(`${this.base}/gimnasios/${id}/estado`, { activo });
+  }
+  auditoria(filtros: FiltrosAuditoria = {}): Observable<AuditLog[]> {
+    return this.http.get<AuditLog[]>(`${this.base}/auditoria`, { params: paramsAuditoria(filtros) });
   }
 
   // AdministradorGimnasio

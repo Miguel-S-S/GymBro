@@ -55,6 +55,14 @@ import { mensajeDeError } from '../../core/util/api-error';
           <ng-container matColumnDef="nombre"><th mat-header-cell *matHeaderCellDef>Nombre</th><td mat-cell *matCellDef="let g">{{ g.nombre }}</td></ng-container>
           <ng-container matColumnDef="codigo"><th mat-header-cell *matHeaderCellDef>Código</th><td mat-cell *matCellDef="let g"><code>{{ g.codigo }}</code></td></ng-container>
           <ng-container matColumnDef="revision"><th mat-header-cell *matHeaderCellDef>Revisión de rutinas</th><td mat-cell *matCellDef="let g">{{ g.requiereAprobacionRutinas ? 'Obligatoria' : 'Opcional' }}</td></ng-container>
+          <ng-container matColumnDef="estado">
+            <th mat-header-cell *matHeaderCellDef>Estado</th>
+            <td mat-cell *matCellDef="let g">
+              <mat-slide-toggle [checked]="g.activo" [disabled]="cambiando() === g.id"
+                [attr.aria-label]="(g.activo ? 'Desactivar ' : 'Activar ') + g.nombre"
+                (change)="cambiarEstado(g, $event.checked)">{{ g.activo ? 'Activo' : 'Inactivo' }}</mat-slide-toggle>
+            </td>
+          </ng-container>
           <ng-container matColumnDef="alta"><th mat-header-cell *matHeaderCellDef>Alta</th><td mat-cell *matCellDef="let g">{{ g.fechaAlta | date: 'dd/MM/yyyy' }}</td></ng-container>
           <tr mat-header-row *matHeaderRowDef="columnas"></tr>
           <tr mat-row *matRowDef="let g; columns: columnas"></tr>
@@ -71,7 +79,8 @@ export class Gimnasios {
   private readonly api = inject(AccesoApi);
   private readonly snack = inject(MatSnackBar);
 
-  readonly columnas = ['nombre', 'codigo', 'revision', 'alta'];
+  readonly columnas = ['nombre', 'codigo', 'revision', 'estado', 'alta'];
+  readonly cambiando = signal<string | null>(null);
   readonly gimnasios = signal<Gimnasio[]>([]);
   readonly cargando = signal(true);
   readonly guardando = signal(false);
@@ -94,6 +103,23 @@ export class Gimnasios {
     this.api.listarGimnasios().subscribe({
       next: (g) => { this.gimnasios.set(g); this.cargando.set(false); },
       error: (e) => { this.snack.open(mensajeDeError(e), 'Cerrar', { duration: 5000 }); this.cargando.set(false); },
+    });
+  }
+
+  cambiarEstado(g: Gimnasio, activo: boolean): void {
+    this.cambiando.set(g.id);
+    this.api.cambiarEstadoGimnasio(g.id, activo).subscribe({
+      next: (act) => {
+        this.gimnasios.update((l) => l.map((x) => (x.id === act.id ? act : x)));
+        this.snack.open(activo ? 'Gimnasio activado.' : 'Gimnasio desactivado: su personal ya no puede iniciar sesión.', 'Cerrar', { duration: 5000 });
+        this.cambiando.set(null);
+      },
+      error: (e) => {
+        // Se recarga para que el interruptor refleje el estado real del servidor.
+        this.snack.open(mensajeDeError(e), 'Cerrar', { duration: 5000 });
+        this.cambiando.set(null);
+        this.cargar();
+      },
     });
   }
 

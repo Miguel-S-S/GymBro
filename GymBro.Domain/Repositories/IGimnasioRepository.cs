@@ -1,5 +1,4 @@
 ﻿using GymBro.Domain.Entities;
-
 namespace GymBro.Domain.Repositories
 {
     public interface IGimnasioRepository
@@ -11,6 +10,8 @@ namespace GymBro.Domain.Repositories
         Task AddAsync(Gimnasio gimnasio, Usuario dueno);
         /// <summary>Política del gimnasio; ignora el filtro de tenant porque la consulta un socio.</summary>
         Task<bool> RequiereAprobacionAsync(Guid gimnasioId);
+        /// <summary>Indica si el gimnasio está habilitado; ignora el filtro de tenant porque se usa al iniciar sesión.</summary>
+        Task<bool> EstaActivoAsync(Guid gimnasioId);
         Task SaveChangesAsync();
     }
 }

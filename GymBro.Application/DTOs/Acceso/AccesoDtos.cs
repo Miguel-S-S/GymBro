@@ -47,6 +47,8 @@
 
     public record PoliticaRevisionRequest(bool RequiereAprobacionRutinas);
 
+    public record EstadoGimnasioRequest(bool Activo);
+
     public class EntrenadorCreateDto
     {
         public string NombreCompleto { get; set; } = string.Empty;

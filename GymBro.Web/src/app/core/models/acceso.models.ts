@@ -94,3 +94,30 @@ export interface AuditLog {
   entidadId: string | null;
   detalle: string | null;
 }
+
+/** Filtros opcionales de GET /api/auditoria. `desde` y `hasta` son fechas (yyyy-MM-dd); `hasta` es inclusiva. */
+export interface FiltrosAuditoria {
+  cantidad?: number;
+  gimnasioId?: string;
+  desde?: string;
+  hasta?: string;
+  accion?: string;
+  entidad?: string;
+}
+
+/** Arma los parámetros de consulta omitiendo los vacíos; `hasta` se envía como el día siguiente (límite exclusivo en la API). */
+export function paramsAuditoria(f: FiltrosAuditoria): Record<string, string | number> {
+  const p: Record<string, string | number> = { cantidad: f.cantidad ?? 200 };
+  if (f.gimnasioId) p['gimnasioId'] = f.gimnasioId;
+  if (f.desde) p['desde'] = f.desde;
+  if (f.hasta) {
+    const d = new Date(`${f.hasta}T00:00:00`);
+    d.setDate(d.getDate() + 1);
+    const mm = String(d.getMonth() + 1).padStart(2, '0');
+    const dd = String(d.getDate()).padStart(2, '0');
+    p['hasta'] = `${d.getFullYear()}-${mm}-${dd}`;
+  }
+  if (f.accion?.trim()) p['accion'] = f.accion.trim();
+  if (f.entidad?.trim()) p['entidad'] = f.entidad.trim();
+  return p;
+}

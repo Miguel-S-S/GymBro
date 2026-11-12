@@ -3,7 +3,6 @@ using GymBro.Domain.Enums;
 using GymBro.Domain.Repositories;
 using GymBro.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
-
 namespace GymBro.Infrastructure.Repositories
 {
     public class GimnasioRepository : IGimnasioRepository
@@ -35,6 +34,10 @@ namespace GymBro.Infrastructure.Repositories
         public Task<bool> RequiereAprobacionAsync(Guid gimnasioId) =>
             _context.Gimnasios.IgnoreQueryFilters()
                 .Where(g => g.Id == gimnasioId).Select(g => g.RequiereAprobacionRutinas).FirstOrDefaultAsync();
+
+        public Task<bool> EstaActivoAsync(Guid gimnasioId) =>
+            _context.Gimnasios.IgnoreQueryFilters()
+                .AnyAsync(g => g.Id == gimnasioId && g.Activo && g.FechaBaja == null);
 
         public Task SaveChangesAsync() => _context.SaveChangesAsync();
     }

@@ -4,7 +4,6 @@ using GymBro.Application.Services;
 using GymBro.Domain.Enums;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-
 namespace GymBro.Api.Controllers
 {
     /// <summary>Gestión SaaS de instituciones: exclusivo del Administrador de la Plataforma.</summary>
@@ -20,8 +19,12 @@ namespace GymBro.Api.Controllers
         public async Task<IActionResult> Get() => Ok(await _gimnasios.ListarAsync());
 
         [HttpPost]
-        public async Task<IActionResult> Post([FromBody] GimnasioCreateDto dto) =>
-StatusCode(StatusCodes.Status201Created, await _gimnasios.CrearAsync(dto));
+        public async Task<IActionResult> Post([FromBody] GimnasioCreateDto dto) => StatusCode(StatusCodes.Status201Created, await _gimnasios.CrearAsync(dto));
+
+        /// <summary>Activa o desactiva una institución.</summary>
+        [HttpPut("{id:guid}/estado")]
+        public async Task<IActionResult> PutEstado(Guid id, [FromBody] EstadoGimnasioRequest request) =>
+            Ok(await _gimnasios.CambiarEstadoAsync(id, request.Activo));
     }
 
     /// <summary>Configuración del propio gimnasio: Dueño de Gimnasio.</summary>
@@ -38,7 +41,6 @@ StatusCode(StatusCodes.Status201Created, await _gimnasios.CrearAsync(dto));
 
         /// <summary>Activa/desactiva la revisión humana obligatoria de las rutinas generadas por la IA.</summary>
         [HttpPut("politica-revision")]
-        public async Task<IActionResult> PutPolitica([FromBody] PoliticaRevisionRequest request) =>
-Ok(await _gimnasios.ActualizarPoliticaRevisionAsync(request.RequiereAprobacionRutinas));
+        public async Task<IActionResult> PutPolitica([FromBody] PoliticaRevisionRequest request) => Ok(await _gimnasios.ActualizarPoliticaRevisionAsync(request.RequiereAprobacionRutinas));
     }
 }

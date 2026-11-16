@@ -23,6 +23,20 @@ namespace GymBro.Infrastructure.Repositories
             await _context.Usuarios.Where(u => u.Rol == RolUsuario.Entrenador)
                 .OrderBy(u => u.NombreCompleto).ToListAsync();
 
+        public Task<Usuario?> GetBySocioIdAsync(Guid socioId) =>
+            _context.Usuarios.IgnoreQueryFilters()
+                .FirstOrDefaultAsync(u => u.SocioId == socioId && u.FechaBaja == null);
+
+        public async Task<HashSet<Guid>> GetSocioIdsConCuentaAsync(IReadOnlyCollection<Guid> socioIds)
+        {
+            if (socioIds.Count == 0) return new HashSet<Guid>();
+            var ids = await _context.Usuarios.IgnoreQueryFilters()
+                .Where(u => u.SocioId != null && socioIds.Contains(u.SocioId.Value) && u.FechaBaja == null)
+                .Select(u => u.SocioId!.Value)
+                .ToListAsync();
+            return ids.ToHashSet();
+        }
+
         public async Task AddAsync(Usuario usuario)
         {
             await _context.Usuarios.AddAsync(usuario); // si trae Socio, se inserta en la misma transacción

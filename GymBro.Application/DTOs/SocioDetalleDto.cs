@@ -11,6 +11,12 @@ namespace GymBro.Application.DTOs
         public string Email { get; set; } = string.Empty;
         public string Genero { get; set; } = string.Empty;
 
+        /// <summary>Visible solo para el Dueño del gimnasio y para el propio socio.</summary>
+        public string? Dni { get; set; }
+
+        /// <summary>Activo, Invitado o SinAcceso (ver EstadosAcceso). Mientras no sea Activo, el Dueño puede corregir la ficha.</summary>
+        public string EstadoAcceso { get; set; } = EstadosAcceso.SinAcceso;
+
         /// <summary>Null cuando el socio se dio de alta sin informar la fecha.</summary>
         public DateTime? FechaNacimiento { get; set; }
 

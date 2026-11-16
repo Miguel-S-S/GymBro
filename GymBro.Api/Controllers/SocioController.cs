@@ -47,13 +47,34 @@ namespace GymBro.Api.Controllers
             return Ok(socio);
         }
 
+        /// <summary>Alta presencial: crea la ficha y devuelve el código de invitación (se muestra una sola vez).</summary>
         [HttpPost]
         [Authorize(Roles = Roles.AdministradorGimnasio)]
         public async Task<IActionResult> Post([FromBody] SocioCreateDto socio)
         {
-            //var nuevoSocio = await _repository.AddAsync(socio);
-            var nuevoSocio = await _socioService.CreateSocioAsync(socio);
-            return CreatedAtAction(nameof(GetById), new { id = nuevoSocio.Id }, nuevoSocio);
+            var alta = await _socioService.CreateSocioAsync(socio);
+            return CreatedAtAction(nameof(GetById), new { id = alta.Socio.Id }, alta);
+        }
+
+        /// <summary>Corrige la ficha de un socio que todavía no activó su cuenta.</summary>
+        [HttpPut("{id:guid}")]
+        [Authorize(Roles = Roles.AdministradorGimnasio)]
+        public async Task<IActionResult> Put(Guid id, [FromBody] SocioUpdateDto dto) =>
+            Ok(await _socioService.ActualizarSocioAsync(id, dto));
+
+        /// <summary>Emite una invitación nueva; la anterior deja de valer.</summary>
+        [HttpPost("{id:guid}/invitacion")]
+        [Authorize(Roles = Roles.AdministradorGimnasio)]
+        public async Task<IActionResult> RenovarInvitacion(Guid id) =>
+            Ok(await _socioService.RenovarInvitacionAsync(id));
+
+        /// <summary>Ficha sin cuenta: baja lógica. Socio con cuenta: se desvincula del gimnasio.</summary>
+        [HttpDelete("{id:guid}")]
+        [Authorize(Roles = Roles.AdministradorGimnasio)]
+        public async Task<IActionResult> Delete(Guid id)
+        {
+            await _socioService.BajaSocioAsync(id);
+            return NoContent();
         }
     }
 }

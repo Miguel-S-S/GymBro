@@ -11,7 +11,7 @@ namespace GymBro.Domain.Repositories
 
         /// <summary>Socios asignados a un Personal Trainer.</summary>
         Task<IEnumerable<Socio>> GetByEntrenadorAsync(Guid entrenadorUsuarioId);
-        Task<bool> ExisteDniAsync(string dni);
+        Task<bool> ExisteDniAsync(string dni, Guid? excluirSocioId = null);
         /// <summary>Carga el socio para modificarlo (con tracking).</summary>
         Task<Socio?> GetForUpdateAsync(Guid id);
         Task SaveChangesAsync();

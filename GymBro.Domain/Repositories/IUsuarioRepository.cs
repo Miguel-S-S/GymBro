@@ -9,5 +9,11 @@ namespace GymBro.Domain.Repositories
         Task<Usuario?> GetByIdAsync(Guid id);
         Task<IEnumerable<Usuario>> GetEntrenadoresAsync();
         Task AddAsync(Usuario usuario);
+
+        /// <summary>Cuenta de acceso de un socio (ignora el filtro de tenant: la cuenta del socio no pertenece a un gimnasio).</summary>
+        Task<Usuario?> GetBySocioIdAsync(Guid socioId);
+
+        /// <summary>De los socios indicados, los que ya tienen cuenta de acceso.</summary>
+        Task<HashSet<Guid>> GetSocioIdsConCuentaAsync(IReadOnlyCollection<Guid> socioIds);
     }
 }

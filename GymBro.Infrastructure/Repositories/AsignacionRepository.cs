@@ -21,6 +21,14 @@ namespace GymBro.Infrastructure.Repositories
             await _context.Asignaciones.Where(a => a.EntrenadorUsuarioId == entrenadorUsuarioId)
                 .Select(a => a.SocioId).ToListAsync();
 
+        // Se borra de verdad (no baja lógica): el índice único (entrenador, socio) bloquearía una reasignación posterior.
+        // La traza queda en la auditoría.
+        public async Task QuitarDeSocioAsync(Guid socioId)
+        {
+            var asignaciones = await _context.Asignaciones.Where(a => a.SocioId == socioId).ToListAsync();
+            _context.Asignaciones.RemoveRange(asignaciones);
+        }
+
         public async Task AddAsync(AsignacionEntrenadorSocio asignacion)
         {
             await _context.Asignaciones.AddAsync(asignacion);

@@ -24,6 +24,26 @@ export interface LoginRequest {
   password: string;
 }
 
+/** GymBro.Application.DTOs.Acceso.InvitacionInfoDto: lo que ve quien abre el enlace de invitación. */
+export interface InvitacionInfo {
+  nombre: string;
+  apellido: string;
+  email: string;
+  gimnasio: string;
+  expiraUtc: string;
+}
+
+/** GymBro.Application.DTOs.Acceso.ActivarInvitacionRequest */
+export interface ActivarInvitacion {
+  token: string;
+  password: string;
+  /** yyyy-MM-dd */
+  fechaNacimiento: string;
+  /** M, F o X */
+  genero: 'M' | 'F' | 'X';
+  consentimientoDatosSalud: boolean;
+}
+
 /** Pantalla de inicio de cada rol tras iniciar sesión. */
 export function rutaInicial(rol: Rol): string {
   switch (rol) {

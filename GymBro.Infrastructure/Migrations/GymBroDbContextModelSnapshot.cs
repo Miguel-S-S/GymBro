@@ -355,6 +355,79 @@ namespace GymBro.Infrastructure.Migrations
                     b.ToTable("gimnasios", (string)null);
                 });
 
+            modelBuilder.Entity("GymBro.Domain.Entities.InvitacionSocio", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<DateTime>("ExpiraUtc")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("expira_utc");
+
+                    b.Property<DateTime>("FechaAlta")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("fecha_alta");
+
+                    b.Property<DateTime?>("FechaBaja")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("fecha_baja");
+
+                    b.Property<DateTime?>("FechaModificacion")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("fecha_modificacion");
+
+                    b.Property<Guid>("GimnasioId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("gimnasio_id");
+
+                    b.Property<DateTime?>("RevocadaUtc")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("revocada_utc");
+
+                    b.Property<Guid>("SocioId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("socio_id");
+
+                    b.Property<string>("TokenHash")
+                        .IsRequired()
+                        .HasMaxLength(64)
+                        .HasColumnType("character varying(64)")
+                        .HasColumnName("token_hash");
+
+                    b.Property<DateTime?>("UsadaUtc")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("usada_utc");
+
+                    b.Property<int>("UsuarioAlta")
+                        .HasColumnType("integer")
+                        .HasColumnName("usuario_alta");
+
+                    b.Property<int?>("UsuarioBaja")
+                        .HasColumnType("integer")
+                        .HasColumnName("usuario_baja");
+
+                    b.Property<int?>("UsuarioModificacion")
+                        .HasColumnType("integer")
+                        .HasColumnName("usuario_modificacion");
+
+                    b.HasKey("Id")
+                        .HasName("pk_invitaciones");
+
+                    b.HasIndex("GimnasioId")
+                        .HasDatabaseName("ix_invitaciones_gimnasio_id");
+
+                    b.HasIndex("SocioId")
+                        .HasDatabaseName("ix_invitaciones_socio_id");
+
+                    b.HasIndex("TokenHash")
+                        .IsUnique()
+                        .HasDatabaseName("ix_invitaciones_token_hash");
+
+                    b.ToTable("invitaciones", (string)null);
+                });
+
             modelBuilder.Entity("GymBro.Domain.Entities.MatrizRecomendacion", b =>
                 {
                     b.Property<int>("Id")
@@ -1232,6 +1305,27 @@ namespace GymBro.Infrastructure.Migrations
                         .HasConstraintName("fk_asignaciones_socios_socio_id");
 
                     b.Navigation("EntrenadorUsuario");
+
+                    b.Navigation("Socio");
+                });
+
+            modelBuilder.Entity("GymBro.Domain.Entities.InvitacionSocio", b =>
+                {
+                    b.HasOne("GymBro.Domain.Entities.Gimnasio", "Gimnasio")
+                        .WithMany()
+                        .HasForeignKey("GimnasioId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired()
+                        .HasConstraintName("fk_invitaciones_gimnasios_gimnasio_id");
+
+                    b.HasOne("GymBro.Domain.Entities.Socio", "Socio")
+                        .WithMany()
+                        .HasForeignKey("SocioId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired()
+                        .HasConstraintName("fk_invitaciones_socios_socio_id");
+
+                    b.Navigation("Gimnasio");
 
                     b.Navigation("Socio");
                 });

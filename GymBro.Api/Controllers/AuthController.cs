@@ -1,4 +1,4 @@
-﻿using GymBro.Application.DTOs.Acceso;
+using GymBro.Application.DTOs.Acceso;
 using GymBro.Application.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -13,7 +13,8 @@ namespace GymBro.Api.Controllers
     public class AuthController : ControllerBase
     {
         private readonly IAuthService _auth;
-        public AuthController(IAuthService auth) { _auth = auth; }
+        private readonly IInvitacionService _invitaciones;
+        public AuthController(IAuthService auth, IInvitacionService invitaciones) { _auth = auth; _invitaciones = invitaciones; }
 
         [HttpPost("login")]
         public async Task<ActionResult<LoginResponse>> Login([FromBody] LoginRequest request) =>
@@ -23,5 +24,17 @@ namespace GymBro.Api.Controllers
         [HttpPost("registro-socio")]
         public async Task<ActionResult<LoginResponse>> RegistrarSocio([FromBody] RegistroSocioRequest request) =>
 Ok(await _auth.RegistrarSocioAsync(request));
+
+        // El código viaja en el cuerpo (POST) y no en la URL para que no quede en registros de acceso.
+
+        /// <summary>Datos de una invitación de alta presencial, para quien abre el enlace.</summary>
+        [HttpPost("invitacion/consultar")]
+        public async Task<ActionResult<InvitacionInfoDto>> ConsultarInvitacion([FromBody] ConsultarInvitacionRequest request) =>
+            Ok(await _invitaciones.ConsultarAsync(request.Token));
+
+        /// <summary>El socio crea su contraseña y completa sus datos; queda con la sesión iniciada.</summary>
+        [HttpPost("invitacion/activar")]
+        public async Task<ActionResult<LoginResponse>> ActivarInvitacion([FromBody] ActivarInvitacionRequest request) =>
+            Ok(await _invitaciones.ActivarAsync(request));
     }
 }

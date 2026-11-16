@@ -4,6 +4,12 @@ import { Shell } from './layout/shell';
 
 export const routes: Routes = [
   { path: 'login', title: 'Ingresar · GymBro', loadComponent: () => import('./features/auth/login').then((m) => m.Login) },
+  // Pública: el socio llega con el enlace de invitación que le entrega el gimnasio.
+  {
+    path: 'activar/:token',
+    title: 'Activar cuenta · GymBro',
+    loadComponent: () => import('./features/auth/activar-invitacion').then((m) => m.ActivarInvitacion),
+  },
   {
     path: '',
     component: Shell,

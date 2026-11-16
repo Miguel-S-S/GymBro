@@ -47,8 +47,9 @@ namespace GymBro.Infrastructure.Repositories
         }
 
         // El DNI es único en toda la plataforma, por eso se consulta sin filtro de tenant.
-        public Task<bool> ExisteDniAsync(string dni) =>
-            _context.Socios.IgnoreQueryFilters().AnyAsync(s => s.Dni == dni && s.FechaBaja == null);
+        public Task<bool> ExisteDniAsync(string dni, Guid? excluirSocioId = null) =>
+            _context.Socios.IgnoreQueryFilters()
+                .AnyAsync(s => s.Dni == dni && s.FechaBaja == null && (excluirSocioId == null || s.Id != excluirSocioId));
 
         // Se usa al resolver una vinculación: el socio todavía no es del gimnasio. La autorización
         // se verifica antes, a través de la solicitud (que sí está filtrada por gimnasio).

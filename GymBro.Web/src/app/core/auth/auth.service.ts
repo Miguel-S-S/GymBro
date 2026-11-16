@@ -3,7 +3,7 @@ import { Injectable, computed, inject, signal } from '@angular/core';
 import { Router } from '@angular/router';
 import { Observable, tap } from 'rxjs';
 import { API_BASE_URL } from '../api/api.config';
-import { LoginRequest, Rol, Sesion, rutaInicial } from './auth.models';
+import { ActivarInvitacion, InvitacionInfo, LoginRequest, Rol, Sesion, rutaInicial } from './auth.models';
 
 const CLAVE = 'gymbro.sesion';
 
@@ -23,6 +23,16 @@ export class AuthService {
 
   login(dto: LoginRequest): Observable<Sesion> {
     return this.http.post<Sesion>(`${this.url}/login`, dto).pipe(tap((s) => this.guardar(s)));
+  }
+
+  /** Datos de una invitación de alta presencial, antes de que el socio cree su contraseña. */
+  consultarInvitacion(token: string): Observable<InvitacionInfo> {
+    return this.http.post<InvitacionInfo>(`${this.url}/invitacion/consultar`, { token });
+  }
+
+  /** El socio crea su contraseña y completa sus datos: la API devuelve la sesión ya iniciada. */
+  activarInvitacion(dto: ActivarInvitacion): Observable<Sesion> {
+    return this.http.post<Sesion>(`${this.url}/invitacion/activar`, dto).pipe(tap((s) => this.guardar(s)));
   }
 
   cerrarSesion(): void {

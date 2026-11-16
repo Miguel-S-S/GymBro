@@ -10,7 +10,8 @@ import { MatSnackBar } from '@angular/material/snack-bar';
 import { MatTableModule } from '@angular/material/table';
 import { Router } from '@angular/router';
 import { SociosApi } from '../../core/api/socios.api';
-import { SocioResumen } from '../../core/models/socio.models';
+import { AuthService } from '../../core/auth/auth.service';
+import { ESTADO_ACCESO_ETIQUETA, SocioResumen } from '../../core/models/socio.models';
 import { mensajeDeError } from '../../core/util/api-error';
 import { SocioAltaDialog } from './socio-alta-dialog';
 
@@ -31,9 +32,11 @@ import { SocioAltaDialog } from './socio-alta-dialog';
         <h1>Socios</h1>
         <p class="subtitulo">{{ socios().length }} registrados</p>
       </div>
-      <button mat-flat-button (click)="abrirAlta()">
-        <mat-icon>person_add</mat-icon> Nuevo socio
-      </button>
+      @if (esDueno()) {
+        <button mat-flat-button (click)="abrirAlta()">
+          <mat-icon>person_add</mat-icon> Nuevo socio
+        </button>
+      }
     </div>
 
     <mat-form-field class="buscador">
@@ -66,6 +69,14 @@ import { SocioAltaDialog } from './socio-alta-dialog';
             <th mat-header-cell *matHeaderCellDef>Email</th>
             <td mat-cell *matCellDef="let s">{{ s.email }}</td>
           </ng-container>
+          <ng-container matColumnDef="acceso">
+            <th mat-header-cell *matHeaderCellDef>Acceso</th>
+            <td mat-cell *matCellDef="let s">
+              <span class="insignia" [class.pendiente]="s.estadoAcceso === 'Invitado'" [class.sin-acceso]="s.estadoAcceso === 'SinAcceso'">
+                {{ etiqueta(s) }}
+              </span>
+            </td>
+          </ng-container>
           <ng-container matColumnDef="alta">
             <th mat-header-cell *matHeaderCellDef>Alta</th>
             <td mat-cell *matCellDef="let s">{{ s.fechaAlta | date: 'dd/MM/yyyy' }}</td>
@@ -83,6 +94,12 @@ import { SocioAltaDialog } from './socio-alta-dialog';
   `,
   styles: `
     .buscador { width: 100%; max-width: 420px; }
+    .insignia {
+      display: inline-block; padding: 2px 10px; border-radius: 999px; font: var(--mat-sys-label-medium);
+      background: var(--mat-sys-secondary-container); color: var(--mat-sys-on-secondary-container);
+    }
+    .insignia.pendiente { background: var(--mat-sys-tertiary-container); color: var(--mat-sys-on-tertiary-container); }
+    .insignia.sin-acceso { background: var(--mat-sys-error-container); color: var(--mat-sys-on-error-container); }
   `,
 })
 export class SociosLista {
@@ -90,8 +107,11 @@ export class SociosLista {
   private readonly dialog = inject(MatDialog);
   private readonly snack = inject(MatSnackBar);
   private readonly router = inject(Router);
+  private readonly auth = inject(AuthService);
 
-  readonly columnas = ['nombre', 'email', 'alta', 'ir'];
+  readonly esDueno = computed(() => this.auth.rol() === 'AdministradorGimnasio');
+
+  readonly columnas = ['nombre', 'email', 'acceso', 'alta', 'ir'];
   readonly socios = signal<SocioResumen[]>([]);
   readonly cargando = signal(true);
   readonly error = signal<string | null>(null);
@@ -107,6 +127,10 @@ export class SociosLista {
 
   constructor() {
     this.cargar();
+  }
+
+  etiqueta(s: SocioResumen): string {
+    return ESTADO_ACCESO_ETIQUETA[s.estadoAcceso] ?? s.estadoAcceso;
   }
 
   cargar(): void {
@@ -126,7 +150,8 @@ export class SociosLista {
 
   abrirAlta(): void {
     this.dialog
-      .open(SocioAltaDialog, { width: '480px', maxWidth: '95vw' })
+      // disableClose: el enlace de invitación se ve una sola vez y el propio diálogo decide cuándo cerrarse.
+      .open(SocioAltaDialog, { width: '520px', maxWidth: '95vw', disableClose: true })
       .afterClosed()
       .subscribe((creado?: SocioResumen) => {
         if (!creado) return;

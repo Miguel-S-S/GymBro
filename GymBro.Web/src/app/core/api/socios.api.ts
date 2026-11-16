@@ -1,7 +1,7 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
 import { Observable } from 'rxjs';
-import { SocioCreate, SocioDetalle, SocioResumen } from '../models/socio.models';
+import { Invitacion, SocioAlta, SocioCreate, SocioDetalle, SocioResumen, SocioUpdate } from '../models/socio.models';
 import { API_BASE_URL } from './api.config';
 
 /** Cliente de GymBro.Api/Controllers/SocioController. */
@@ -18,7 +18,23 @@ export class SociosApi {
     return this.http.get<SocioDetalle>(`${this.url}/${id}`);
   }
 
-  crear(dto: SocioCreate): Observable<SocioResumen> {
-    return this.http.post<SocioResumen>(this.url, dto);
+  /** Alta presencial (Dueño): crea la ficha y devuelve la invitación para que el socio active su cuenta. */
+  crear(dto: SocioCreate): Observable<SocioAlta> {
+    return this.http.post<SocioAlta>(this.url, dto);
+  }
+
+  /** Corrige la ficha de un socio que todavía no activó su cuenta. */
+  actualizar(id: string, dto: SocioUpdate): Observable<SocioDetalle> {
+    return this.http.put<SocioDetalle>(`${this.url}/${id}`, dto);
+  }
+
+  /** Emite una invitación nueva; la anterior deja de valer. */
+  renovarInvitacion(id: string): Observable<Invitacion> {
+    return this.http.post<Invitacion>(`${this.url}/${id}/invitacion`, {});
+  }
+
+  /** Ficha sin cuenta: baja lógica. Socio con cuenta: se desvincula del gimnasio. */
+  baja(id: string): Observable<void> {
+    return this.http.delete<void>(`${this.url}/${id}`);
   }
 }

@@ -54,6 +54,8 @@ builder.Services.AddScoped<IAuditLogRepository, AuditLogRepository>();
 builder.Services.AddScoped<IAuditService, AuditService>();
 builder.Services.AddScoped<ISocioAccessService, SocioAccessService>();
 builder.Services.AddScoped<IAuthService, AuthService>();
+builder.Services.AddScoped<IInvitacionRepository, InvitacionRepository>();
+builder.Services.AddScoped<IInvitacionService, InvitacionService>();
 builder.Services.AddScoped<IGimnasioService, GimnasioService>();
 builder.Services.AddScoped<IPersonalService, PersonalService>();
 builder.Services.AddScoped<IVinculacionService, VinculacionService>();
@@ -127,6 +129,13 @@ using (var scope = app.Services.CreateScope())
 
     await AccesoSeeder.SeedSuperAdministradorAsync(context, services.GetRequiredService<IHasheadorContrasena>(),
         app.Configuration["SuperAdmin:Email"], app.Configuration["SuperAdmin:Password"]);
+
+    // Datos de demostración (gimnasio, trainer, socios, solicitud, rutina pendiente e invitación): solo en desarrollo y si se habilita.
+    if (app.Environment.IsDevelopment() && app.Configuration.GetValue<bool>("DemoData:Habilitado"))
+    {
+        await DemoSeeder.SeedAsync(context, services.GetRequiredService<IHasheadorContrasena>(),
+            app.Configuration["DemoData:UrlFront"] ?? "http://localhost:4200");
+    }
 }
 
 // Configure the HTTP request pipeline.

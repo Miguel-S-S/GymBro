@@ -1,4 +1,4 @@
-﻿namespace GymBro.Application.DTOs.Acceso
+namespace GymBro.Application.DTOs.Acceso
 {
     public record LoginRequest(string Email, string Password);
 
@@ -19,6 +19,29 @@
         public string Email { get; set; } = string.Empty;
         public string Password { get; set; } = string.Empty;
         public string Dni { get; set; } = string.Empty;
+        public DateTime FechaNacimiento { get; set; }
+        /// <summary>M, F u X.</summary>
+        public string Genero { get; set; } = string.Empty;
+        /// <summary>Consentimiento para tratar datos de salud (Ley 25.326). Obligatorio.</summary>
+        public bool ConsentimientoDatosSalud { get; set; }
+    }
+
+    public record ConsultarInvitacionRequest(string Token);
+
+    /// <summary>Datos que ve quien abre el enlace de invitación, antes de crear su contraseña.</summary>
+    public class InvitacionInfoDto
+    {
+        public string Nombre { get; set; } = string.Empty;
+        public string Apellido { get; set; } = string.Empty;
+        public string Email { get; set; } = string.Empty;
+        public string Gimnasio { get; set; } = string.Empty;
+        public DateTime ExpiraUtc { get; set; }
+    }
+
+    public class ActivarInvitacionRequest
+    {
+        public string Token { get; set; } = string.Empty;
+        public string Password { get; set; } = string.Empty;
         public DateTime FechaNacimiento { get; set; }
         /// <summary>M, F u X.</summary>
         public string Genero { get; set; } = string.Empty;

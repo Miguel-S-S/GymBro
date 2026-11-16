@@ -19,6 +19,7 @@ namespace GymBro.Infrastructure.Persistence
         public DbSet<Usuario> Usuarios { get; set; }
         public DbSet<AsignacionEntrenadorSocio> Asignaciones { get; set; }
         public DbSet<SolicitudVinculacion> SolicitudesVinculacion { get; set; }
+        public DbSet<InvitacionSocio> Invitaciones { get; set; }
         public DbSet<RevisionPrescripcion> RevisionesPrescripcion { get; set; }
         public DbSet<AuditLog> AuditLogs { get; set; }
 
@@ -246,6 +247,19 @@ namespace GymBro.Infrastructure.Persistence
                 e.HasIndex(s => new { s.GimnasioId, s.Estado });
                 // Un socio no puede tener dos solicitudes pendientes al mismo gimnasio.
                 e.HasIndex(s => new { s.SocioId, s.GimnasioId }).IsUnique().HasFilter("estado = 'Pendiente'");
+            });
+
+            // Invitación de alta presencial (el socio activa su cuenta con un código de un solo uso)
+            modelBuilder.Entity<InvitacionSocio>(e =>
+            {
+                e.HasQueryFilter(i => i.FechaBaja == null && (
+                    _actual.EsProcesoDeSistema
+                    || (_actual.GimnasioId != null && i.GimnasioId == _actual.GimnasioId)));
+                e.Property(i => i.TokenHash).HasMaxLength(64).IsRequired();
+                e.HasIndex(i => i.TokenHash).IsUnique();
+                e.HasOne(i => i.Socio).WithMany().HasForeignKey(i => i.SocioId).OnDelete(DeleteBehavior.Restrict);
+                e.HasOne(i => i.Gimnasio).WithMany().HasForeignKey(i => i.GimnasioId).OnDelete(DeleteBehavior.Restrict);
+                e.HasIndex(i => i.SocioId);
             });
 
             // Traza de revisión humana de rutinas

@@ -1,9 +1,16 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
+  <!--
+    Proyecto contenedor del microservicio de IA (Python/FastAPI).
+    No compila código C#: existe para mostrar los archivos en Visual Studio y para
+    lanzar uvicorn con F5 (ver Properties/launchSettings.json y GymBro.slnLaunch).
+    Requiere el entorno virtual en venv\ (python -m venv venv; pip install -r requirements.txt).
+  -->
   <PropertyGroup>
     <TargetFramework>net10.0</TargetFramework>
-    <ImplicitUsings>enable</ImplicitUsings>
-    <Nullable>enable</Nullable>
+    <EnableDefaultCompileItems>false</EnableDefaultCompileItems>
+    <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
+    <DefaultItemExcludes>$(DefaultItemExcludes);venv\**;__pycache__\**;.ipynb_checkpoints\**;gymbro_datasets\**</DefaultItemExcludes>
   </PropertyGroup>
 
 </Project>

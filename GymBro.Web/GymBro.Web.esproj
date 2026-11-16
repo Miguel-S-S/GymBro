@@ -1,0 +1,12 @@
+<Project Sdk="Microsoft.VisualStudio.JavaScript.Sdk/1.0.6165494">
+  <!--
+    Proyecto de Visual Studio para el frontend Angular.
+    F5 ejecuta "npm start" (ng serve en http://localhost:4200, con proxy de /api a GymBro.Api)
+    y abre el navegador con la configuración "Visual Studio (Edge)" de .vscode/launch.json.
+  -->
+  <PropertyGroup>
+    <StartupCommand>npm start</StartupCommand>
+    <ShouldRunBuildScript>false</ShouldRunBuildScript>
+    <BuildOutputFolder>$(MSBuildProjectDirectory)\dist\gymbro-web\browser\</BuildOutputFolder>
+  </PropertyGroup>
+</Project>

@@ -1,15 +1,17 @@
-version: '3.8'
-
+# Base de datos local de GymBro (PostgreSQL 16 + pgvector).
+# Alineado con el entorno de desarrollo: contenedor gymbro-db, puerto 5433 del equipo, usuario postgres, base gymbro_db.
+# La contraseña se toma de la variable POSTGRES_PASSWORD (archivo .env en la raíz con POSTGRES_PASSWORD=..., ignorado por git).
+# Debe coincidir con la de ConnectionStrings:DefaultConnection de GymBro.Api.
 services:
   db:
     image: pgvector/pgvector:pg16
-    container_name: gymbro_db
+    container_name: gymbro-db
     environment:
-      POSTGRES_USER: gymbro_user
-      POSTGRES_PASSWORD: gymbro_password
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Definir POSTGRES_PASSWORD en .env}
       POSTGRES_DB: gymbro_db
     ports:
-      - "5432:5432"
+      - "5433:5432"
     volumes:
       - gymbro_db_data:/var/lib/postgresql/data
     networks:

@@ -1,0 +1,15 @@
+# Microservicio de IA (main.py)
+fastapi==0.141.1
+uvicorn==0.52.4
+ollama==0.6.2
+
+# Script de embeddings (generador_embeddings.py)
+psycopg2-binary==2.9.12
+requests==2.34.2
+
+# Análisis y ETL de datasets (notebook, traducir_dataset.py)
+pandas==3.0.5
+numpy==2.5.2
+matplotlib==3.11.1
+seaborn==0.13.2
+deep-translator==1.11.4

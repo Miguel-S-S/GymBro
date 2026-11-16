@@ -11,7 +11,7 @@ def health_check():
 def generar_embedding(texto: str):
     """
     recibe un texto por ejemplo la descripcion de un ejercicio y devuelve
-    su representacion vectorial matematica usando el modelo phi3 local
+    su representacion vectorial matematica usando el modelo nomic-embed-text local (Ollama)
     """
     try:
         #llamada para ollama en puerto 11434

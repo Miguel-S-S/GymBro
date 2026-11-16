@@ -20,7 +20,7 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddHttpClient<IIaService, IaService>(client =>
 {
-    client.BaseAddress = new Uri("http://127.0.0.1:8000");
+    client.BaseAddress = new Uri(builder.Configuration["Ia:UrlBase"] ?? "http://127.0.0.1:8000");
 });
 
 // Add services to the container.
@@ -116,8 +116,9 @@ using (var scope = app.Services.CreateScope())
 
     await context.Database.MigrateAsync();
 
-    // Ruta a los archivos
-    string datasetPath = @"C:\Users\miguel\source\repos\GymBro\GymBro.IA\gymbro_datasets";
+    // Ruta a los datasets: configurable con "Datasets:Ruta"; por defecto, GymBro.IA/gymbro_datasets relativo a la solución.
+    string datasetPath = app.Configuration["Datasets:Ruta"]
+        ?? Path.GetFullPath(Path.Combine(app.Environment.ContentRootPath, "..", "GymBro.IA", "gymbro_datasets"));
 
     // --- NUEVOS LOGS DE DEPURACION ---
     Console.WriteLine("========================================");

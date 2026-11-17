@@ -1,0 +1,53 @@
+Etapa 8b (bienestar diario) - evidencia
+Comando: dotnet ef migrations script Etapa6_InvitacionesSocio Etapa8b_BienestarDiario --project GymBro.Infrastructure --startup-project GymBro.Api
+Commit: ee3d039b7684aedfee8ea2e9b9f1e7594c218845
+Fecha: 2026-11-17 17:41:20 -03:00
+Codigo de salida: 0
+------------------------------------------------------------
+dotnet : warn: Microsoft.EntityFrameworkCore.Model.Validation[10622]
+En línea: 12 Carácter: 186
++ ... mBro.Api' { dotnet ef migrations script Etapa6_InvitacionesSocio Etap ...
++                 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (warn: Microsoft...lidation[10622]:String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+      Entity 'PrescripcionEntrenamiento' has a global query filter defined and is the required end of a relationship with the entity 'RevisionPrescripcion'. This may lead to unexpected results when the required entity is filtered out. Either configure the navigation as optional, or define matching query filters for both entities in the navigation. See 
+https://go.microsoft.com/fwlink/?linkid=2131316 for more information.
+START TRANSACTION;
+CREATE TABLE registros_bienestar_diario (
+    id uuid NOT NULL,
+    socio_id uuid NOT NULL,
+    fecha date NOT NULL,
+    horas_sueno numeric(3,1),
+    estres smallint,
+    fatiga smallint,
+    peso_kg numeric(5,1),
+    nutricion_categoria smallint,
+    ingesta_agua_litros numeric(3,1),
+    nutricion_notas character varying(500),
+    frecuencia_cardiaca_reposo smallint,
+    fecha_alta timestamp with time zone NOT NULL,
+    usuario_alta integer NOT NULL,
+    fecha_modificacion timestamp with time zone,
+    usuario_modificacion integer,
+    fecha_baja timestamp with time zone,
+    usuario_baja integer,
+    CONSTRAINT pk_registros_bienestar_diario PRIMARY KEY (id),
+    CONSTRAINT "CK_RegistroBienestar_Estres" CHECK (estres IS NULL OR (estres >= 1 AND estres <= 7)),
+    CONSTRAINT "CK_RegistroBienestar_Fatiga" CHECK (fatiga IS NULL OR (fatiga >= 1 AND fatiga <= 7)),
+    CONSTRAINT "CK_RegistroBienestar_FcReposo" CHECK (frecuencia_cardiaca_reposo IS NULL OR (frecuencia_cardiaca_reposo >= 30 AND frecuencia_cardiaca_reposo <= 120)),
+    CONSTRAINT "CK_RegistroBienestar_HorasSueno" CHECK (horas_sueno IS NULL OR (horas_sueno >= 0 AND horas_sueno <= 24 AND mod(horas_sueno * 2, 1) = 0)),
+    CONSTRAINT "CK_RegistroBienestar_IngestaAgua" CHECK (ingesta_agua_litros IS NULL OR (ingesta_agua_litros >= 0 AND ingesta_agua_litros <= 10)),
+    CONSTRAINT "CK_RegistroBienestar_NutricionCategoria" CHECK (nutricion_categoria IS NULL OR nutricion_categoria IN (1, 2, 3)),
+    CONSTRAINT "CK_RegistroBienestar_PesoKg" CHECK (peso_kg IS NULL OR (peso_kg >= 1 AND peso_kg <= 400)),
+    CONSTRAINT fk_registros_bienestar_diario_socios_socio_id FOREIGN KEY (socio_id) REFERENCES socios (id) ON DELETE RESTRICT
+);
+
+CREATE UNIQUE INDEX ix_registros_bienestar_diario_socio_id_fecha ON registros_bienestar_diario (socio_id, fecha) WHERE fecha_baja IS NULL;
+
+INSERT INTO "__EFMigrationsHistory" (migration_id, product_version)
+VALUES ('20261117203130_Etapa8b_BienestarDiario', '10.0.11');
+
+COMMIT;
+
+

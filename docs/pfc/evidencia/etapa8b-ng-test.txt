@@ -1,0 +1,19 @@
+Etapa 8b (bienestar diario) - evidencia
+Comando: ng test --watch=false
+Commit: ee3d039b7684aedfee8ea2e9b9f1e7594c218845
+Fecha: 2026-11-17 17:41:30 -03:00
+Codigo de salida: 0
+------------------------------------------------------------
+> Building...
+√ Building...
+Application bundle generation complete. [3.878 seconds] - 2026-11-17T20:41:36.927Z
+
+
+ RUN  v5.1.0 C:/Users/miguel/source/repos/GymBro/GymBro.Web
+
+
+ Test Files  20 passed (20)
+      Tests  135 passed (135)
+   Start at  17:41:37
+   Duration  5.54s (environment 70%, setup 12%, import 9%, tests 6%, transform 3%)
+

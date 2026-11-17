@@ -1,0 +1,37 @@
+Etapa 8b (bienestar diario) - evidencia
+Comando: ng build
+Commit: ee3d039b7684aedfee8ea2e9b9f1e7594c218845
+Fecha: 2026-11-17 17:41:23 -03:00
+Codigo de salida: 0
+------------------------------------------------------------
+> Building...
+√ Building...
+Initial chunk files | Names               |  Raw size | Estimated transfer size
+main-25SIOG63.js    | main                | 361.22 kB |                70.17 kB
+chunk-ClddjZx3.js   | -                   | 337.78 kB |                86.70 kB
+styles-56MVVM6I.css | styles              |  25.10 kB |                 3.46 kB
+
+                    | Initial total       | 724.10 kB |               160.33 kB
+
+Lazy chunk files    | Names               |  Raw size | Estimated transfer size
+chunk-3DETPqK1.js   | -                   |  44.72 kB |                 9.55 kB
+chunk-1AnK2GOk.js   | -                   |  40.99 kB |                 8.69 kB
+chunk-CWvE9cUG.js   | -                   |  35.89 kB |                 8.83 kB
+chunk-D3d21_Ah.js   | sesion-registro     |  34.11 kB |                 9.79 kB
+chunk-DgQk_KzN.js   | -                   |  30.07 kB |                 7.10 kB
+chunk-U6EFIEmy.js   | -                   |  29.39 kB |                 4.93 kB
+chunk-D9VD5rcO.js   | mi-layout           |  29.20 kB |                 8.01 kB
+chunk-plVZpyzU.js   | socio-detalle       |  28.30 kB |                 7.17 kB
+chunk-B8q9wWt6.js   | -                   |  26.53 kB |                 4.48 kB
+chunk-2svdVI-s.js   | ejercicios-catalogo |  26.12 kB |                 7.08 kB
+chunk-CGX61fCX.js   | -                   |  15.21 kB |                 4.16 kB
+chunk-D89J8FqK.js   | mi-bienestar        |  14.12 kB |                 4.51 kB
+chunk-Cex4Irtt.js   | -                   |  12.05 kB |                 2.54 kB
+chunk-C3uu696N.js   | socios-lista        |  11.32 kB |                 3.62 kB
+chunk-CVnYVvTG.js   | -                   |  11.11 kB |                 3.18 kB
+...and 28 more lazy chunks files. Use "--verbose" to show all the files.
+
+Application bundle generation complete. [5.230 seconds] - 2026-11-17T20:41:30.760Z
+
+Output location: C:\Users\miguel\source\repos\GymBro\GymBro.Web\dist\gymbro-web
+

@@ -1,0 +1,19 @@
+Etapa 8c - evidencia
+Comando: ng test --watch=false
+Commit: 8610b22c8d952f0ce55736980aa679f2c643f5d4
+Fecha: 2026-11-17 14:07:39 -03:00
+Codigo de salida: 0
+------------------------------------------------------------
+> Building...
+√ Building...
+Application bundle generation complete. [3.312 seconds] - 2026-11-17T17:07:45.015Z
+
+
+ RUN  v5.1.0 C:/Users/miguel/source/repos/GymBro/GymBro.Web
+
+
+ Test Files  15 passed (15)
+      Tests  107 passed (107)
+   Start at  14:07:45
+   Duration  4.45s (environment 76%, setup 13%, import 6%, tests 3%, transform 2%)
+

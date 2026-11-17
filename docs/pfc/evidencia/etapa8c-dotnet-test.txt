@@ -1,0 +1,22 @@
+Etapa 8c - evidencia
+Comando: dotnet test GymBro.slnx
+Commit: 8610b22c8d952f0ce55736980aa679f2c643f5d4
+Fecha: 2026-11-17 14:07:18 -03:00
+Codigo de salida: 0
+------------------------------------------------------------
+  Determinando los proyectos que se van a restaurar...
+  Todos los proyectos están actualizados para la restauración.
+  GymBro.Domain -> C:\Users\miguel\source\repos\GymBro\GymBro.Domain\bin\Debug\net10.0\GymBro.Domain.dll
+  GymBro.Application -> C:\Users\miguel\source\repos\GymBro\GymBro.Application\bin\Debug\net10.0\GymBro.Application.dll
+  GymBro.Infrastructure -> C:\Users\miguel\source\repos\GymBro\GymBro.Infrastructure\bin\Debug\net10.0\GymBro.Infrastructure.dll
+  GymBro.Tests -> C:\Users\miguel\source\repos\GymBro\GymBro.Tests\bin\Debug\net10.0\GymBro.Tests.dll
+Serie de pruebas para C:\Users\miguel\source\repos\GymBro\GymBro.Tests\bin\Debug\net10.0\GymBro.Tests.dll (.NETCoreApp,Version=v10.0)
+1 archivos de prueba en total coincidieron con el patrón especificado.
+  GymBro.Api -> C:\Users\miguel\source\repos\GymBro\GymBro.Api\bin\Debug\net10.0\GymBro.Api.dll
+  GymBro.Tests.Integration -> C:\Users\miguel\source\repos\GymBro\GymBro.Tests.Integration\bin\Debug\net10.0\GymBro.Tests.Integration.dll
+Serie de pruebas para C:\Users\miguel\source\repos\GymBro\GymBro.Tests.Integration\bin\Debug\net10.0\GymBro.Tests.Integration.dll (.NETCoreApp,Version=v10.0)
+1 archivos de prueba en total coincidieron con el patrón especificado.
+
+Correctas! - Con error:     0, Superado:    38, Omitido:     0, Total:    38, Duración: 187 ms - GymBro.Tests.dll (net10.0)
+
+Correctas! - Con error:     0, Superado:   136, Omitido:     0, Total:   136, Duración: 8 s - GymBro.Tests.Integration.dll (net10.0)

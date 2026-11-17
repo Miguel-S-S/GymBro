@@ -24,7 +24,7 @@ describe('pantalla de activación de cuenta (etapa 6)', () => {
   beforeEach(() => {
     localStorage.clear();
     TestBed.configureTestingModule({
-      providers: [provideHttpClient(), provideHttpClientTesting(), provideRouter([{ path: 'mi-gimnasio/vinculacion', children: [] }])],
+      providers: [provideHttpClient(), provideHttpClientTesting(), provideRouter([{ path: 'mi', children: [] }])],
     });
     http = TestBed.inject(HttpTestingController);
   });
@@ -91,6 +91,7 @@ describe('pantalla de activación de cuenta (etapa 6)', () => {
     expect(auth.token()).toBe('jwt');
 
     await fixture.whenStable();
-    expect(TestBed.inject(Router).url).toBe('/mi-gimnasio/vinculacion');
+    // Etapa 8: el Socio entra a su área /mi (PWA).
+    expect(TestBed.inject(Router).url).toBe('/mi');
   });
 });

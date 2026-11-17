@@ -119,7 +119,10 @@ namespace GymBro.Application.DTOs.Acceso
 
     public class RutinaEjercicioDto
     {
+        /// <summary>Id de la línea de la prescripción (PrescripcionEjercicio).</summary>
         public Guid Id { get; set; }
+        /// <summary>Id del ejercicio del catálogo: lo necesita el cliente para registrar la sesión vinculada (Etapa 8).</summary>
+        public Guid EjercicioId { get; set; }
         public int Orden { get; set; }
         public string Ejercicio { get; set; } = string.Empty;
         public int SeriesObjetivo { get; set; }

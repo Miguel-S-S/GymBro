@@ -53,6 +53,6 @@ export function rutaInicial(rol: Rol): string {
     case 'Entrenador':
       return '/socios';
     case 'Socio':
-      return '/mi-gimnasio/vinculacion';
+      return '/mi';
   }
 }

@@ -4,7 +4,7 @@ import { RutinaEjercicioCard } from './rutina-ejercicio-card';
 
 function ejercicio(): RutinaEjercicio {
   return {
-    id: 'e1', orden: 2, ejercicio: 'Remo con barra', seriesObjetivo: 3, repeticionesMinimas: 8, repeticionesMaximas: 12,
+    id: 'e1', ejercicioId: 'ej1', orden: 2, ejercicio: 'Remo con barra', seriesObjetivo: 3, repeticionesMinimas: 8, repeticionesMaximas: 12,
     rirObjetivo: 2, descansoObjetivoSegundos: 90, observaciones: null,
   };
 }

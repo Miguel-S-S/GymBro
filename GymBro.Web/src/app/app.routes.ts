@@ -1,5 +1,8 @@
+import { inject } from '@angular/core';
 import { Routes } from '@angular/router';
 import { authGuard, rolGuard } from './core/auth/auth.guard';
+import { rutaInicial } from './core/auth/auth.models';
+import { AuthService } from './core/auth/auth.service';
 import { Shell } from './layout/shell';
 
 export const routes: Routes = [
@@ -10,12 +13,47 @@ export const routes: Routes = [
     title: 'Activar cuenta · GymBro',
     loadComponent: () => import('./features/auth/activar-invitacion').then((m) => m.ActivarInvitacion),
   },
+  // Socio: PWA con navegación inferior (Etapa 8).
+  {
+    path: 'mi',
+    canActivate: [authGuard, rolGuard('Socio')],
+    loadComponent: () => import('./features/mi/mi-layout').then((m) => m.MiLayout),
+    children: [
+      { path: '', title: 'Hoy · GymBro', loadComponent: () => import('./features/mi/mi-hoy').then((m) => m.MiHoy) },
+      { path: 'rutina', title: 'Mi rutina · GymBro', loadComponent: () => import('./features/mi/mi-rutina').then((m) => m.MiRutina) },
+      { path: 'entrenar', title: 'Entrenar · GymBro', loadComponent: () => import('./features/mi/mi-entrenar').then((m) => m.MiEntrenar) },
+      { path: 'historial', title: 'Historial · GymBro', loadComponent: () => import('./features/mi/mi-historial').then((m) => m.MiHistorial) },
+      {
+        path: 'historial/:id',
+        title: 'Sesión · GymBro',
+        loadComponent: () => import('./features/mi/mi-historial').then((m) => m.MiSesionDetalle),
+      },
+      {
+        path: 'mediciones',
+        title: 'Mis mediciones · GymBro',
+        loadComponent: () => import('./features/mi/mi-mediciones').then((m) => m.MiMediciones),
+      },
+      {
+        path: 'gimnasio',
+        title: 'Mi gimnasio · GymBro',
+        loadComponent: () => import('./features/socio-portal/vinculacion').then((m) => m.Vinculacion),
+      },
+    ],
+  },
   {
     path: '',
     component: Shell,
     canActivate: [authGuard],
     children: [
-      { path: '', pathMatch: 'full', redirectTo: 'socios' },
+      // Cada rol entra a su pantalla de inicio (el Socio, a /mi).
+      {
+        path: '',
+        pathMatch: 'full',
+        redirectTo: () => {
+          const rol = inject(AuthService).rol();
+          return rol ? rutaInicial(rol) : '/login';
+        },
+      },
 
       // Dueño de Gimnasio, Personal Trainer y Socio (cada uno ve solo lo que le corresponde; lo aplica la API).
       {
@@ -85,13 +123,8 @@ export const routes: Routes = [
         loadComponent: () => import('./features/plataforma/auditoria').then((m) => m.Auditoria),
       },
 
-      // Socio
-      {
-        path: 'mi-gimnasio/vinculacion',
-        title: 'Mi gimnasio · GymBro',
-        canActivate: [rolGuard('Socio')],
-        loadComponent: () => import('./features/socio-portal/vinculacion').then((m) => m.Vinculacion),
-      },
+      // Socio: la vinculación pasó al área /mi (se conserva la ruta anterior como redirección).
+      { path: 'mi-gimnasio/vinculacion', redirectTo: '/mi/gimnasio' },
     ],
   },
   { path: '**', redirectTo: '' },

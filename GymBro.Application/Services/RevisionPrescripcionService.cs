@@ -137,6 +137,7 @@ namespace GymBro.Application.Services
             Ejercicios = p.EjerciciosPrescritos.OrderBy(e => e.Orden).Select(e => new RutinaEjercicioDto
             {
                 Id = e.Id,
+                EjercicioId = e.EjercicioId,
                 Orden = e.Orden,
                 Ejercicio = e.Ejercicio?.Nombre ?? string.Empty,
                 SeriesObjetivo = e.SeriesObjetivo,

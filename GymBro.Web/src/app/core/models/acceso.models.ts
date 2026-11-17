@@ -43,7 +43,10 @@ export interface SolicitudVinculacion {
 }
 
 export interface RutinaEjercicio {
+  /** Línea de la prescripción (PrescripcionEjercicio). */
   id: string;
+  /** Ejercicio del catálogo: se usa para registrar la sesión vinculada. */
+  ejercicioId: string;
   orden: number;
   ejercicio: string;
   seriesObjetivo: number;

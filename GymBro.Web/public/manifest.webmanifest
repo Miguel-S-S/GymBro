@@ -1,9 +1,9 @@
 {
-  "name": "GymBro – Panel administrativo",
+  "name": "GymBro",
   "short_name": "GymBro",
   "display": "standalone",
-  "scope": "./",
-  "start_url": "./",
+  "scope": "/",
+  "start_url": "/mi",
   "icons": [
     {
       "src": "icons/icon-72x72.png",

@@ -38,10 +38,11 @@ import { map } from 'rxjs';
           <span>GymBro</span>
         </div>
         <mat-nav-list>
-          @if (auth.tieneRol('AdministradorGimnasio', 'Entrenador', 'Socio')) {
+          <!-- El Socio usa el área /mi (PWA, Etapa 8): no tiene ítems en este menú. -->
+          @if (auth.tieneRol('AdministradorGimnasio', 'Entrenador')) {
             <a mat-list-item routerLink="/socios" routerLinkActive="activo" (click)="esMovil() && nav.close()">
               <mat-icon matListItemIcon>group</mat-icon>
-              <span matListItemTitle>{{ auth.rol() === 'Socio' ? 'Mi perfil' : 'Socios' }}</span>
+              <span matListItemTitle>Socios</span>
             </a>
             <a mat-list-item routerLink="/ejercicios" routerLinkActive="activo" (click)="esMovil() && nav.close()">
               <mat-icon matListItemIcon>sports_gymnastics</mat-icon>
@@ -72,12 +73,6 @@ import { map } from 'rxjs';
             <a mat-list-item routerLink="/plataforma/auditoria" routerLinkActive="activo" (click)="esMovil() && nav.close()">
               <mat-icon matListItemIcon>fact_check</mat-icon>
               <span matListItemTitle>Auditoría</span>
-            </a>
-          }
-          @if (auth.tieneRol('Socio')) {
-            <a mat-list-item routerLink="/mi-gimnasio/vinculacion" routerLinkActive="activo" (click)="esMovil() && nav.close()">
-              <mat-icon matListItemIcon>store</mat-icon>
-              <span matListItemTitle>Mi gimnasio</span>
             </a>
           }
         </mat-nav-list>

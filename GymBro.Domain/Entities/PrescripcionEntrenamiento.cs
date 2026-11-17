@@ -22,6 +22,12 @@ namespace GymBro.Domain.Entities
         public ICollection<SesionEntrenamiento> Sesiones { get; set; } = new List<SesionEntrenamiento>();
         public ICollection<RevisionPrescripcion> Revisiones { get; set; } = new List<RevisionPrescripcion>();
 
+        /// <summary>
+        /// Rutina vigente: la que el socio puede ejecutar. Decisión del 16/11/2026: Aprobada o Editada
+        /// (Editada = aprobada con ajustes del entrenador).
+        /// </summary>
+        public bool EsVigente() => Estado is EstadoPrescripcion.Aprobada or EstadoPrescripcion.Editada;
+
         /// <summary>Se invoca al generar la rutina: define si pasa a revisión humana o queda aprobada.</summary>
         public void DefinirEstadoInicial(bool requiereRevisionHumana) =>
             Estado = requiereRevisionHumana ? EstadoPrescripcion.PendienteRevision : EstadoPrescripcion.Aprobada;

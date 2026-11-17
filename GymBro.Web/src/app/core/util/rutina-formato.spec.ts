@@ -2,7 +2,7 @@ import { RutinaEjercicio } from '../models/acceso.models';
 import { aplicarPaso, etiquetaEstado, resumenEjercicio } from './rutina-formato';
 
 const base: RutinaEjercicio = {
-  id: 'e1', orden: 1, ejercicio: 'Press de banca', seriesObjetivo: 3, repeticionesMinimas: 8, repeticionesMaximas: 12,
+  id: 'e1', ejercicioId: 'ej1', orden: 1, ejercicio: 'Press de banca', seriesObjetivo: 3, repeticionesMinimas: 8, repeticionesMaximas: 12,
   rirObjetivo: 2, descansoObjetivoSegundos: 90, observaciones: null,
 };
 

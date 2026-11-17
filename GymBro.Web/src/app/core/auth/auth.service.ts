@@ -3,6 +3,7 @@ import { Injectable, computed, inject, signal } from '@angular/core';
 import { Router } from '@angular/router';
 import { Observable, tap } from 'rxjs';
 import { API_BASE_URL } from '../api/api.config';
+import { borrarTodosLosBorradores } from '../util/borrador-sesion';
 import { ActivarInvitacion, InvitacionInfo, LoginRequest, Rol, Sesion, rutaInicial } from './auth.models';
 
 const CLAVE = 'gymbro.sesion';
@@ -42,6 +43,8 @@ export class AuthService {
     } catch {
       /* almacenamiento no disponible */
     }
+    // Los borradores de sesión no deben quedar en el dispositivo después de salir.
+    borrarTodosLosBorradores();
     this.router.navigateByUrl('/login');
   }
 

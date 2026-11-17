@@ -28,19 +28,10 @@ namespace GymBro.Api.Controllers
                 return BadRequest(ModelState);
             }
 
-            try
-            {
-                var result = await _sesionService.RegistrarSesionAsync(request);
-                return CreatedAtAction(nameof(GetById), new { id = result.Id }, result);
-            }
-            catch (ArgumentException ex)
-            {
-                return BadRequest(new { Error = ex.Message });
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, new { Error = "Error interno del servidor al procesar la sesión.", Detalle = ex.Message });
-            }
+            // Los errores los traduce ManejadorExcepciones: ArgumentException y ReglaNegocioException -> 400,
+            // AccesoDenegadoException -> 403 y cualquier otro -> 500 sin exponer el detalle interno.
+            var result = await _sesionService.RegistrarSesionAsync(request);
+            return CreatedAtAction(nameof(GetById), new { id = result.Id }, result);
         }
 
         [HttpGet("{id:guid}")]

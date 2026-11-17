@@ -159,3 +159,6 @@ app.UseAuthorization();
 app.MapControllers();
 
 app.Run();
+
+/// <summary>Expuesta para WebApplicationFactory (GymBro.Tests.Integration). No cambia el comportamiento.</summary>
+public partial class Program;

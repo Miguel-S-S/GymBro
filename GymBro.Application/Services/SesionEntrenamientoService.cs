@@ -6,6 +6,7 @@ using GymBro.Application.Abstractions;
 using GymBro.Application.DTOs;
 using GymBro.Application.DTOs.Comparacion;
 using GymBro.Domain.Entities;
+using GymBro.Domain.Exceptions;
 using GymBro.Domain.Repositories;
 
 namespace GymBro.Application.Services
@@ -40,8 +41,15 @@ namespace GymBro.Application.Services
 
             if (request.PrescripcionEntrenamientoId.HasValue)
             {
-                if (!await _prescripcionRepo.ExistsAsync(request.PrescripcionEntrenamientoId.Value))
-                    throw new ArgumentException("La PrescripcionEntrenamientoId especificada no existe.");
+                // El filtro de tenant limita la búsqueda al gimnasio del usuario; acá se exige además que la
+                // prescripción sea del mismo socio y que esté vigente (Aprobada o Editada).
+                var prescripcion = await _prescripcionRepo.GetByIdAsync(request.PrescripcionEntrenamientoId.Value)
+                    ?? throw new ArgumentException("La PrescripcionEntrenamientoId especificada no existe.");
+                if (prescripcion.SocioId != request.SocioId)
+                    throw new ReglaNegocioException("La prescripción indicada no pertenece al socio de la sesión.");
+                if (!prescripcion.EsVigente())
+                    throw new ReglaNegocioException(
+                        $"La prescripción no está vigente (estado {prescripcion.Estado}): solo se registran sesiones de rutinas Aprobadas o Editadas.");
             }
 
             var ejercicioIds = request.Ejercicios.Select(e => e.EjercicioId).Distinct().ToList();

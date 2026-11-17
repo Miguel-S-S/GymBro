@@ -64,6 +64,11 @@ builder.Services.AddSingleton(builder.Configuration.GetSection("Baseline").Get<B
 builder.Services.AddScoped<IBaselineRepository, BaselineRepository>();
 builder.Services.AddScoped<IPrescripcionBaselineService, PrescripcionBaselineService>();
 
+// Etapa 8b: bienestar diario. Reloj inyectable (TimeProvider) para calcular el día local y poder probarlo.
+builder.Services.AddSingleton(TimeProvider.System);
+builder.Services.AddScoped<IRegistroBienestarRepository, RegistroBienestarRepository>();
+builder.Services.AddScoped<IBienestarService, BienestarService>();
+
 builder.Services.Configure<JwtOptions>(builder.Configuration.GetSection(JwtOptions.Seccion));
 var jwt = builder.Configuration.GetSection(JwtOptions.Seccion).Get<JwtOptions>() ?? new JwtOptions();
 if (string.IsNullOrWhiteSpace(jwt.Key) || Encoding.UTF8.GetByteCount(jwt.Key) < 32)

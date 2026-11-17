@@ -33,6 +33,7 @@ namespace GymBro.Infrastructure.Persistence
         public DbSet<PrescripcionEntrenamiento> PrescripcionesEntrenamiento { get; set; }
         public DbSet<PrescripcionEjercicio> PrescripcionesEjercicios { get; set; }
         public DbSet<SerieRealizada> SeriesRealizadas { get; set; }
+        public DbSet<RegistroBienestarDiario> RegistrosBienestarDiario { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -161,6 +162,7 @@ namespace GymBro.Infrastructure.Persistence
                 });
 
             ConfigurarAccesoYTenants(modelBuilder);
+            ConfigurarBienestarDiario(modelBuilder);
 
             // 5. Conversión de Enums a texto puro en la base de datos
             modelBuilder.Entity<Socio>().Property(s => s.Objetivo).HasConversion<string>();
@@ -169,6 +171,43 @@ namespace GymBro.Infrastructure.Persistence
             modelBuilder.Entity<MatrizRecomendacion>().Property(m => m.CategoriaIMC).HasConversion<string>();
             modelBuilder.Entity<MedicionFisica>().Property(m => m.TipoEntrenamiento).HasConversion<string>();
             modelBuilder.Entity<PrescripcionEntrenamiento>().Property(p => p.Estado).HasConversion<string>();
+        }
+
+        /// <summary>Registro diario de bienestar del socio (Etapa 8b).</summary>
+        private void ConfigurarBienestarDiario(ModelBuilder modelBuilder)
+        {
+            modelBuilder.Entity<RegistroBienestarDiario>(e =>
+            {
+                e.ToTable("registros_bienestar_diario", t =>
+                {
+                    t.HasCheckConstraint("CK_RegistroBienestar_HorasSueno",
+                        "horas_sueno IS NULL OR (horas_sueno >= 0 AND horas_sueno <= 24 AND mod(horas_sueno * 2, 1) = 0)");
+                    t.HasCheckConstraint("CK_RegistroBienestar_Estres", "estres IS NULL OR (estres >= 1 AND estres <= 7)");
+                    t.HasCheckConstraint("CK_RegistroBienestar_Fatiga", "fatiga IS NULL OR (fatiga >= 1 AND fatiga <= 7)");
+                    t.HasCheckConstraint("CK_RegistroBienestar_PesoKg", "peso_kg IS NULL OR (peso_kg >= 1 AND peso_kg <= 400)");
+                    t.HasCheckConstraint("CK_RegistroBienestar_NutricionCategoria", "nutricion_categoria IS NULL OR nutricion_categoria IN (1, 2, 3)");
+                    t.HasCheckConstraint("CK_RegistroBienestar_IngestaAgua", "ingesta_agua_litros IS NULL OR (ingesta_agua_litros >= 0 AND ingesta_agua_litros <= 10)");
+                    t.HasCheckConstraint("CK_RegistroBienestar_FcReposo",
+                        "frecuencia_cardiaca_reposo IS NULL OR (frecuencia_cardiaca_reposo >= 30 AND frecuencia_cardiaca_reposo <= 120)");
+                });
+
+                // Mismo aislamiento que MedicionFisica: el gimnasio ve a sus socios; el socio, solo lo suyo.
+                e.HasQueryFilter(r => r.FechaBaja == null && (
+                    _actual.EsProcesoDeSistema
+                    || (_actual.GimnasioId != null && r.Socio.GimnasioId == _actual.GimnasioId)
+                    || (_actual.SocioId != null && r.SocioId == _actual.SocioId)));
+
+                e.HasOne(r => r.Socio).WithMany().HasForeignKey(r => r.SocioId).OnDelete(DeleteBehavior.Restrict);
+                e.Property(r => r.Fecha).HasColumnType("date");
+                e.Property(r => r.HorasSueno).HasPrecision(3, 1);
+                e.Property(r => r.PesoKg).HasPrecision(5, 1);
+                e.Property(r => r.IngestaAguaLitros).HasPrecision(3, 1);
+                e.Property(r => r.NutricionCategoria).HasConversion<short>();
+                e.Property(r => r.NutricionNotas).HasMaxLength(RangosBienestar.NotasMaxLargo);
+
+                // Un registro por socio y día entre las filas vigentes.
+                e.HasIndex(r => new { r.SocioId, r.Fecha }).IsUnique().HasFilter("fecha_baja IS NULL");
+            });
         }
 
         /// <summary>Modelo de acceso (roles), multi-tenant, vinculación, asignación, revisión de rutinas y auditoría.</summary>

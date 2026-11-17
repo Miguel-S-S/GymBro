@@ -39,7 +39,9 @@ namespace GymBro.Tests.Integration
         private const string Fallback = "Program.cs: FallbackPolicy RequireAuthenticatedUser / JwtBearer";
         private const string AccesoSocio = "SocioAccessService.AsegurarAccesoAsync";
         private const string Tenant = "filtro de tenant de GymBroDbContext (otro gimnasio)";
-        private const string NoVisible = "SocioAccessService: socio no visible -> RecursoNoEncontrado (T7)";
+        private const string AttrBienestarSocio = "BienestarController: [Authorize(Roles = Socio)] en la acción";
+        private const string AttrBienestarHistorial = "BienestarController.Historial: [Authorize(AdministradorGimnasio,Entrenador,Socio)]";
+        private const string NoVisible ="SocioAccessService: socio no visible -> RecursoNoEncontrado (T7)";
 
         public static TheoryData<string, string, string, int, string> Celdas()
         {
@@ -123,6 +125,17 @@ namespace GymBro.Tests.Integration
             Fila("GET", "/api/Ejercicios/zonas", "EjerciciosController: FallbackPolicy (usuario autenticado)",
                 (Anonimo, 401, Fallback), (SuperAdmin, 200, null));
 
+            // ---- Bienestar diario (Etapa 8b; datos de salud: el Administrador de la Plataforma no accede) ----
+            Fila("GET", "/api/bienestar/hoy", AttrBienestarSocio,
+                (Anonimo, 401, Fallback), (SuperAdmin, 403, null), (Dueno, 403, null), (Trainer, 403, null), (Socio, 200, null));
+            // Solo celdas rechazadas: el PUT permitido del Socio lo cubre BienestarTests (sin efectos acá).
+            Fila("PUT", "/api/bienestar/{HOY}", AttrBienestarSocio,
+                (Anonimo, 401, Fallback), (SuperAdmin, 403, null), (Dueno, 403, null), (Trainer, 403, null));
+            Fila("GET", "/api/bienestar?socioId={A}", AttrBienestarHistorial,
+                (Anonimo, 401, Fallback), (SuperAdmin, 403, null), (Dueno, 200, AccesoSocio), (Trainer, 200, AccesoSocio + " (asignado)"), (Socio, 200, AccesoSocio + " (propio)"));
+            Fila("GET", "/api/bienestar?socioId={B}", NoVisible, (Trainer, 404, NoVisible + " (no asignado)"), (Socio, 404, NoVisible + " (ajeno)"));
+            Fila("GET", "/api/bienestar?socioId={C}", NoVisible, (Dueno, 404, Tenant + " + " + NoVisible));
+
             // ---- Auditoría ----
             Fila("GET", "/api/auditoria", AttrAuditoria,
                 (Anonimo, 401, Fallback), (SuperAdmin, 200, null), (Dueno, 403, null), (Trainer, 403, null), (Socio, 403, null));
@@ -138,7 +151,8 @@ namespace GymBro.Tests.Integration
         public async Task Celda(string rol, string metodo, string ruta, int esperado, string justificacion)
         {
             var url = ruta.Replace("{A}", _esc.SocioA.Id.ToString()).Replace("{B}", _esc.SocioB.Id.ToString())
-                .Replace("{C}", _esc.SocioC.Id.ToString()).Replace("{X}", Guid.NewGuid().ToString());
+                .Replace("{C}", _esc.SocioC.Id.ToString()).Replace("{X}", Guid.NewGuid().ToString())
+                .Replace("{HOY}", GymBro.Application.Services.DiaLocal.Hoy(TimeProvider.System).ToString("yyyy-MM-dd"));
             var cliente = rol == Anonimo ? _esc.Api.CreateClient() : _esc.Api.ClienteComo(_esc.Usuario(rol));
             var pedido = new HttpRequestMessage(new HttpMethod(metodo), url);
             if (metodo is "POST" or "PUT") pedido.Content = new StringContent("{}", Encoding.UTF8, "application/json");

@@ -766,6 +766,107 @@ namespace GymBro.Infrastructure.Migrations
                     b.ToTable("prescripciones_entrenamiento", (string)null);
                 });
 
+            modelBuilder.Entity("GymBro.Domain.Entities.RegistroBienestarDiario", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<short?>("Estres")
+                        .HasColumnType("smallint")
+                        .HasColumnName("estres");
+
+                    b.Property<short?>("Fatiga")
+                        .HasColumnType("smallint")
+                        .HasColumnName("fatiga");
+
+                    b.Property<DateOnly>("Fecha")
+                        .HasColumnType("date")
+                        .HasColumnName("fecha");
+
+                    b.Property<DateTime>("FechaAlta")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("fecha_alta");
+
+                    b.Property<DateTime?>("FechaBaja")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("fecha_baja");
+
+                    b.Property<DateTime?>("FechaModificacion")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("fecha_modificacion");
+
+                    b.Property<short?>("FrecuenciaCardiacaReposo")
+                        .HasColumnType("smallint")
+                        .HasColumnName("frecuencia_cardiaca_reposo");
+
+                    b.Property<decimal?>("HorasSueno")
+                        .HasPrecision(3, 1)
+                        .HasColumnType("numeric(3,1)")
+                        .HasColumnName("horas_sueno");
+
+                    b.Property<decimal?>("IngestaAguaLitros")
+                        .HasPrecision(3, 1)
+                        .HasColumnType("numeric(3,1)")
+                        .HasColumnName("ingesta_agua_litros");
+
+                    b.Property<short?>("NutricionCategoria")
+                        .HasColumnType("smallint")
+                        .HasColumnName("nutricion_categoria");
+
+                    b.Property<string>("NutricionNotas")
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)")
+                        .HasColumnName("nutricion_notas");
+
+                    b.Property<decimal?>("PesoKg")
+                        .HasPrecision(5, 1)
+                        .HasColumnType("numeric(5,1)")
+                        .HasColumnName("peso_kg");
+
+                    b.Property<Guid>("SocioId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("socio_id");
+
+                    b.Property<int>("UsuarioAlta")
+                        .HasColumnType("integer")
+                        .HasColumnName("usuario_alta");
+
+                    b.Property<int?>("UsuarioBaja")
+                        .HasColumnType("integer")
+                        .HasColumnName("usuario_baja");
+
+                    b.Property<int?>("UsuarioModificacion")
+                        .HasColumnType("integer")
+                        .HasColumnName("usuario_modificacion");
+
+                    b.HasKey("Id")
+                        .HasName("pk_registros_bienestar_diario");
+
+                    b.HasIndex("SocioId", "Fecha")
+                        .IsUnique()
+                        .HasDatabaseName("ix_registros_bienestar_diario_socio_id_fecha")
+                        .HasFilter("fecha_baja IS NULL");
+
+                    b.ToTable("registros_bienestar_diario", null, t =>
+                        {
+                            t.HasCheckConstraint("CK_RegistroBienestar_Estres", "estres IS NULL OR (estres >= 1 AND estres <= 7)");
+
+                            t.HasCheckConstraint("CK_RegistroBienestar_Fatiga", "fatiga IS NULL OR (fatiga >= 1 AND fatiga <= 7)");
+
+                            t.HasCheckConstraint("CK_RegistroBienestar_FcReposo", "frecuencia_cardiaca_reposo IS NULL OR (frecuencia_cardiaca_reposo >= 30 AND frecuencia_cardiaca_reposo <= 120)");
+
+                            t.HasCheckConstraint("CK_RegistroBienestar_HorasSueno", "horas_sueno IS NULL OR (horas_sueno >= 0 AND horas_sueno <= 24 AND mod(horas_sueno * 2, 1) = 0)");
+
+                            t.HasCheckConstraint("CK_RegistroBienestar_IngestaAgua", "ingesta_agua_litros IS NULL OR (ingesta_agua_litros >= 0 AND ingesta_agua_litros <= 10)");
+
+                            t.HasCheckConstraint("CK_RegistroBienestar_NutricionCategoria", "nutricion_categoria IS NULL OR nutricion_categoria IN (1, 2, 3)");
+
+                            t.HasCheckConstraint("CK_RegistroBienestar_PesoKg", "peso_kg IS NULL OR (peso_kg >= 1 AND peso_kg <= 400)");
+                        });
+                });
+
             modelBuilder.Entity("GymBro.Domain.Entities.RevisionPrescripcion", b =>
                 {
                     b.Property<Guid>("Id")
@@ -1371,6 +1472,18 @@ namespace GymBro.Infrastructure.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired()
                         .HasConstraintName("fk_prescripciones_entrenamiento_socios_socio_id");
+
+                    b.Navigation("Socio");
+                });
+
+            modelBuilder.Entity("GymBro.Domain.Entities.RegistroBienestarDiario", b =>
+                {
+                    b.HasOne("GymBro.Domain.Entities.Socio", "Socio")
+                        .WithMany()
+                        .HasForeignKey("SocioId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired()
+                        .HasConstraintName("fk_registros_bienestar_diario_socios_socio_id");
 
                     b.Navigation("Socio");
                 });

@@ -1,0 +1,19 @@
+Etapa 8c-bis (T7, T8, T9) - evidencia
+Comando: ng test --watch=false
+Commit: e3f3d935042db00eb2a2b3afa964739856e946b5
+Fecha: 2026-11-17 15:37:55 -03:00
+Codigo de salida: 0
+------------------------------------------------------------
+> Building...
+√ Building...
+Application bundle generation complete. [3.554 seconds] - 2026-11-17T18:38:00.813Z
+
+
+ RUN  v5.1.0 C:/Users/miguel/source/repos/GymBro/GymBro.Web
+
+
+ Test Files  16 passed (16)
+      Tests  109 passed (109)
+   Start at  15:38:01
+   Duration  4.55s (environment 74%, setup 12%, import 7%, tests 4%, transform 2%)
+

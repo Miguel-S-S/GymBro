@@ -1,0 +1,14 @@
+fix-nivel-socio (enums no definidos) - evidencia
+Comando: dotnet test GymBro.slnx --no-build
+Commit: edacdac5e6cf50459c86653ac1e40a3f0380a188
+Fecha: 2026-11-17 20:18:05 -03:00
+Codigo de salida: 0
+------------------------------------------------------------
+Serie de pruebas para C:\Users\miguel\source\repos\GymBro\GymBro.Tests.Integration\bin\Debug\net10.0\GymBro.Tests.Integration.dll (.NETCoreApp,Version=v10.0)
+Serie de pruebas para C:\Users\miguel\source\repos\GymBro\GymBro.Tests\bin\Debug\net10.0\GymBro.Tests.dll (.NETCoreApp,Version=v10.0)
+1 archivos de prueba en total coincidieron con el patrón especificado.
+1 archivos de prueba en total coincidieron con el patrón especificado.
+
+Correctas! - Con error:     0, Superado:    83, Omitido:     0, Total:    83, Duración: 85 ms - GymBro.Tests.dll (net10.0)
+
+Correctas! - Con error:     0, Superado:   195, Omitido:     0, Total:   195, Duración: 10 s - GymBro.Tests.Integration.dll (net10.0)

@@ -1,0 +1,95 @@
+fix-nivel-socio (enums no definidos) - evidencia
+Comando: dotnet ef migrations script 20261117203130_Etapa8b_BienestarDiario 20261117230626_Fix_EnumsNoDefinidos --idempotent
+         aplicado con: docker exec -i gymbro-db psql -v ON_ERROR_STOP=1 (una transaccion; salida: START TRANSACTION, 8 x DO, COMMIT; codigo 0)
+Commit: edacdac5e6cf50459c86653ac1e40a3f0380a188
+Fecha: 2026-11-17 20:18:20 -03:00
+Codigo de salida (consulta posterior): 0
+------------------------------------------------------------
+Estado previo (consultado en gymbro-db antes de aplicar, 2026-11-17):
+  socios: Intermedio/Mantenimiento 734; Principiante/0 6; Principiante/Mantenimiento 5
+  mediciones_fisicas.tipo_entrenamiento: Cardio 255; Fuerza 258; HIIT 221; '0' 9
+  (los 6 socios con nivel '0' se habian corregido a Principiante el mismo dia, antes de esta rama)
+------------------------------------------------------------
+Script SQL aplicado:
+START TRANSACTION;
+
+DO $EF$
+BEGIN
+    IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "migration_id" = '20261117230626_Fix_EnumsNoDefinidos') THEN
+    ALTER TABLE mediciones_fisicas ALTER COLUMN tipo_entrenamiento DROP NOT NULL;
+    END IF;
+END $EF$;
+
+DO $EF$
+BEGIN
+    IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "migration_id" = '20261117230626_Fix_EnumsNoDefinidos') THEN
+    UPDATE socios SET nivel = 'Principiante' WHERE nivel = '0';
+    END IF;
+END $EF$;
+
+DO $EF$
+BEGIN
+    IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "migration_id" = '20261117230626_Fix_EnumsNoDefinidos') THEN
+    UPDATE socios SET objetivo = 'Mantenimiento' WHERE objetivo = '0';
+    END IF;
+END $EF$;
+
+DO $EF$
+BEGIN
+    IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "migration_id" = '20261117230626_Fix_EnumsNoDefinidos') THEN
+    UPDATE mediciones_fisicas SET tipo_entrenamiento = NULL WHERE tipo_entrenamiento = '0';
+    END IF;
+END $EF$;
+
+DO $EF$
+BEGIN
+    IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "migration_id" = '20261117230626_Fix_EnumsNoDefinidos') THEN
+    ALTER TABLE socios ADD CONSTRAINT "CK_Socio_Nivel" CHECK (nivel IN ('Principiante', 'Intermedio', 'Avanzado'));
+    END IF;
+END $EF$;
+
+DO $EF$
+BEGIN
+    IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "migration_id" = '20261117230626_Fix_EnumsNoDefinidos') THEN
+    ALTER TABLE socios ADD CONSTRAINT "CK_Socio_Objetivo" CHECK (objetivo IN ('PerdidaPeso', 'GananciaMuscular', 'Mantenimiento'));
+    END IF;
+END $EF$;
+
+DO $EF$
+BEGIN
+    IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "migration_id" = '20261117230626_Fix_EnumsNoDefinidos') THEN
+    ALTER TABLE mediciones_fisicas ADD CONSTRAINT "CK_MedicionFisica_TipoEntrenamiento" CHECK (tipo_entrenamiento IS NULL OR tipo_entrenamiento IN ('Fuerza', 'Cardio', 'HIIT'));
+    END IF;
+END $EF$;
+
+DO $EF$
+BEGIN
+    IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "migration_id" = '20261117230626_Fix_EnumsNoDefinidos') THEN
+    INSERT INTO "__EFMigrationsHistory" (migration_id, product_version)
+    VALUES ('20261117230626_Fix_EnumsNoDefinidos', '10.0.11');
+    END IF;
+END $EF$;
+COMMIT;
+
+------------------------------------------------------------
+Estado posterior:
+    nivel     |   objetivo    | count 
+--------------+---------------+-------
+ Intermedio   | Mantenimiento |   734
+ Principiante | Mantenimiento |    11
+(2 rows)
+
+  tipo  | count 
+--------+-------
+ Cardio |   255
+ Fuerza |   258
+ HIIT   |   221
+ (NULL) |     9
+(4 rows)
+
+               conname               |                                                    pg_get_constraintdef                                                    
+-------------------------------------+----------------------------------------------------------------------------------------------------------------------------
+ CK_MedicionFisica_TipoEntrenamiento | CHECK (((tipo_entrenamiento IS NULL) OR (tipo_entrenamiento = ANY (ARRAY['Fuerza'::text, 'Cardio'::text, 'HIIT'::text]))))
+ CK_Socio_Nivel                      | CHECK ((nivel = ANY (ARRAY['Principiante'::text, 'Intermedio'::text, 'Avanzado'::text])))
+ CK_Socio_Objetivo                   | CHECK ((objetivo = ANY (ARRAY['PerdidaPeso'::text, 'GananciaMuscular'::text, 'Mantenimiento'::text])))
+(3 rows)

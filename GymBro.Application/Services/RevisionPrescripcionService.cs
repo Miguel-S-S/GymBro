@@ -65,12 +65,27 @@ namespace GymBro.Application.Services
             return pendientes.Select(Mapear);
         }
 
+        private static readonly EstadoPrescripcion[] DecisionesDeRevision =
+            { EstadoPrescripcion.Aprobada, EstadoPrescripcion.Editada, EstadoPrescripcion.Rechazada };
+
+        /// <summary>
+        /// Solo admite los nombres Aprobada, Editada o Rechazada (sin distinguir mayúsculas).
+        /// No usa Enum.TryParse: aceptaba números ("5" = Aprobada) y listas separadas por coma ("Aprobada,Editada").
+        /// </summary>
+        public static EstadoPrescripcion LeerDecision(string? texto)
+        {
+            var valor = (texto ?? string.Empty).Trim();
+            foreach (var d in DecisionesDeRevision)
+                if (string.Equals(d.ToString(), valor, StringComparison.OrdinalIgnoreCase))
+                    return d;
+            throw new ReglaNegocioException("Decisión inválida. Use Aprobada, Editada o Rechazada.");
+        }
+
         public async Task<RutinaPendienteDto> RevisarAsync(Guid prescripcionId, RevisarRutinaRequest request)
         {
             var revisorId = _actual.UsuarioId ?? throw new AccesoDenegadoException();
 
-            if (!Enum.TryParse<EstadoPrescripcion>(request.Decision, true, out var decision))
-                throw new ReglaNegocioException("Decisión inválida. Use Aprobada, Editada o Rechazada.");
+            var decision = LeerDecision(request.Decision);
 
             var rutina = await _prescripciones.GetForRevisionAsync(prescripcionId)
                 ?? throw new RecursoNoEncontradoException("Rutina no encontrada.");

@@ -50,4 +50,5 @@ POSTGRES_PASSWORD=
 
 ## Archivos que no se versionan
 
-`.env` y `.env.*` (salvo `.env.example`), según `.gitignore`.
+- `.env` y `.env.*` (salvo `.env.example`).
+- `GymBro.Api/appsettings.Development.json`: configuración local de cada equipo; dejó de versionarse en la Etapa 8c. Los valores no secretos que necesita la API tienen valor por defecto en el código o en `appsettings.json`; los secretos van en user-secrets. Claves opcionales de desarrollo: `DemoData:Habilitado`, `DemoData:UrlFront`, `Datasets:Ruta`, `Ia:UrlBase`.

@@ -8,6 +8,9 @@
 .env.*
 !.env.example
 
+# Configuración local de desarrollo de la API: puede tener secretos (Etapa 8c, T1). Los secretos van en user-secrets.
+GymBro.Api/appsettings.Development.json
+
 # User-specific files
 *.rsuser
 *.suo

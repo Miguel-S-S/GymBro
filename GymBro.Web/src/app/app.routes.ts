@@ -84,7 +84,8 @@ export const routes: Routes = [
       {
         path: 'ejercicios',
         title: 'Ejercicios · GymBro',
-        canActivate: [rolGuard('AdministradorGimnasio', 'Entrenador')],
+        // Etapa 8c, T8: el catálogo no tiene datos de salud, así que también lo ve el Administrador de la Plataforma.
+        canActivate: [rolGuard('AdministradorGimnasio', 'Entrenador', 'SuperAdministrador')],
         loadComponent: () => import('./features/ejercicios/ejercicios-catalogo').then((m) => m.EjerciciosCatalogo),
       },
 

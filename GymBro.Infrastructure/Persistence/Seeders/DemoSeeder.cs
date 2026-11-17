@@ -9,9 +9,12 @@ namespace GymBro.Infrastructure.Persistence.Seeders
     /// <summary>
     /// Datos de demostración para probar todos los roles sin scripts ni SQL manual.
     /// Solo corre en Development y con DemoData:Habilitado = true. No toca nada si detecta datos de demo previos.
+    /// La contraseña de las cuentas demo sale de DemoData:Password (user-secrets); sin ella no se siembra nada (Etapa 8c, T9).
     /// </summary>
     public static class DemoSeeder
     {
+        public const string ClavePassword = "DemoData:Password";
+
         public const string NombreGimnasio = "GymBro Demo";
         public const string CodigoGimnasio = "DEMO01";
 
@@ -27,8 +30,16 @@ namespace GymBro.Infrastructure.Persistence.Seeders
         private const string DniMario = "28999000";
         private const string DniSofia = "35222111";
 
-        public static async Task SeedAsync(GymBroDbContext context, IHasheadorContrasena hasheador, string urlFront)
+        /// <returns>true si creó los datos de demostración.</returns>
+        public static async Task<bool> SeedAsync(GymBroDbContext context, IHasheadorContrasena hasheador, string urlFront, string? password)
         {
+            if (string.IsNullOrWhiteSpace(password))
+            {
+                Console.WriteLine($"[DEMO] DemoData:Habilitado es verdadero pero falta {ClavePassword}: se omiten los datos de demostración. " +
+                    $"Configurala con: dotnet user-secrets set \"{ClavePassword}\" \"<contraseña>\" --project GymBro.Api");
+                return false;
+            }
+
             try
             {
                 var emails = new[] { EmailDueno, EmailEntrenador, EmailLucas, EmailAna, EmailMario, EmailSofia };
@@ -40,19 +51,19 @@ namespace GymBro.Infrastructure.Persistence.Seeders
                 if (yaExiste)
                 {
                     Console.WriteLine("[DEMO] Ya hay datos de demostración (gimnasio, cuentas o DNI): no se crea nada.");
-                    return;
+                    return false;
                 }
 
                 var gimnasio = new Gimnasio { Nombre = NombreGimnasio, Codigo = CodigoGimnasio, RequiereAprobacionRutinas = true };
 
                 var dueno = new Usuario
                 {
-                    Email = EmailDueno, PasswordHash = hasheador.Hash("Dueno-1234"),
+                    Email = EmailDueno, PasswordHash = hasheador.Hash(password),
                     NombreCompleto = "Dueño Demo", Rol = RolUsuario.AdministradorGimnasio, GimnasioId = gimnasio.Id
                 };
                 var entrenador = new Usuario
                 {
-                    Email = EmailEntrenador, PasswordHash = hasheador.Hash("Entrena-1234"),
+                    Email = EmailEntrenador, PasswordHash = hasheador.Hash(password),
                     NombreCompleto = "Entrenador Demo", Rol = RolUsuario.Entrenador, GimnasioId = gimnasio.Id
                 };
 
@@ -82,7 +93,7 @@ namespace GymBro.Infrastructure.Persistence.Seeders
 
                 context.AddRange(gimnasio, dueno, entrenador, lucas, ana, mario, sofia);
                 context.AddRange(
-                    CuentaDe(lucas, "Socio-1234", hasheador), CuentaDe(ana, "Socio-1234", hasheador), CuentaDe(mario, "Socio-1234", hasheador));
+                    CuentaDe(lucas, password, hasheador), CuentaDe(ana, password, hasheador), CuentaDe(mario, password, hasheador));
                 context.Add(invitacion);
                 context.Add(new SolicitudVinculacion
                 {
@@ -117,16 +128,19 @@ namespace GymBro.Infrastructure.Persistence.Seeders
 
                 Console.WriteLine("========================================");
                 Console.WriteLine($"[DEMO] Gimnasio '{NombreGimnasio}' creado. Código: {CodigoGimnasio}");
-                Console.WriteLine($"[DEMO] Dueño: {EmailDueno} / Dueno-1234");
-                Console.WriteLine($"[DEMO] Personal Trainer: {EmailEntrenador} / Entrena-1234");
-                Console.WriteLine($"[DEMO] Socios (clave Socio-1234): {EmailLucas} (vinculado y asignado), {EmailAna} (independiente), {EmailMario} (solicitud pendiente)");
+                Console.WriteLine($"[DEMO] Cuentas (contraseña: la de {ClavePassword}):");
+                Console.WriteLine($"[DEMO] Dueño: {EmailDueno}");
+                Console.WriteLine($"[DEMO] Personal Trainer: {EmailEntrenador}");
+                Console.WriteLine($"[DEMO] Socios: {EmailLucas} (vinculado y asignado), {EmailAna} (independiente), {EmailMario} (solicitud pendiente)");
                 Console.WriteLine($"[DEMO] Invitación de {EmailSofia}: {urlFront.TrimEnd('/')}/activar/{tokenSofia}");
                 Console.WriteLine("========================================");
+                return true;
             }
             catch (Exception ex)
             {
                 // Los datos de demostración nunca deben impedir que la API arranque.
                 Console.WriteLine($"[DEMO][ERROR] No se pudieron crear los datos de demostración: {ex.Message}");
+                return false;
             }
         }
 

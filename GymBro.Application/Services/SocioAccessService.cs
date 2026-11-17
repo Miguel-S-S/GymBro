@@ -11,6 +11,10 @@ namespace GymBro.Application.Services
     /// </summary>
     public interface ISocioAccessService
     {
+        /// <summary>
+        /// Lanza RecursoNoEncontradoException (404) si el socio no es visible para quien llama y
+        /// AccesoDenegadoException (403) si su rol no puede actuar sobre datos de socios.
+        /// </summary>
         Task AsegurarAccesoAsync(Guid socioId);
     }
 
@@ -32,7 +36,9 @@ namespace GymBro.Application.Services
             if (_actual.EsProcesoDeSistema) return;
             if (!_actual.EsAutenticado) throw new AccesoDenegadoException();
 
-            var permitido = _actual.Rol switch
+            // Etapa 8c, T7: si el socio no es visible para quien llama (ajeno, otro gimnasio o no asignado) se responde 404,
+            // sin revelar que existe; 403 queda para el rol que no puede actuar sobre datos de socios.
+            bool visible = _actual.Rol switch
             {
                 // El socio solo ve lo suyo.
                 RolUsuario.Socio => _actual.SocioId == socioId,
@@ -40,11 +46,11 @@ namespace GymBro.Application.Services
                 RolUsuario.Entrenador => _actual.UsuarioId is Guid uid && await _asignaciones.EstaAsignadoAsync(uid, socioId),
                 // El dueño ve los socios de su gimnasio (el filtro de tenant ya limita la consulta).
                 RolUsuario.AdministradorGimnasio => await _socios.ExistsAsync(socioId),
-                // El administrador de la plataforma NO accede a datos de salud de los socios (mínimo privilegio).
-                _ => false
+                // El administrador de la plataforma NO accede a datos de salud de los socios (mínimo privilegio): 403.
+                _ => throw new AccesoDenegadoException()
             };
 
-            if (!permitido) throw new AccesoDenegadoException();
+            if (!visible) throw new RecursoNoEncontradoException("Socio no encontrado.");
         }
     }
 }

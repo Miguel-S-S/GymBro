@@ -11,6 +11,11 @@ Ningún secreto se versiona. Los archivos `appsettings*.json` solo llevan valore
 | `SuperAdmin:Email` | `SuperAdmin__Email` | No | Alta del Administrador de la Plataforma al iniciar. |
 | `SuperAdmin:Password` | `SuperAdmin__Password` | No | Contraseña inicial de esa cuenta. |
 | `Datasets:SembrarAlIniciar` | `Datasets__SembrarAlIniciar` | No | Siembra de los CSV al iniciar. Por defecto: `true` en Development, `false` en el resto (T3). |
+| `DemoData:Password` | `DemoData__Password` | Solo si `DemoData:Habilitado` es `true` | Contraseña de todas las cuentas de demostración (T9). Si falta, los datos demo se omiten con un aviso y la API arranca igual. |
+
+## Valores no secretos de desarrollo
+
+`GymBro.Api/appsettings.Development.example.json` (versionado) tiene las claves no secretas con los valores por defecto de las clases de opciones (`JwtOptions`, `BaselineConfig`) y de las claves que lee `Program.cs` (`Ia:UrlBase`, `Datasets:SembrarAlIniciar`, `DemoData:Habilitado`, `DemoData:UrlFront`). Para usarlo, copiarlo como `appsettings.Development.json` (no versionado) y ajustar lo necesario. `Datasets:Ruta` se omite a propósito: sin ella, la API usa `GymBro.IA/gymbro_datasets`.
 
 ## Desarrollo: user-secrets
 
@@ -21,6 +26,7 @@ dotnet user-secrets set "ConnectionStrings:DefaultConnection" "Host=localhost;Po
 dotnet user-secrets set "Jwt:Key" "<clave de 32 caracteres o más>" --project GymBro.Api
 dotnet user-secrets set "SuperAdmin:Email" "<email>" --project GymBro.Api
 dotnet user-secrets set "SuperAdmin:Password" "<contraseña>" --project GymBro.Api
+dotnet user-secrets set "DemoData:Password" "<contraseña de las cuentas demo>" --project GymBro.Api
 dotnet user-secrets list --project GymBro.Api   # muestra los valores: no compartir la salida
 ```
 

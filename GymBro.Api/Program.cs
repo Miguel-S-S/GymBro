@@ -147,7 +147,8 @@ using (var scope = app.Services.CreateScope())
     if (app.Environment.IsDevelopment() && app.Configuration.GetValue<bool>("DemoData:Habilitado"))
     {
         await DemoSeeder.SeedAsync(context, services.GetRequiredService<IHasheadorContrasena>(),
-            app.Configuration["DemoData:UrlFront"] ?? "http://localhost:4200");
+            app.Configuration["DemoData:UrlFront"] ?? "http://localhost:4200",
+            app.Configuration[DemoSeeder.ClavePassword]); // secreto: user-secrets (Etapa 8c, T9)
     }
 }
 

@@ -43,6 +43,8 @@ function navegar(ruta: string): true | string {
 }
 
 const PANTALLAS_DEL_PERSONAL = ['socios', 'socios/:id', 'socios/:id/sesiones/nueva', 'sesiones/:id', 'ejercicios'];
+/** Pantallas con datos de socios (salud): el Administrador de la Plataforma no entra (Ley 25.326). */
+const PANTALLAS_CON_DATOS_DE_SOCIOS = PANTALLAS_DEL_PERSONAL.filter((r) => r !== 'ejercicios');
 
 describe('rutas por rol (Etapa 8c, T2)', () => {
   beforeEach(() => {
@@ -72,9 +74,14 @@ describe('rutas por rol (Etapa 8c, T2)', () => {
     expect(navegar(ruta)).toBe(true);
   });
 
-  it.each(PANTALLAS_DEL_PERSONAL)('el Administrador de la Plataforma sigue sin acceso a /%s (sin cambios)', (ruta) => {
+  it.each(PANTALLAS_CON_DATOS_DE_SOCIOS)('el Administrador de la Plataforma no accede a /%s (datos de salud)', (ruta) => {
     guardar('SuperAdministrador');
     expect(navegar(ruta)).toBe('/plataforma/gimnasios');
+  });
+
+  it('el Administrador de la Plataforma accede al catálogo /ejercicios (T8)', () => {
+    guardar('SuperAdministrador');
+    expect(navegar('ejercicios')).toBe(true);
   });
 
   it('el Socio conserva su área /mi', () => {

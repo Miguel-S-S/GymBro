@@ -44,6 +44,9 @@ import { map } from 'rxjs';
               <mat-icon matListItemIcon>group</mat-icon>
               <span matListItemTitle>Socios</span>
             </a>
+          }
+          <!-- Catálogo de ejercicios: sin datos de salud; también para el Administrador de la Plataforma (Etapa 8c, T8). -->
+          @if (auth.tieneRol('AdministradorGimnasio', 'Entrenador', 'SuperAdministrador')) {
             <a mat-list-item routerLink="/ejercicios" routerLinkActive="activo" (click)="esMovil() && nav.close()">
               <mat-icon matListItemIcon>sports_gymnastics</mat-icon>
               <span matListItemTitle>Ejercicios</span>

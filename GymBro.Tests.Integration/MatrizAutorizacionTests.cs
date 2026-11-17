@@ -9,6 +9,7 @@ namespace GymBro.Tests.Integration
     /// <summary>
     /// Etapa 8c, T4: matriz rol × endpoint contra la API real (Postgres descartable).
     /// Cada celda indica el código esperado y el atributo o servicio que lo justifica.
+    /// Criterio (T7): 404 si el socio no es visible para quien llama; 403 solo si el recurso es visible y el rol no puede actuar.
     /// Escenario SINTÉTICO de prueba:
     ///   Gimnasio 1: Dueño, Personal Trainer (asignado al socio A), socio A (con cuenta) y socio B (sin trainer).
     ///   Gimnasio 2: socio C. Administrador de la Plataforma sin gimnasio.
@@ -38,6 +39,7 @@ namespace GymBro.Tests.Integration
         private const string Fallback = "Program.cs: FallbackPolicy RequireAuthenticatedUser / JwtBearer";
         private const string AccesoSocio = "SocioAccessService.AsegurarAccesoAsync";
         private const string Tenant = "filtro de tenant de GymBroDbContext (otro gimnasio)";
+        private const string NoVisible = "SocioAccessService: socio no visible -> RecursoNoEncontrado (T7)";
 
         public static TheoryData<string, string, string, int, string> Celdas()
         {
@@ -52,10 +54,10 @@ namespace GymBro.Tests.Integration
                 (Anonimo, 401, Fallback), (SuperAdmin, 403, null), (Dueno, 200, null), (Trainer, 200, null), (Socio, 200, null));
             Fila("GET", "/api/Socio/{A}", AttrSocio,
                 (Anonimo, 401, Fallback), (SuperAdmin, 403, null), (Dueno, 200, null), (Trainer, 200, AccesoSocio + " (asignado)"), (Socio, 200, AccesoSocio + " (propio)"));
+            // T7: socio no visible para quien llama -> 404 (no se revela que existe).
             Fila("GET", "/api/Socio/{B}", AccesoSocio,
-                (Trainer, 403, AccesoSocio + " (no asignado)"), (Socio, 403, AccesoSocio + " (ajeno)"), (Dueno, 200, AccesoSocio + " (mismo gimnasio)"));
-            // El filtro de tenant oculta al socio C y SocioAccessService (Dueño: ISocioRepository.ExistsAsync) responde 403.
-            Fila("GET", "/api/Socio/{C}", Tenant, (Dueno, 403, Tenant + " + " + AccesoSocio + " (ExistsAsync = false)"));
+                (Trainer, 404, NoVisible + " (no asignado)"), (Socio, 404, NoVisible + " (ajeno)"), (Dueno, 200, AccesoSocio + " (mismo gimnasio)"));
+            Fila("GET", "/api/Socio/{C}", Tenant, (Dueno, 404, Tenant + " + " + NoVisible + " (ExistsAsync = false)"));
             Fila("POST", "/api/Socio", AttrSocioDueno,
                 (Anonimo, 401, Fallback), (SuperAdmin, 403, null), (Trainer, 403, null), (Socio, 403, null));
             Fila("PUT", "/api/Socio/{A}", AttrSocioDueno,
@@ -66,12 +68,12 @@ namespace GymBro.Tests.Integration
             // ---- Prescripciones ----
             Fila("GET", "/api/Socio/{A}/prescripciones", AttrPrescripciones,
                 (Anonimo, 401, Fallback), (SuperAdmin, 403, null), (Dueno, 200, null), (Trainer, 200, AccesoSocio), (Socio, 200, AccesoSocio));
-            Fila("GET", "/api/Socio/{B}/prescripciones", AccesoSocio, (Trainer, 403, null), (Socio, 403, null));
+            Fila("GET", "/api/Socio/{B}/prescripciones", NoVisible, (Trainer, 404, null), (Socio, 404, null));
+            Fila("GET", "/api/Socio/{C}/prescripciones", NoVisible, (Dueno, 404, null));
             Fila("POST", "/api/Socio/{A}/prescripciones/baseline", AttrPrescripciones, (Anonimo, 401, Fallback), (SuperAdmin, 403, null));
-            // PrescripcionBaselineService.GenerarAsync busca primero al socio: para la cuenta de Socio el filtro de tenant
-            // solo deja ver su propio registro, así que B no existe (404) antes de llegar a SocioAccessService.
-            Fila("POST", "/api/Socio/{B}/prescripciones/baseline", AccesoSocio,
-                (Trainer, 403, null), (Socio, 404, "PrescripcionBaselineService.GenerarAsync: RecursoNoEncontrado (filtro de tenant del Socio)"));
+            // Para la cuenta de Socio, PrescripcionBaselineService.GenerarAsync ya no encuentra a B (filtro de tenant).
+            Fila("POST", "/api/Socio/{B}/prescripciones/baseline", NoVisible,
+                (Trainer, 404, null), (Socio, 404, "PrescripcionBaselineService.GenerarAsync: RecursoNoEncontrado (filtro de tenant del Socio)"));
 
             // ---- Revisiones ----
             Fila("GET", "/api/revisiones/pendientes", AttrRevisiones,
@@ -81,13 +83,15 @@ namespace GymBro.Tests.Integration
             // ---- Sesiones ----
             Fila("GET", "/api/Sesiones?socioId={A}", AttrSesiones,
                 (Anonimo, 401, Fallback), (SuperAdmin, 403, null), (Dueno, 200, AccesoSocio), (Trainer, 200, AccesoSocio), (Socio, 200, AccesoSocio));
-            Fila("GET", "/api/Sesiones?socioId={B}", AccesoSocio, (Trainer, 403, null), (Socio, 403, null));
+            Fila("GET", "/api/Sesiones?socioId={B}", NoVisible, (Trainer, 404, null), (Socio, 404, null));
+            Fila("GET", "/api/Sesiones?socioId={C}", NoVisible, (Dueno, 404, null));
             Fila("POST", "/api/Sesiones", AttrSesiones, (Anonimo, 401, Fallback), (SuperAdmin, 403, null));
 
             // ---- Medición ----
             Fila("GET", "/api/Medicion?socioId={A}", AttrMedicion,
                 (Anonimo, 401, Fallback), (SuperAdmin, 403, null), (Dueno, 200, AccesoSocio), (Trainer, 200, AccesoSocio), (Socio, 200, AccesoSocio));
-            Fila("GET", "/api/Medicion?socioId={B}", AccesoSocio, (Trainer, 403, null), (Socio, 403, null));
+            Fila("GET", "/api/Medicion?socioId={B}", NoVisible, (Trainer, 404, null), (Socio, 404, null));
+            Fila("GET", "/api/Medicion?socioId={C}", NoVisible, (Dueno, 404, null));
             Fila("POST", "/api/Medicion", AttrMedicion, (Anonimo, 401, Fallback), (SuperAdmin, 403, null));
 
             // ---- Vinculaciones ----
@@ -112,6 +116,12 @@ namespace GymBro.Tests.Integration
             Fila("GET", "/api/mi-gimnasio", AttrMiGimnasio,
                 (Anonimo, 401, Fallback), (SuperAdmin, 403, null), (Dueno, 200, null), (Trainer, 403, null), (Socio, 403, null));
             Fila("PUT", "/api/mi-gimnasio/politica-revision", AttrMiGimnasio, (Anonimo, 401, Fallback), (SuperAdmin, 403, null), (Trainer, 403, null), (Socio, 403, null));
+
+            // ---- Catálogo de ejercicios (sin datos de salud; T8: también para el Administrador de la Plataforma) ----
+            Fila("GET", "/api/Ejercicios", "EjerciciosController: sin [Authorize] propio -> FallbackPolicy (usuario autenticado)",
+                (Anonimo, 401, Fallback), (SuperAdmin, 200, null), (Dueno, 200, null), (Trainer, 200, null), (Socio, 200, null));
+            Fila("GET", "/api/Ejercicios/zonas", "EjerciciosController: FallbackPolicy (usuario autenticado)",
+                (Anonimo, 401, Fallback), (SuperAdmin, 200, null));
 
             // ---- Auditoría ----
             Fila("GET", "/api/auditoria", AttrAuditoria,

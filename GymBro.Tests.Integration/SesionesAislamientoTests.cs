@@ -79,7 +79,8 @@ namespace GymBro.Tests.Integration
         public async Task SocioA_NoListaLasSesionesDeB()
         {
             var r = await _api.ClienteComo(_usuarioA).GetAsync($"/api/Sesiones?socioId={_socioB.Id}");
-            Assert.Equal(HttpStatusCode.Forbidden, r.StatusCode);
+            Assert.Equal(HttpStatusCode.NotFound, r.StatusCode); // T7: el socio B no es visible para A
+            await AssertSinDatosDeB(r);
         }
 
         [Fact]
@@ -101,7 +102,14 @@ namespace GymBro.Tests.Integration
         public async Task SocioA_NoRegistraUnaSesionAnombreDeB()
         {
             var r = await _api.ClienteComo(_usuarioA).PostAsJsonAsync("/api/Sesiones", Sesion(_socioB.Id, null));
-            Assert.Equal(HttpStatusCode.Forbidden, r.StatusCode);
+            Assert.Equal(HttpStatusCode.NotFound, r.StatusCode); // T7: el socio B no es visible para A
+        }
+
+        private async Task AssertSinDatosDeB(HttpResponseMessage r)
+        {
+            var cuerpo = await r.Content.ReadAsStringAsync();
+            Assert.DoesNotContain(_socioB.Nombre, cuerpo);
+            Assert.DoesNotContain(_sesionB.Id.ToString(), cuerpo);
         }
 
         [Fact]

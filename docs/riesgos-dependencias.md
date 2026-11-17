@@ -13,6 +13,7 @@ Registro de vulnerabilidades conocidas que no tienen corrección disponible y se
 | Aviso | https://github.com/advisories/GHSA-fc5q-39xc-vjpf (publicado el 19/10/2026) |
 | Proyecto | `GymBro.Web` (solo dependencias de desarrollo) |
 | Evidencia | `docs/pfc/evidencia/npm-audit-2026-11-17.txt` |
+| Última verificación | 17/11/2026 16:14 (UTC−3): `npm view picomatch version` → 4.0.7; GHSA consultado por la API de GitHub (actualizado el 17/11/2026 15:56 UTC): rango vulnerable `<= 4.0.7`, sin `first_patched_version` |
 
 **Qué es.** Un patrón glob malicioso del tipo `+(*)` provoca un backtracking exponencial y bloquea el event loop de Node.js (denegación de servicio).
 

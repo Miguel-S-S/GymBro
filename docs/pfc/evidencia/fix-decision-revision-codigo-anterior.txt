@@ -1,0 +1,23 @@
+fix-decision-revision (decision de revision por nombre) - evidencia
+Comando: dotnet test GymBro.Tests.Integration --no-build --filter "FullyQualifiedName~RevisionDecisionTests"
+Codigo: RevisionPrescripcionService.cs de main 9e39982 (con Enum.TryParse) + las pruebas nuevas de integracion
+Fecha: 2026-11-17 (antes del commit de la correccion; salida transcripta de la ejecucion)
+Codigo de salida: distinto de 0 (5 pruebas con error)
+Proposito: mostrar que las pruebas detectan el defecto con el codigo anterior.
+------------------------------------------------------------
+  Con error ...Una_decision_que_no_es_un_nombre_valido_responde_400_y_no_cambia_la_rutina(decision: "Aprobada,Editada")
+   Assert.Equal() Failure: Values differ
+  Con error ...Una_decision_que_no_es_un_nombre_valido_responde_400_y_no_cambia_la_rutina(decision: "PendienteRevision")
+   Assert.Contains() Failure: Sub-string not found
+  Con error ...Una_decision_que_no_es_un_nombre_valido_responde_400_y_no_cambia_la_rutina(decision: "6")
+   Assert.Contains() Failure: Sub-string not found
+  Con error ...Una_decision_que_no_es_un_nombre_valido_responde_400_y_no_cambia_la_rutina(decision: "5")
+   Assert.Equal() Failure: Values differ
+  Con error ...Una_decision_que_no_es_un_nombre_valido_responde_400_y_no_cambia_la_rutina(decision: "7")
+   Assert.Equal() Failure: Values differ
+Con error! - Con error: 5, Superado: 1, Omitido: 0, Total: 6 - GymBro.Tests.Integration.dll (net10.0)
+
+Interpretacion:
+- "5", "7" y "Aprobada,Editada": status distinto de 400 (la API respondio 200 y cambio el estado:
+  "5" -> Aprobada; "7" y "Aprobada,Editada" (5|6 = 7) -> Rechazada, porque la prueba envia comentario).
+- "6" y "PendienteRevision": 400, pero con otro mensaje (Editada sin ajustes / decision invalida del dominio).

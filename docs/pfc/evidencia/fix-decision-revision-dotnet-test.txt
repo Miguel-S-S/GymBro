@@ -1,0 +1,14 @@
+fix-decision-revision (decision de revision por nombre) - evidencia
+Comando: dotnet test GymBro.slnx --no-build
+Commit: 5bf15bfbcfe1424073d6c8773f96b719118630ab
+Fecha: 2026-11-17 20:27:52 -03:00
+Codigo de salida: 0
+------------------------------------------------------------
+Serie de pruebas para C:\Users\miguel\source\repos\GymBro\GymBro.Tests.Integration\bin\Debug\net10.0\GymBro.Tests.Integration.dll (.NETCoreApp,Version=v10.0)
+Serie de pruebas para C:\Users\miguel\source\repos\GymBro\GymBro.Tests\bin\Debug\net10.0\GymBro.Tests.dll (.NETCoreApp,Version=v10.0)
+1 archivos de prueba en total coincidieron con el patrón especificado.
+1 archivos de prueba en total coincidieron con el patrón especificado.
+
+Correctas! - Con error:     0, Superado:   103, Omitido:     0, Total:   103, Duración: 102 ms - GymBro.Tests.dll (net10.0)
+
+Correctas! - Con error:     0, Superado:   201, Omitido:     0, Total:   201, Duración: 12 s - GymBro.Tests.Integration.dll (net10.0)

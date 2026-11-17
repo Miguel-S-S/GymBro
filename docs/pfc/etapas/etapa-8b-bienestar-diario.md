@@ -48,16 +48,21 @@ Todas las variables son opcionales, pero se exige al menos una.
 **Vínculo con la sesión:** sin clave foránea; se asocia por `(socio_id, fecha local de SesionEntrenamiento.Inicio)`. Registrar una sesión nunca queda bloqueado por no haber cargado el bienestar.
 
 ## 6. API
-- `PUT /api/bienestar/hoy`: alta o actualización del registro del día (idempotente). Solo rol `Socio`, sobre su propio `socio_id` (del JWT, no del cuerpo).
+- `PUT /api/bienestar/{fecha}` (`fecha` en formato `yyyy-MM-dd`): alta o actualización del registro de ese día (idempotente). Solo se aceptan **hoy o ayer según el día local calculado en el servidor**; cualquier otra fecha, 400. Solo rol `Socio`, sobre su propio `socio_id` (del JWT, no del cuerpo). *(Decisión A, 17/11/2026: reemplaza a `PUT /api/bienestar/hoy`, que no permitía corregir el día anterior.)*
+- `GET /api/bienestar/hoy`: solo rol `Socio`. Responde **200** con `{ fechaLocal, registro }`, donde `fechaLocal` es el día local del servidor y `registro` es `null` si todavía no cargó el de hoy (no 204). La PWA usa `fechaLocal` y no depende del reloj del celular. *(Decisión A.)*
 - `GET /api/bienestar?socioId&desde&hasta`: historial. Socio propio; Personal Trainer y Dueño solo de sus socios, vía `ISocioAccessService`. **El Administrador de la Plataforma no accede** (datos de salud; decisión aprobada).
-- Exige `ConsentimientoDatosSaludFecha`: 400 si falta.
+- Consentimiento (`ConsentimientoDatosSaludFecha`) *(Decisión C, 17/11/2026)*:
+  - `PUT`: 400 si el socio no tiene consentimiento.
+  - `GET` del propio Socio sin consentimiento: 200 con lista vacía (o `registro` nulo en `/hoy`).
+  - `GET` de Personal Trainer o Dueño sobre un socio sin consentimiento vigente: 400.
+  - Criterio de error copiado de `PrescripcionBaselineService.GenerarAsync` (`ReglaNegocioException`, 400), el único control de consentimiento existente. **Diferencia informada:** hoy las lecturas y altas de `MedicionFisica` y de sesiones no controlan el consentimiento; queda fuera del alcance de esta etapa.
 - Ventana de edición: hoy y ayer. Fuera de ella, 400.
 - Contrato de rechazo (8c-bis T7): recurso no visible para quien llama = 404; 403 si es visible y el rol no puede realizar la acción.
 - Los errores se traducen en el manejador global, sin devolver `ex.Message`.
 - Agregar las celdas de los dos endpoints a la matriz de autorización (rol × endpoint).
 
 ## 7. PWA
-Tarjeta "¿Cómo estás hoy?" en `/mi/hoy` que abre una pantalla única: sueño (paso 0,5 h), estrés y fatiga (7 botones con anclas escritas en ambos extremos), peso (opcional), ingesta (3 opciones), agua, FC en reposo y nota opcionales. Si ya existe el registro del día, se muestra para editarlo. Uso con una mano, sin teclado salvo peso, FC y nota. Sin conexión se conserva el borrador local como en `borrador-sesion.ts`; el envío requiere red. Interfaz simple y no cargada (preferencia del autor).
+Tarjeta "¿Cómo estás hoy?" en la pantalla Hoy (`/mi`) que abre una pantalla única en **`/mi/bienestar`** (solo rol `Socio`) *(Decisión B, 17/11/2026: en el código la pantalla Hoy es `/mi`; no existe `/mi/hoy`)*: sueño (paso 0,5 h), estrés y fatiga (7 botones con anclas escritas en ambos extremos), peso (opcional), ingesta (3 opciones), agua, FC en reposo y nota opcionales. Si ya existe el registro del día, se muestra para editarlo. Uso con una mano, sin teclado salvo peso, FC y nota. Sin conexión se conserva el borrador local como en `borrador-sesion.ts`; el envío requiere red. Interfaz simple y no cargada (preferencia del autor).
 
 ## 8. Condiciones iniciales: verificar y reportar antes de escribir código
 1. `main` en `e411e3e`, única rama; `git status` limpio salvo archivos sin versionar del autor (`Nuevo Documento de texto.txt` no debe entrar).

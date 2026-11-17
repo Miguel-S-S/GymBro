@@ -1,0 +1,108 @@
+Auditoria npm de GymBro.Web
+Fecha: 2026-11-17 15:56:44 -03:00
+Base: commit 329a603 + package.json con el script audit:prod
+------------------------------------------------------------
+$ npm audit   (codigo de salida 1)
+# npm audit report
+
+picomatch  *
+Severity: high
+picomatch vulnerable to ReDoS through single-branch repeated extglobs - https://github.com/advisories/GHSA-fc5q-39xc-vjpf
+No fix available
+node_modules/picomatch
+  @angular-devkit/core  >=16.2.1
+  Depends on vulnerable versions of picomatch
+  node_modules/@angular-devkit/core
+    @angular-devkit/architect  0.1000.0-next.0 - 0.1000.0-rc.1 || >=0.1602.1
+    Depends on vulnerable versions of @angular-devkit/core
+    node_modules/@angular-devkit/architect
+    @angular-devkit/schematics  >=16.2.1
+    Depends on vulnerable versions of @angular-devkit/core
+    node_modules/@angular-devkit/schematics
+    @angular/cli  10.0.0-next.0 - 10.0.0-rc.1 || 14.1.0-next.0 - 14.1.0-rc.3 || >=16.2.1
+    Depends on vulnerable versions of @angular-devkit/architect
+    Depends on vulnerable versions of @angular-devkit/core
+    Depends on vulnerable versions of @angular-devkit/schematics
+    Depends on vulnerable versions of @schematics/angular
+    node_modules/@angular/cli
+    @schematics/angular  >=16.2.1
+    Depends on vulnerable versions of @angular-devkit/core
+    Depends on vulnerable versions of @angular-devkit/schematics
+    node_modules/@schematics/angular
+  @angular/build  *
+  Depends on vulnerable versions of @angular-devkit/architect
+  Depends on vulnerable versions of @parcel/watcher
+  Depends on vulnerable versions of picomatch
+  Depends on vulnerable versions of tinyglobby
+  Depends on vulnerable versions of vite
+  Depends on vulnerable versions of vitest
+  node_modules/@angular/build
+  @parcel/watcher  >=2.5.4
+  Depends on vulnerable versions of picomatch
+  node_modules/@parcel/watcher
+  fdir  >=5.2.1
+  Depends on vulnerable versions of picomatch
+  node_modules/fdir
+  tinyglobby  *
+  Depends on vulnerable versions of fdir
+  Depends on vulnerable versions of picomatch
+  node_modules/tinyglobby
+    vitest  >=3.1.2
+    Depends on vulnerable versions of picomatch
+    Depends on vulnerable versions of tinyglobby
+    Depends on vulnerable versions of vite
+    node_modules/vitest
+  vite  >=6.3.0-beta.0
+  Depends on vulnerable versions of picomatch
+  Depends on vulnerable versions of tinyglobby
+  node_modules/@angular/build/node_modules/vite
+  node_modules/vite
+
+12 high severity vulnerabilities
+
+To address issues that do not require attention, run:
+  npm audit fix
+
+To address all issues possible (including breaking changes), run:
+  npm audit fix --force
+
+Some issues need review, and may require choosing
+a different dependency.
+
+------------------------------------------------------------
+$ npm run audit:prod   (codigo de salida 0)
+
+> gymbro-web@0.0.0 audit:prod
+> npm audit --omit=dev --audit-level=low
+
+found 0 vulnerabilities
+
+------------------------------------------------------------
+$ npm ls picomatch --all
+gymbro-web@0.0.0 C:\Users\miguel\source\repos\GymBro\GymBro.Web
++-- @angular/build@22.2.6
+| +-- @parcel/watcher@2.6.0
+| | `-- picomatch@4.0.7 deduped
+| +-- picomatch@4.0.7
+| +-- tinyglobby@0.2.17
+| | +-- fdir@6.5.0
+| | | `-- picomatch@4.0.7 deduped
+| | `-- picomatch@4.0.7 deduped
+| `-- vite@8.3.5
+|   `-- picomatch@4.0.7 deduped
++-- @angular/cli@22.2.6
+| `-- @angular-devkit/core@22.2.6
+|   `-- picomatch@4.0.7 deduped
+`-- vitest@5.1.0
+  +-- picomatch@4.0.7 deduped
+  `-- vite@8.3.7
+    `-- picomatch@4.0.7 deduped
+
+------------------------------------------------------------
+$ npm ls picomatch --omit=dev
+gymbro-web@0.0.0 C:\Users\miguel\source\repos\GymBro\GymBro.Web
+`-- (empty)
+
+
+------------------------------------------------------------
+Busqueda de 'picomatch|analyzeRepeatedExtglob' en dist/gymbro-web (salida de ng build): 0 coincidencias en 115 archivos

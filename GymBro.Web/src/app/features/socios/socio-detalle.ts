@@ -18,12 +18,13 @@ import { ConfirmarDialog } from '../../core/ui/confirmar-dialog';
 import { mensajeDeError } from '../../core/util/api-error';
 import { SesionesPanel } from '../sesiones/sesiones-panel';
 import { InvitacionDialog } from './invitacion-dialog';
+import { RutinasPanel } from '../rutinas/rutinas-panel';
 import { MedicionesPanel } from './mediciones-panel';
 import { SocioEditarDialog } from './socio-editar-dialog';
 
 @Component({
   selector: 'app-socio-detalle',
-  imports: [DatePipe, RouterLink, MatButtonModule, MatIconModule, MatProgressBarModule, MatTabsModule, MedicionesPanel, SesionesPanel],
+  imports: [DatePipe, RouterLink, MatButtonModule, MatIconModule, MatProgressBarModule, MatTabsModule, MedicionesPanel, RutinasPanel, SesionesPanel],
   template: `
     <a mat-button routerLink="/socios" class="volver"><mat-icon>arrow_back</mat-icon> Socios</a>
 
@@ -75,6 +76,9 @@ import { SocioEditarDialog } from './socio-editar-dialog';
       <mat-tab-group class="pestanias" mat-stretch-tabs="false" animationDuration="0ms">
         <mat-tab label="Mediciones físicas">
           <app-mediciones-panel [socioId]="s.id" />
+        </mat-tab>
+        <mat-tab label="Rutinas">
+          <app-rutinas-panel [socioId]="s.id" />
         </mat-tab>
         <mat-tab label="Sesiones de entrenamiento">
           <app-sesiones-panel [socioId]="s.id" />

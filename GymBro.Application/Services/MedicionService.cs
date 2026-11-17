@@ -1,5 +1,6 @@
 ﻿using GymBro.Domain.Entities;
 using GymBro.Domain.Repositories;
+using GymBro.Domain.Rules;
 using GymBro.Application.DTOs;
 using GymBro.Application.Abstractions;
 
@@ -23,7 +24,8 @@ namespace GymBro.Application.Services
             {
                 SocioId = dto.SocioId,
                 PesoKg = dto.PesoKg,
-                AlturaCm = dto.AlturaCm
+                AlturaCm = dto.AlturaCm,
+                IMC = ClasificadorIMC.Calcular(dto.PesoKg, dto.AlturaCm) ?? 0
             };
             await _repository.AddAsync(medicion);
         }

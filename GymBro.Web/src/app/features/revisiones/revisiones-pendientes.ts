@@ -10,11 +10,12 @@ import { MatSnackBar } from '@angular/material/snack-bar';
 import { AccesoApi } from '../../core/api/acceso.api';
 import { AjusteEjercicio, DecisionRevision, RutinaEjercicio, RutinaPendiente } from '../../core/models/acceso.models';
 import { mensajeDeError } from '../../core/util/api-error';
+import { RutinaEjercicioCard } from '../rutinas/rutina-ejercicio-card';
 
 /** Dueño y Personal Trainer: aprueban, editan o rechazan las rutinas generadas por la IA. */
 @Component({
   selector: 'app-revisiones-pendientes',
-  imports: [DatePipe, FormsModule, MatButtonModule, MatFormFieldModule, MatIconModule, MatInputModule, MatProgressBarModule],
+  imports: [DatePipe, FormsModule, MatButtonModule, MatFormFieldModule, MatIconModule, MatInputModule, MatProgressBarModule, RutinaEjercicioCard],
   template: `
     <div class="encabezado">
       <div><h1>Rutinas para revisar</h1><p class="subtitulo">{{ rutinas().length }} pendientes</p></div>
@@ -33,26 +34,9 @@ import { mensajeDeError } from '../../core/util/api-error';
           </header>
           @if (r.observaciones) { <p class="meta">{{ r.observaciones }}</p> }
 
-          <table class="ejercicios">
-            <thead><tr><th>Ejercicio</th><th>Series</th><th>Rep. mín</th><th>Rep. máx</th><th>RIR</th><th>Descanso (s)</th></tr></thead>
-            <tbody>
-              @for (e of r.ejercicios; track e.id) {
-                <tr>
-                  <td>{{ e.orden }}. {{ e.ejercicio }}</td>
-                  @if (editando() === r.id) {
-                    <td><input type="number" min="1" [(ngModel)]="e.seriesObjetivo" /></td>
-                    <td><input type="number" min="1" [(ngModel)]="e.repeticionesMinimas" /></td>
-                    <td><input type="number" min="1" [(ngModel)]="e.repeticionesMaximas" /></td>
-                    <td><input type="number" min="0" max="5" [(ngModel)]="e.rirObjetivo" /></td>
-                    <td><input type="number" min="1" [(ngModel)]="e.descansoObjetivoSegundos" /></td>
-                  } @else {
-                    <td>{{ e.seriesObjetivo }}</td><td>{{ e.repeticionesMinimas }}</td><td>{{ e.repeticionesMaximas }}</td>
-                    <td>{{ e.rirObjetivo ?? '—' }}</td><td>{{ e.descansoObjetivoSegundos }}</td>
-                  }
-                </tr>
-              }
-            </tbody>
-          </table>
+          @for (e of r.ejercicios; track e.id) {
+            <app-rutina-ejercicio-card [ejercicio]="e" [editable]="editando() === r.id" />
+          }
 
           <mat-form-field class="comentario">
             <mat-label>Comentario {{ rechazando() === r.id ? '(obligatorio)' : '(opcional)' }}</mat-label>
@@ -77,10 +61,6 @@ import { mensajeDeError } from '../../core/util/api-error';
     .rutina { border: 1px solid var(--mat-sys-outline-variant); border-radius: 12px; padding: 16px; margin-bottom: 16px; }
     header { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 8px; }
     .meta { color: var(--mat-sys-on-surface-variant); font: var(--mat-sys-body-small); margin: 4px 0; }
-    .ejercicios { width: 100%; border-collapse: collapse; margin: 12px 0; overflow-x: auto; display: block; }
-    th, td { text-align: left; padding: 6px 10px; white-space: nowrap; }
-    th { font: var(--mat-sys-label-medium); color: var(--mat-sys-on-surface-variant); }
-    input[type='number'] { width: 64px; }
     .comentario { width: 100%; }
     footer { display: flex; justify-content: flex-end; gap: 8px; }
   `,

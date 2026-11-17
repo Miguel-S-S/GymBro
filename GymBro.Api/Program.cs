@@ -60,6 +60,9 @@ builder.Services.AddScoped<IGimnasioService, GimnasioService>();
 builder.Services.AddScoped<IPersonalService, PersonalService>();
 builder.Services.AddScoped<IVinculacionService, VinculacionService>();
 builder.Services.AddScoped<IRevisionPrescripcionService, RevisionPrescripcionService>();
+builder.Services.AddSingleton(builder.Configuration.GetSection("Baseline").Get<BaselineConfig>() ?? new BaselineConfig());
+builder.Services.AddScoped<IBaselineRepository, BaselineRepository>();
+builder.Services.AddScoped<IPrescripcionBaselineService, PrescripcionBaselineService>();
 
 builder.Services.Configure<JwtOptions>(builder.Configuration.GetSection(JwtOptions.Seccion));
 var jwt = builder.Configuration.GetSection(JwtOptions.Seccion).Get<JwtOptions>() ?? new JwtOptions();

@@ -3,6 +3,7 @@
   <Project Path="GymBro.Application/GymBro.Application.csproj" Id="1906642f-7cec-47f1-bea5-a24c0989bb68" />
   <Project Path="GymBro.Domain/GymBro.Domain.csproj" Id="24d0f85a-e44d-48da-8bce-9e08cb8e4158" />
   <Project Path="GymBro.IA/GymBro.IA.csproj" />
+  <Project Path="GymBro.Tests/GymBro.Tests.csproj" />
   <Project Path="GymBro.Infrastructure/GymBro.Infrastructure.csproj" Id="06b8db05-2407-41e5-857f-86a6124ee840" />
   <Project Path="GymBro.Web/GymBro.Web.esproj" Type="54a90642-561a-4bb1-a94e-469adee60c69">
     <Build Project="false" />

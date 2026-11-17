@@ -117,19 +117,28 @@ using (var scope = app.Services.CreateScope())
     var services = scope.ServiceProvider;
     var context = services.GetRequiredService<GymBroDbContext>();
 
+    // Las migraciones se aplican siempre.
     await context.Database.MigrateAsync();
 
-    // Ruta a los datasets: configurable con "Datasets:Ruta"; por defecto, GymBro.IA/gymbro_datasets relativo a la solución.
-    string datasetPath = app.Configuration["Datasets:Ruta"]
-        ?? Path.GetFullPath(Path.Combine(app.Environment.ContentRootPath, "..", "GymBro.IA", "gymbro_datasets"));
+    // Datasets CSV: solo si Datasets:SembrarAlIniciar es verdadero (por defecto, solo en Development).
+    if (ArranqueDatos.DebeSembrarDatasets(app.Configuration, app.Environment))
+    {
+        // Ruta a los datasets: configurable con "Datasets:Ruta"; por defecto, GymBro.IA/gymbro_datasets relativo a la solución.
+        string datasetPath = app.Configuration["Datasets:Ruta"]
+            ?? Path.GetFullPath(Path.Combine(app.Environment.ContentRootPath, "..", "GymBro.IA", "gymbro_datasets"));
 
-    // --- NUEVOS LOGS DE DEPURACION ---
-    Console.WriteLine("========================================");
-    Console.WriteLine($"[DEBUG] Buscando datasets en: {datasetPath}");
-    Console.WriteLine($"[DEBUG] ¿La carpeta existe?: {Directory.Exists(datasetPath)}");
-    Console.WriteLine("========================================");
+        // --- NUEVOS LOGS DE DEPURACION ---
+        Console.WriteLine("========================================");
+        Console.WriteLine($"[DEBUG] Buscando datasets en: {datasetPath}");
+        Console.WriteLine($"[DEBUG] ¿La carpeta existe?: {Directory.Exists(datasetPath)}");
+        Console.WriteLine("========================================");
 
-    await DataSeeder.SeedAsync(context, datasetPath);
+        await DataSeeder.SeedAsync(context, datasetPath);
+    }
+    else
+    {
+        Console.WriteLine($"[INFO] Siembra de datasets omitida ({ArranqueDatos.ClaveSembrarAlIniciar} = false o entorno distinto de Development).");
+    }
 
     await AccesoSeeder.SeedSuperAdministradorAsync(context, services.GetRequiredService<IHasheadorContrasena>(),
         app.Configuration["SuperAdmin:Email"], app.Configuration["SuperAdmin:Password"]);

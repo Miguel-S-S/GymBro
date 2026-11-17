@@ -25,17 +25,27 @@ namespace GymBro.Tests.Integration
 
         private readonly string _datasetsVacios = Directory.CreateTempSubdirectory("gymbro-tests-").FullName;
 
+        /// <summary>Carpeta de datasets de la API levantada (por defecto, vacía). Las subclases pueden copiar CSV acá.</summary>
+        protected string CarpetaDatasets => _datasetsVacios;
+
+        /// <summary>Entorno ASP.NET de la API levantada. "Testing": sin Swagger ni DemoSeeder (solo se activan en Development).</summary>
+        protected virtual string Entorno => "Testing";
+
+        /// <summary>Configuración adicional para subclases (se aplica después de la base).</summary>
+        protected virtual void ConfigurarExtra(IWebHostBuilder builder) { }
+
         protected override void ConfigureWebHost(IWebHostBuilder builder)
         {
-            builder.UseEnvironment("Testing"); // sin Swagger ni DemoSeeder (solo se activan en Development)
+            builder.UseEnvironment(Entorno);
             builder.UseSetting("ConnectionStrings:DefaultConnection", _db.GetConnectionString());
             builder.UseSetting("Jwt:Key", ClaveJwtDePrueba);
             builder.UseSetting("Datasets:Ruta", _datasetsVacios);
             builder.UseSetting("SuperAdmin:Email", "");
             builder.UseSetting("SuperAdmin:Password", "");
+            ConfigurarExtra(builder);
         }
 
-        public async Task InitializeAsync()
+        public virtual async Task InitializeAsync()
         {
             await _db.StartAsync();
             _ = Server; // fuerza el arranque (migraciones) antes de sembrar datos

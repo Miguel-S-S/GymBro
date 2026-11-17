@@ -3,8 +3,10 @@
 ##
 ## Get latest from `dotnet new gitignore`
 
-# dotenv files
+# dotenv files (la plantilla sin valores, .env.example, sí se versiona)
 .env
+.env.*
+!.env.example
 
 # User-specific files
 *.rsuser

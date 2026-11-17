@@ -55,35 +55,36 @@ export const routes: Routes = [
         },
       },
 
-      // Dueño de Gimnasio, Personal Trainer y Socio (cada uno ve solo lo que le corresponde; lo aplica la API).
+      // Dueño de Gimnasio y Personal Trainer (cada uno ve solo lo que le corresponde; lo aplica la API).
+      // El Socio usa su propia área /mi (Etapa 8c, T2): estas pantallas lo redirigen a /mi.
       {
         path: 'socios',
         title: 'Socios · GymBro',
-        canActivate: [rolGuard('AdministradorGimnasio', 'Entrenador', 'Socio')],
+        canActivate: [rolGuard('AdministradorGimnasio', 'Entrenador')],
         loadComponent: () => import('./features/socios/socios-lista').then((m) => m.SociosLista),
       },
       {
         path: 'socios/:id',
         title: 'Socio · GymBro',
-        canActivate: [rolGuard('AdministradorGimnasio', 'Entrenador', 'Socio')],
+        canActivate: [rolGuard('AdministradorGimnasio', 'Entrenador')],
         loadComponent: () => import('./features/socios/socio-detalle').then((m) => m.SocioDetalle),
       },
       {
         path: 'socios/:id/sesiones/nueva',
         title: 'Registrar sesión · GymBro',
-        canActivate: [rolGuard('AdministradorGimnasio', 'Entrenador', 'Socio')],
+        canActivate: [rolGuard('AdministradorGimnasio', 'Entrenador')],
         loadComponent: () => import('./features/sesiones/sesion-registro').then((m) => m.SesionRegistro),
       },
       {
         path: 'sesiones/:id',
         title: 'Sesión · GymBro',
-        canActivate: [rolGuard('AdministradorGimnasio', 'Entrenador', 'Socio')],
+        canActivate: [rolGuard('AdministradorGimnasio', 'Entrenador')],
         loadComponent: () => import('./features/sesiones/sesion-detalle').then((m) => m.SesionDetalle),
       },
       {
         path: 'ejercicios',
         title: 'Ejercicios · GymBro',
-        canActivate: [rolGuard('AdministradorGimnasio', 'Entrenador', 'Socio')],
+        canActivate: [rolGuard('AdministradorGimnasio', 'Entrenador')],
         loadComponent: () => import('./features/ejercicios/ejercicios-catalogo').then((m) => m.EjerciciosCatalogo),
       },
 

@@ -20,9 +20,9 @@ namespace GymBro.Infrastructure.ExternalServices
             response.EnsureSuccessStatusCode();
 
             var result = await response.Content.ReadFromJsonAsync<IaResponse>();
-            return result?.Embedding ?? Array.Empty<float>();
+            return result?.Embedding ?? Array.Empty<float>();   
         }
-        //Pass.Labora_01
+
         // Clase privada solo para atrapar la respuesta de Python
         private class IaResponse
         {

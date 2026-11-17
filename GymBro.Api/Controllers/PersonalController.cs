@@ -1,5 +1,4 @@
 ﻿using GymBro.Application.DTOs.Acceso;
-using Microsoft.AspNetCore.Mvc;
 using GymBro.Application.Services;
 using GymBro.Domain.Enums;
 using Microsoft.AspNetCore.Authorization;

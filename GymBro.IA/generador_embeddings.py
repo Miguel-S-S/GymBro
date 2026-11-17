@@ -1,22 +1,38 @@
+import os
+import sys
+
 import psycopg2
 import requests
-import json
 
-# 1. Configuración de Conexión (Ajusta tu contraseña)
-DB_CONFIG = {
-    "dbname": "gymbro_db",
-    "user": "postgres",
-    "password": "admin", 
-    "host": "localhost",
-    "port": "5433"
-}
+# 1. Configuración de conexión desde variables de entorno (Etapa 8c, T1).
+#    Obligatoria: POSTGRES_PASSWORD (la misma del archivo .env que usa docker-compose; ver docs/configuracion-secretos.md).
+#    Opcionales, con los valores no secretos del entorno local: POSTGRES_HOST, POSTGRES_PORT, POSTGRES_DB, POSTGRES_USER.
+VARIABLES_OBLIGATORIAS = ["POSTGRES_PASSWORD"]
 
-OLLAMA_URL = "http://localhost:11434/api/embeddings"
+
+def leer_config_db():
+    faltantes = [v for v in VARIABLES_OBLIGATORIAS if not os.environ.get(v)]
+    if faltantes:
+        sys.exit(
+            "Faltan variables de entorno: " + ", ".join(faltantes) + ". "
+            "Definilas antes de ejecutar el script (ver docs/configuracion-secretos.md)."
+        )
+    return {
+        "dbname": os.environ.get("POSTGRES_DB", "gymbro_db"),
+        "user": os.environ.get("POSTGRES_USER", "postgres"),
+        "password": os.environ["POSTGRES_PASSWORD"],
+        "host": os.environ.get("POSTGRES_HOST", "localhost"),
+        "port": os.environ.get("POSTGRES_PORT", "5433"),
+    }
+
+
+OLLAMA_URL = os.environ.get("OLLAMA_URL", "http://localhost:11434/api/embeddings")
 MODEL = "nomic-embed-text"
 
 def generar_embeddings():
+    db_config = leer_config_db()
     try:
-        conn = psycopg2.connect(**DB_CONFIG)
+        conn = psycopg2.connect(**db_config)
         cur = conn.cursor()
 
         # Seleccionamos solo los ejercicios que no tienen vector

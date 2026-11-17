@@ -89,6 +89,16 @@ describe('rutas por rol (Etapa 8c, T2)', () => {
     expect(navegar('mi/entrenar')).toBe(true);
   });
 
+  it('el Socio entra a /mi/bienestar (Etapa 8b)', () => {
+    guardar('Socio');
+    expect(navegar('mi/bienestar')).toBe(true);
+  });
+
+  it.each<Rol>(['Entrenador', 'AdministradorGimnasio', 'SuperAdministrador'])('%s no entra a /mi/bienestar', (rol) => {
+    guardar(rol);
+    expect(navegar('mi/bienestar')).not.toBe(true);
+  });
+
   it('el Personal Trainer no entra al área /mi', () => {
     guardar('Entrenador');
     expect(navegar('mi/entrenar')).toBe('/socios');

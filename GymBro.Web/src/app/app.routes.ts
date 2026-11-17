@@ -29,6 +29,12 @@ export const routes: Routes = [
         loadComponent: () => import('./features/mi/mi-historial').then((m) => m.MiSesionDetalle),
       },
       {
+        // Etapa 8b: registro de bienestar del día (la tarjeta "¿Cómo estás hoy?" está en Hoy).
+        path: 'bienestar',
+        title: 'Bienestar · GymBro',
+        loadComponent: () => import('./features/mi/mi-bienestar').then((m) => m.MiBienestar),
+      },
+      {
         path: 'mediciones',
         title: 'Mis mediciones · GymBro',
         loadComponent: () => import('./features/mi/mi-mediciones').then((m) => m.MiMediciones),

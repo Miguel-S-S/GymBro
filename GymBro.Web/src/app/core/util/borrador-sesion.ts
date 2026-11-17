@@ -5,6 +5,9 @@
  * Si el almacenamiento no está disponible (modo privado, bloqueado), se trabaja solo en memoria.
  */
 export const PREFIJO_BORRADOR = 'gymbro.borrador-sesion.';
+/** Borrador del registro de bienestar del día (Etapa 8b, ver borrador-bienestar.ts). */
+export const PREFIJO_BORRADOR_BIENESTAR = 'gymbro.borrador-bienestar.';
+const PREFIJOS_DE_BORRADOR = [PREFIJO_BORRADOR, PREFIJO_BORRADOR_BIENESTAR];
 
 type Almacen = Pick<Storage, 'getItem' | 'setItem' | 'removeItem' | 'key' | 'length'>;
 
@@ -41,14 +44,14 @@ export function borrarBorrador(socioId: string, almacen: Almacen | null = almace
   }
 }
 
-/** Al cerrar sesión: elimina todos los borradores del dispositivo (pueden contener datos de entrenamiento). */
+/** Al cerrar sesión: elimina todos los borradores del dispositivo (entrenamiento y bienestar: datos de salud). */
 export function borrarTodosLosBorradores(almacen: Almacen | null = almacenPorDefecto()): void {
   try {
     if (!almacen) return;
     const claves: string[] = [];
     for (let i = 0; i < almacen.length; i++) {
       const k = almacen.key(i);
-      if (k?.startsWith(PREFIJO_BORRADOR)) claves.push(k);
+      if (k && PREFIJOS_DE_BORRADOR.some((p) => k.startsWith(p))) claves.push(k);
     }
     claves.forEach((k) => almacen.removeItem(k));
   } catch {

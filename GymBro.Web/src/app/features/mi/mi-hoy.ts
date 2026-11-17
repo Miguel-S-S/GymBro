@@ -5,6 +5,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { RouterLink } from '@angular/router';
+import { BienestarApi } from '../../core/api/bienestar.api';
 import { PrescripcionesApi } from '../../core/api/prescripciones.api';
 import { AuthService } from '../../core/auth/auth.service';
 import { RutinaPendiente } from '../../core/models/acceso.models';
@@ -19,6 +20,17 @@ import { borradorValido, Entrenamiento, rutinaEnRevision, rutinaVigente } from '
   imports: [DatePipe, RouterLink, MatButtonModule, MatIconModule, MatProgressBarModule],
   template: `
     <h1 class="titulo">Hoy</h1>
+
+    <!-- Etapa 8b: registro de bienestar del día. -->
+    <section class="tarjeta-mi bienestar">
+      <h2>¿Cómo estás hoy?</h2>
+      <p class="meta">
+        {{ bienestarCargado() ? 'Ya cargaste tu registro de hoy. Podés corregirlo.' : 'Sueño, estrés, fatiga y comida: menos de 30 segundos.' }}
+      </p>
+      <a mat-stroked-button class="principal" routerLink="/mi/bienestar">
+        <mat-icon>{{ bienestarCargado() ? 'edit' : 'favorite' }}</mat-icon> {{ bienestarCargado() ? 'Editar' : 'Cargar' }}
+      </a>
+    </section>
 
     @if (cargando()) {
       <mat-progress-bar mode="indeterminate" />
@@ -90,8 +102,15 @@ export class MiHoy {
     return !!v && !!this.socioId && borradorValido(leerBorrador<Entrenamiento>(this.socioId), this.socioId, v.id);
   });
   readonly etiqueta = etiquetaEstado;
+  /** Si ya hay registro de bienestar de hoy (si la consulta falla, la tarjeta ofrece cargarlo igual). */
+  readonly bienestarCargado = signal(false);
 
   constructor() {
+    inject(BienestarApi).hoy().subscribe({
+      next: (h) => this.bienestarCargado.set(h.registro !== null),
+      error: () => this.bienestarCargado.set(false),
+    });
+
     if (!this.socioId) {
       this.error.set('Tu cuenta no tiene una ficha de socio asociada.');
       this.cargando.set(false);

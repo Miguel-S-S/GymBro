@@ -494,3 +494,8 @@ env/
 ENV/
 .ipynb_checkpoints/
 *.gdoc
+.claude/
+GymBro.slnLaunch
+
+.claude/
+GymBro.slnLaunch

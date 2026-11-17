@@ -17,7 +17,8 @@ namespace GymBro.Domain.Entities
 
         //metricas de entrenamiento y esfuerzo
         public int FrecuenciaEntrenamientoDias { get; set; }
-        public TipoEntrenamiento TipoEntrenamiento { get; set; }
+        /// <summary>null = sin dato: la medición cargada desde la app no lo pide (antes quedaba en 0 y se guardaba "0").</summary>
+        public TipoEntrenamiento? TipoEntrenamiento { get; set; }
         public decimal IngestaAguaLitros { get; set; }
 
         //metricas cardiovasculares

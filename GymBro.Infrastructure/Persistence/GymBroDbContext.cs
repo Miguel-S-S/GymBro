@@ -171,6 +171,28 @@ namespace GymBro.Infrastructure.Persistence
             modelBuilder.Entity<MatrizRecomendacion>().Property(m => m.CategoriaIMC).HasConversion<string>();
             modelBuilder.Entity<MedicionFisica>().Property(m => m.TipoEntrenamiento).HasConversion<string>();
             modelBuilder.Entity<PrescripcionEntrenamiento>().Property(p => p.Estado).HasConversion<string>();
+
+            // fix-nivel-socio: la base rechaza valores de enum no definidos (antes un 0 se guardaba como "0").
+            modelBuilder.Entity<Socio>().ToTable(t =>
+            {
+                t.HasCheckConstraint("CK_Socio_Nivel", GuardaEnums.CondicionTexto<NivelExperiencia>("nivel"));
+                t.HasCheckConstraint("CK_Socio_Objetivo", GuardaEnums.CondicionTexto<ObjetivoEntrenamiento>("objetivo"));
+            });
+            modelBuilder.Entity<MedicionFisica>().ToTable(t =>
+                t.HasCheckConstraint("CK_MedicionFisica_TipoEntrenamiento",
+                    GuardaEnums.CondicionTexto<TipoEntrenamiento>("tipo_entrenamiento", admiteNulo: true)));
+        }
+
+        public override int SaveChanges(bool acceptAllChangesOnSuccess)
+        {
+            GuardaEnums.Validar(ChangeTracker);
+            return base.SaveChanges(acceptAllChangesOnSuccess);
+        }
+
+        public override Task<int> SaveChangesAsync(bool acceptAllChangesOnSuccess, CancellationToken cancellationToken = default)
+        {
+            GuardaEnums.Validar(ChangeTracker);
+            return base.SaveChangesAsync(acceptAllChangesOnSuccess, cancellationToken);
         }
 
         /// <summary>Registro diario de bienestar del socio (Etapa 8b).</summary>

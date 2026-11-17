@@ -49,7 +49,7 @@ namespace GymBro.Application.Services
             IMC = m.IMC,
 
             FrecuenciaEntrenamientoDias = m.FrecuenciaEntrenamientoDias,
-            TipoEntrenamiento = m.TipoEntrenamiento.ToString(),
+            TipoEntrenamiento = m.TipoEntrenamiento?.ToString(),
             IngestaAguaLitros = m.IngestaAguaLitros,
 
             FrecuenciaCardiacaReposo = m.FrecuenciaCardiacaReposo,

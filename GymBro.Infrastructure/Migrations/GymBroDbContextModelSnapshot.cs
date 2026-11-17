@@ -587,7 +587,6 @@ namespace GymBro.Infrastructure.Migrations
                         .HasColumnName("socio_id");
 
                     b.Property<string>("TipoEntrenamiento")
-                        .IsRequired()
                         .HasColumnType("text")
                         .HasColumnName("tipo_entrenamiento");
 
@@ -609,7 +608,10 @@ namespace GymBro.Infrastructure.Migrations
                     b.HasIndex("SocioId")
                         .HasDatabaseName("ix_mediciones_fisicas_socio_id");
 
-                    b.ToTable("mediciones_fisicas", (string)null);
+                    b.ToTable("mediciones_fisicas", null, t =>
+                        {
+                            t.HasCheckConstraint("CK_MedicionFisica_TipoEntrenamiento", "tipo_entrenamiento IS NULL OR tipo_entrenamiento IN ('Fuerza', 'Cardio', 'HIIT')");
+                        });
                 });
 
             modelBuilder.Entity("GymBro.Domain.Entities.PrescripcionEjercicio", b =>
@@ -1208,7 +1210,12 @@ namespace GymBro.Infrastructure.Migrations
                     b.HasIndex("GimnasioId")
                         .HasDatabaseName("ix_socios_gimnasio_id");
 
-                    b.ToTable("socios", (string)null);
+                    b.ToTable("socios", null, t =>
+                        {
+                            t.HasCheckConstraint("CK_Socio_Nivel", "nivel IN ('Principiante', 'Intermedio', 'Avanzado')");
+
+                            t.HasCheckConstraint("CK_Socio_Objetivo", "objetivo IN ('PerdidaPeso', 'GananciaMuscular', 'Mantenimiento')");
+                        });
                 });
 
             modelBuilder.Entity("GymBro.Domain.Entities.SolicitudVinculacion", b =>

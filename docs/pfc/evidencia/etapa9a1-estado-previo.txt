@@ -1,0 +1,119 @@
+Etapa 9a-1 (Core, tipo de medida, reclasificacion de Abs) - evidencia: estado previo de la base local (solo lectura)
+Comando: docker exec gymbro-db psql -c "SELECT zona_objetivo, count(*) FROM ejercicios GROUP BY 1 ORDER BY 1; SELECT DISTINCT equipamiento, length(equipamiento) AS largo FROM ejercicios ORDER BY 1; SELECT parte_cuerpo, subzona_objetivo, zona_objetivo, series_minimas, series_maximas, repeticiones_minimas, repeticiones_maximas FROM dosificaciones ORDER BY 1,2; SELECT count(*) FILTER (WHERE embedding IS NULL) AS sin_embedding, count(*) AS total FROM ejercicios;"
+Commit: f4a3811386d9a935a1670a4e3b5463e788462a68 (rama etapa9a1, sin cambios)
+Fecha: 2026-11-17 21:06:33 -03:00
+Codigo de salida: 0
+Base: gymbro-db (base local de desarrollo; los datos del catalogo provienen de los datasets publicos, sin datos personales)
+Nota: 'largo' se agrega para mostrar los espacios de ancho cero en algunos valores de equipamiento.
+------------------------------------------------------------
+ zona_objetivo | count 
+---------------+-------
+ Arms          |    59
+ Back          |    97
+ Chest         |    72
+ Forearms      |    23
+ Legs          |   282
+ Movilidad     |    91
+ Shoulders     |    64
+(7 rows)
+
+            equipamiento            | largo 
+------------------------------------+-------
+ Assisted                           |     8
+ Assisted  Chest Dip                |    21
+ Assisted (machine)                 |    18
+ Assisted (partner)                 |    18
+ Band-assisted                      |    13
+ Barbell                            |     7
+ Body Weight                        |    11
+ Cable                              |     5
+ Cable (pull side)                  |    17
+ Cable  Standing Fly                |    21
+ Dumbbell                           |     8
+ Dynamic Stretch                    |    15
+ Lever                              |     5
+ Lever (plate loaded)               |    20
+ Lever (selectorized)               |    20
+ Lever (selectorized)​​​​​​​               |    27
+ Lever (selectorized)  Chest Dip    |    33
+ Plyometric                         |    10
+ Self-assisted                      |    13
+ Self-assisted​​​​​​​                      |    20
+ Sled                               |     4
+ Sled (plate loaded)                |    19
+ Sled (selectorized)                |    19
+ Smith                              |     5
+ Smith​​​​​​​                              |    12
+ Stretch                            |     7
+ StretchBroomstickDoorway           |    25
+ Stretch  Fixed Bar Hugging         |    28
+ Stretch (Gluteus Medius & Minimus) |    34
+ Stretch (Iliopsoas)                |    19
+ Stretch (Piriformis)               |    20
+ Stretch (Tensor Fasciae Latae)     |    30
+ Suspended                          |     9
+ Suspension                         |    10
+ Weighted                           |     8
+ Weighted  Chest Dip                |    21
+(36 rows)
+
+ parte_cuerpo | subzona_objetivo | zona_objetivo | series_minimas | series_maximas | repeticiones_minimas | repeticiones_maximas 
+--------------+------------------+---------------+----------------+----------------+----------------------+----------------------
+ Abs          | Lower            | Legs          |             30 |             60 |                    1 |                    1
+ Abs          | Lower            | Legs          |              3 |              4 |                   10 |                   15
+ Abs          | Middle           | Legs          |              3 |              4 |                   10 |                   15
+ Abs          | Middle           | Legs          |              3 |              4 |                   10 |                   15
+ Abs          | Upper            | Legs          |              3 |              4 |                   10 |                   15
+ Abs          | Upper            | Legs          |              3 |              4 |                   10 |                   15
+ Arms         | Biceps           | Arms          |              3 |              4 |                    8 |                   12
+ Arms         | Biceps           | Arms          |              3 |              4 |                    8 |                   12
+ Arms         | Biceps           | Arms          |              3 |              4 |                    8 |                   12
+ Arms         | Biceps           | Arms          |              3 |              4 |                    8 |                   12
+ Arms         | Biceps           | Arms          |              3 |              4 |                    8 |                   12
+ Arms         | Triceps          | Arms          |              3 |              4 |                    8 |                   12
+ Arms         | Triceps          | Arms          |              3 |              4 |                    8 |                   12
+ Arms         | Triceps          | Arms          |              3 |              5 |                    8 |                   13
+ Arms         | Triceps          | Arms          |              3 |              4 |                    8 |                   12
+ Arms         | Triceps          | Arms          |              3 |              4 |                    8 |                   12
+ Back         | Lower            | Back          |              3 |             10 |                   10 |                   16
+ Back         | Lower            | Back          |              3 |              4 |                   10 |                   15
+ Back         | Lower            | Back          |              3 |              4 |                    8 |                   12
+ Back         | Upper            | Back          |              3 |              4 |                    8 |                   12
+ Back         | Upper            | Back          |              3 |              4 |                    8 |                   12
+ Back         | Upper            | Back          |              3 |              4 |                    8 |                   12
+ Back         | Upper            | Back          |              3 |              4 |                    8 |                   12
+ Chest        | Chest Isolation  | Chest         |              3 |              4 |                   10 |                   15
+ Chest        | Chest Isolation  | Chest         |              3 |              4 |                   10 |                   15
+ Chest        | Chest Isolation  | Chest         |              3 |              4 |                   10 |                   15
+ Chest        | Lower Chest      | Chest         |              3 |              4 |                    8 |                   12
+ Chest        | Lower Chest      | Chest         |              3 |              4 |                   10 |                   15
+ Chest        | Lower Chest      | Chest         |              3 |              4 |                   10 |                   15
+ Chest        | Upper Chest      | Chest         |              3 |              4 |                    8 |                   12
+ Chest        | Upper Chest      | Chest         |              3 |              4 |                   10 |                   15
+ Chest        | Upper Chest      | Chest         |              3 |              4 |                   10 |                   15
+ Forearms     | Grip Strength    | Forearms      |              3 |              4 |                   10 |                   15
+ Forearms     | Grip Strength    | Forearms      |              3 |              4 |                   15 |                   20
+ Forearms     | Grip Strength    | Forearms      |              3 |              4 |                   10 |                   15
+ Forearms     | Grip Strength    | Forearms      |              3 |              4 |                   10 |                   15
+ Forearms     | Wrist Extensors  | Forearms      |              3 |              4 |                   10 |                   15
+ Forearms     | Wrist Flexors    | Forearms      |              3 |              4 |                   10 |                   15
+ Legs         | Calves           | Legs          |              3 |             15 |                   15 |                   20
+ Legs         | Calves           | Legs          |              3 |             15 |                   15 |                   21
+ Legs         | Glutes           | Legs          |              3 |              4 |                    8 |                   12
+ Legs         | Glutes           | Legs          |              3 |             10 |                   10 |                   15
+ Legs         | Hamstrings       | Legs          |              3 |              4 |                    8 |                   12
+ Legs         | Hamstrings       | Legs          |              3 |              4 |                   10 |                   15
+ Legs         | Quadriceps       | Legs          |              3 |              4 |                   10 |                   15
+ Legs         | Quadriceps       | Legs          |              3 |              4 |                    8 |                   12
+ Legs         | Quadriceps       | Legs          |              3 |              4 |                    8 |                   12
+ Shoulders    | Anterior         | Shoulders     |              3 |              4 |                    8 |                   12
+ Shoulders    | Anterior         | Shoulders     |              3 |              4 |                    8 |                   12
+ Shoulders    | Lateral          | Shoulders     |              3 |              4 |                   10 |                   15
+ Shoulders    | Posterior        | Shoulders     |              3 |              4 |                   10 |                   15
+ Shoulders    | Posterior        | Shoulders     |              3 |              4 |                   10 |                   15
+(52 rows)
+
+ sin_embedding | total 
+---------------+-------
+             0 |   688
+(1 row)

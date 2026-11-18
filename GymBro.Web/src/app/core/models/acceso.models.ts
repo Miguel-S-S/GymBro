@@ -1,3 +1,5 @@
+import { TipoMedida } from './ejercicio.models';
+
 /** GymBro.Application.DTOs.Acceso.* */
 export interface Gimnasio {
   id: string;
@@ -50,8 +52,11 @@ export interface RutinaEjercicio {
   orden: number;
   ejercicio: string;
   seriesObjetivo: number;
+  /** Con tipoMedida 'Segundos', repeticionesMinimas/Maximas son segundos (Etapa 9a-1). */
   repeticionesMinimas: number;
   repeticionesMaximas: number;
+  /** Etapa 9a-1. Si falta, se asume 'Repeticiones'. */
+  tipoMedida?: TipoMedida;
   rirObjetivo: number | null;
   descansoObjetivoSegundos: number;
   observaciones: string | null;

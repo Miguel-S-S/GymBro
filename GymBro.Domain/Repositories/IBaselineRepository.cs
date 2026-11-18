@@ -5,7 +5,8 @@ namespace GymBro.Domain.Repositories
 {
     /// <summary>Ejercicio del catálogo sin el vector de embedding (no se necesita para el baseline).</summary>
     public record EjercicioCandidato(
-        Guid Id, string Nombre, string Equipamiento, string ZonaObjetivo, string MusculoPrincipal, int Dificultad);
+        Guid Id, string Nombre, string Equipamiento, string ZonaObjetivo, string MusculoPrincipal, int Dificultad,
+        TipoMedida TipoMedida = TipoMedida.Repeticiones);
 
     /// <summary>
     /// Accesos de lectura al catálogo y escritura de la prescripción para la generación determinista
@@ -29,8 +30,11 @@ namespace GymBro.Domain.Repositories
 
         Task<bool> HayDosificacionesAsync();
 
-        /// <summary>Primera fila de dosificación (orden fijo) cuya zona coincide con alguno de los alias, sin distinguir mayúsculas.</summary>
-        Task<DosificacionVolumetrica?> BuscarDosificacionAsync(IReadOnlyCollection<string> aliasZona);
+        /// <summary>
+        /// Primera fila de dosificación (orden fijo: parte del cuerpo, subzona, id) cuya zona coincide con alguno de los
+        /// alias, sin distinguir mayúsculas, y cuyo tipo de medida es el pedido (Etapa 9a-1).
+        /// </summary>
+        Task<DosificacionVolumetrica?> BuscarDosificacionAsync(IReadOnlyCollection<string> aliasZona, TipoMedida tipoMedida);
 
         /// <summary>Ejercicios de la zona en orden fijo: dificultad, nombre, id.</summary>
         Task<IReadOnlyList<EjercicioCandidato>> GetEjerciciosDeZonaAsync(IReadOnlyCollection<string> aliasZona);

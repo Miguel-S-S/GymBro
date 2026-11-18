@@ -2,7 +2,7 @@ import { RutinaPendiente } from '../../core/models/acceso.models';
 import { Sesion } from '../../core/models/sesion.models';
 import {
   agregarSerie, alternarSerie, borradorValido, construirSesionDesdeEntrenamiento, crearEntrenamiento, editarSerie,
-  quitarSerie, rutinaEnRevision, rutinaVigente, seriesHechas, ultimasSeries,
+  motivoSerieInvalida, quitarSerie, rutinaEnRevision, rutinaVigente, seriesHechas, ultimasSeries,
 } from './entrenamiento';
 
 const T0 = Date.UTC(2026, 10, 16, 18, 0, 0);
@@ -147,5 +147,31 @@ describe('request de la sesión', () => {
 
   it('sin series hechas no se puede finalizar', () => {
     expect(() => construirSesionDesdeEntrenamiento(base())).toThrow(/al menos una serie/);
+  });
+});
+
+// Etapa 9a-1: tipo de medida en el entrenamiento en curso.
+describe('entrenamiento con ejercicios por segundos', () => {
+  it('copia el tipo de medida de la rutina y lo asume "Repeticiones" si falta', () => {
+    const r = rutina('p1', 'Aprobada', '2026-11-10T10:00:00Z');
+    r.ejercicios[1] = { ...r.ejercicios[1], ejercicio: 'Plancha', repeticionesMinimas: 20, repeticionesMaximas: 40, tipoMedida: 'Segundos' };
+    const e = crearEntrenamiento('s1', r, new Map(), T0);
+    expect(e.ejercicios[0]).toMatchObject({ nombre: 'Plancha', tipoMedida: 'Segundos' });
+    expect(e.ejercicios[0].series[0].repeticiones).toBe(20); // el mínimo del rango, en segundos
+    expect(e.ejercicios[1].tipoMedida).toBe('Repeticiones');
+  });
+
+  it('el mensaje de una serie sin valor usa la unidad del ejercicio', () => {
+    const serie = { pesoKg: 0, repeticiones: null, rir: null, hecha: false, completadaEn: null };
+    expect(motivoSerieInvalida(serie, 'Segundos')).toBe('Indicá los segundos (1 o más).');
+    expect(motivoSerieInvalida(serie, 'Repeticiones')).toBe('Indicá las repeticiones (1 o más).');
+    expect(motivoSerieInvalida(serie)).toBe('Indicá las repeticiones (1 o más).');
+  });
+
+  it('un borrador guardado antes de la etapa (sin tipoMedida) sigue siendo válido', () => {
+    const e = crearEntrenamiento('s1', rutina('p1', 'Aprobada', '2026-11-10T10:00:00Z'), new Map(), T0);
+    const viejo = JSON.parse(JSON.stringify(e));
+    for (const ej of viejo.ejercicios) delete ej.tipoMedida;
+    expect(borradorValido(viejo, 's1', 'p1')).toBe(true);
   });
 });

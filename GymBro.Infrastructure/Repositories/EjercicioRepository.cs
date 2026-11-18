@@ -96,6 +96,8 @@ namespace GymBro.Infrastructure.Repositories
                 Preparacion = e.Preparacion,
                 Ejecucion = e.Ejecucion,
                 Dificultad = e.Dificultad,
+                TipoMedida = e.TipoMedida,
+                Origen = e.Origen,
                 FechaAlta = e.FechaAlta
             };
     }

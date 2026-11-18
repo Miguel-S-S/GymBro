@@ -6,6 +6,7 @@ using GymBro.Application.Abstractions;
 using GymBro.Application.DTOs;
 using GymBro.Application.DTOs.Comparacion;
 using GymBro.Domain.Entities;
+using GymBro.Domain.Enums;
 using GymBro.Domain.Exceptions;
 using GymBro.Domain.Repositories;
 
@@ -153,10 +154,16 @@ namespace GymBro.Application.Services
                 var pres = ejerciciosPrescritos.FirstOrDefault(p => p.EjercicioId == key.EjercicioId && p.Orden == key.Orden);
                 var ejec = ejerciciosEjecutados.FirstOrDefault(e => e.EjercicioId == key.EjercicioId && e.Orden == key.Orden);
 
+                // Etapa 9a-1: la unidad sale del ejercicio. Con Segundos no se multiplica kg por segundos (volumen 0).
+                var tipoMedida = (ejec?.Ejercicio ?? pres?.Ejercicio)?.TipoMedida ?? TipoMedida.Repeticiones;
+                var enSegundos = tipoMedida == TipoMedida.Segundos;
+                decimal Volumen(SerieRealizada s) => enSegundos ? 0m : s.PesoLevantadoKg * s.Repeticiones;
+
                 var dto = new EjercicioComparadoDto
                 {
                     EjercicioId = key.EjercicioId,
                     Orden = key.Orden,
+                    TipoMedida = tipoMedida.ToString(),
                     Comparacion = new ComparacionGeneralDto()
                 };
 
@@ -182,9 +189,9 @@ namespace GymBro.Application.Services
                         CantidadSeriesTotales = ejec.SeriesRealizadas.Count,
                         CantidadSeriesEfectivas = seriesEfectivas.Count,
                         CantidadSeriesCalentamiento = seriesCalentamiento.Count,
-                        VolumenTotalKg = ejec.SeriesRealizadas.Sum(s => s.PesoLevantadoKg * s.Repeticiones),
-                        VolumenEfectivoKg = seriesEfectivas.Sum(s => s.PesoLevantadoKg * s.Repeticiones),
-                        VolumenCalentamientoKg = seriesCalentamiento.Sum(s => s.PesoLevantadoKg * s.Repeticiones),
+                        VolumenTotalKg = ejec.SeriesRealizadas.Sum(Volumen),
+                        VolumenEfectivoKg = seriesEfectivas.Sum(Volumen),
+                        VolumenCalentamientoKg = seriesCalentamiento.Sum(Volumen),
                         DetallesSeries = ejec.SeriesRealizadas.OrderBy(s => s.OrdenSerie).Select(s => {
                             var serieDto = new SerieComparadaDto
                             {
@@ -194,7 +201,7 @@ namespace GymBro.Application.Services
                                 RIR = s.RIR,
                                 EsCalentamiento = s.EsCalentamiento,
                                 TiempoDescansoSegundos = s.TiempoDescansoSegundos,
-                                Volumen = s.PesoLevantadoKg * s.Repeticiones
+                                Volumen = Volumen(s)
                             };
 
                             if (!s.EsCalentamiento && pres != null)
@@ -208,7 +215,7 @@ namespace GymBro.Application.Services
                                 {
                                     CumpleObjetivo = cumpleReps,
                                     Desviacion = desviacionReps,
-                                    Mensaje = cumpleReps ? "Dentro del rango" : $"{(desviacionReps < 0 ? "Faltaron" : "Excedieron")} {Math.Abs(desviacionReps)} reps."
+                                    Mensaje = cumpleReps ? "Dentro del rango" : $"{(desviacionReps < 0 ? "Faltaron" : "Excedieron")} {Math.Abs(desviacionReps)} {(enSegundos ? "s" : "reps")}."
                                 };
 
                                 if (pres.RIRObjetivo.HasValue && s.RIR.HasValue)

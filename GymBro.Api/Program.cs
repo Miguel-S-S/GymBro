@@ -145,6 +145,9 @@ using (var scope = app.Services.CreateScope())
         Console.WriteLine($"[INFO] Siembra de datasets omitida ({ArranqueDatos.ClaveSembrarAlIniciar} = false o entorno distinto de Development).");
     }
 
+    // Catálogo propio del proyecto (Etapa 9a-1, Core): en todos los entornos, después de DataSeeder (decisión A).
+    await CatalogoProyectoSeeder.SeedAsync(context);
+
     await AccesoSeeder.SeedSuperAdministradorAsync(context, services.GetRequiredService<IHasheadorContrasena>(),
         app.Configuration["SuperAdmin:Email"], app.Configuration["SuperAdmin:Password"]);
 

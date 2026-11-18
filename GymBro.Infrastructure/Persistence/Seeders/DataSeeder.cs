@@ -19,7 +19,9 @@ namespace GymBro.Infrastructure.Persistence.Seeders
             Console.WriteLine("\n=== INICIANDO PROCESO ETL Y POBLAMIENTO DE BASE DE DATOS ===");
 
             // 1. Cargar Dosificaciones (series.csv)
-            if (!await context.Dosificaciones.AnyAsync())
+            // Etapa 9a-1: las filas propias del proyecto (CatalogoProyectoSeeder) no cuentan; se reconocen por su Id fijo.
+            var idsProyecto = CatalogoProyectoSeeder.IdsDosificacionesProyecto;
+            if (!await context.Dosificaciones.AnyAsync(d => !idsProyecto.Contains(d.Id)))
             {
                 try
                 {
@@ -55,7 +57,8 @@ namespace GymBro.Infrastructure.Persistence.Seeders
             }
 
             // 4. Cargar Catálogos de Ejercicios
-            if (!await context.Ejercicios.AnyAsync())
+            // Etapa 9a-1: solo cuentan los ejercicios del dataset; los del proyecto (Core) no bloquean la carga.
+            if (!await context.Ejercicios.AnyAsync(e => e.Origen == OrigenEjercicio.Dataset))
             {
                 try
                 {

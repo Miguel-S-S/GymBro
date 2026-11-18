@@ -14,6 +14,11 @@ namespace GymBro.Application.DTOs.Comparacion
     {
         public Guid EjercicioId { get; set; }
         public int Orden { get; set; }
+        /// <summary>
+        /// "Repeticiones" o "Segundos", tomado del ejercicio (no de la prescripción; Etapa 9a-1). Con Segundos,
+        /// los campos de repeticiones guardan segundos y los volúmenes en kg valen 0.
+        /// </summary>
+        public string TipoMedida { get; set; } = "Repeticiones";
         
         public PrescripcionResumenDto? Prescripcion { get; set; }
         public EjecucionResumenDto? Ejecucion { get; set; }

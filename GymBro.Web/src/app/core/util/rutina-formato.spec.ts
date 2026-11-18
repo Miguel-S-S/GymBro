@@ -1,5 +1,5 @@
 import { RutinaEjercicio } from '../models/acceso.models';
-import { aplicarPaso, etiquetaEstado, resumenEjercicio } from './rutina-formato';
+import { aplicarPaso, columnaMedida, etiquetaEstado, etiquetaMedida, rangoConUnidad, resumenEjercicio } from './rutina-formato';
 
 const base: RutinaEjercicio = {
   id: 'e1', ejercicioId: 'ej1', orden: 1, ejercicio: 'Press de banca', seriesObjetivo: 3, repeticionesMinimas: 8, repeticionesMaximas: 12,
@@ -55,5 +55,23 @@ describe('aplicarPaso', () => {
 
   it('no baja el descanso de 15 s', () => {
     expect(aplicarPaso({ ...base, descansoObjetivoSegundos: 15 }, 'descansoObjetivoSegundos', -15).descansoObjetivoSegundos).toBe(15);
+  });
+});
+
+// Etapa 9a-1: tipo de medida (solo cambian unidad y etiqueta).
+describe('unidad según el tipo de medida', () => {
+  it('por segundos muestra "s" en el rango y en el resumen', () => {
+    const plancha: RutinaEjercicio = { ...base, ejercicio: 'Plancha', seriesObjetivo: 2, repeticionesMinimas: 20, repeticionesMaximas: 40, tipoMedida: 'Segundos' };
+    expect(resumenEjercicio(plancha)).toBe('2 series × 20–40 s · RIR 2 · 90 s');
+    expect(rangoConUnidad(30, 30, 'Segundos')).toBe('30 s');
+    expect(etiquetaMedida('Segundos')).toBe('Segundos');
+    expect(columnaMedida('Segundos')).toBe('Seg.');
+  });
+
+  it('por repeticiones, o sin dato, se mantiene como antes', () => {
+    expect(resumenEjercicio({ ...base, tipoMedida: 'Repeticiones' })).toBe('3 series × 8–12 reps · RIR 2 · 90 s');
+    expect(rangoConUnidad(8, 12, undefined)).toBe('8–12 reps');
+    expect(etiquetaMedida(null)).toBe('Repeticiones');
+    expect(columnaMedida(undefined)).toBe('Reps');
   });
 });

@@ -35,7 +35,9 @@ namespace GymBro.Application.Services
                     ZonaObjetivo = e.ZonaObjetivo,
                     MusculoPrincipal = e.MusculoPrincipal,
                     Equipamiento = e.Equipamiento,
-                    Dificultad = e.Dificultad
+                    Dificultad = e.Dificultad,
+                    TipoMedida = e.TipoMedida.ToString(),
+                    Origen = e.Origen.ToString()
                 }).ToList(),
                 Total = total,
                 Pagina = pagina,
@@ -59,7 +61,9 @@ namespace GymBro.Application.Services
                 Estabilizadores = e.Estabilizadores,
                 Preparacion = e.Preparacion,
                 Ejecucion = e.Ejecucion,
-                Dificultad = e.Dificultad
+                Dificultad = e.Dificultad,
+                TipoMedida = e.TipoMedida.ToString(),
+                Origen = e.Origen.ToString()
             };
         }
 

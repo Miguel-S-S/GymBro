@@ -186,6 +186,12 @@ namespace GymBro.Infrastructure.Migrations
                         .HasColumnType("text")
                         .HasColumnName("subzona_objetivo");
 
+                    b.Property<string>("TipoMedida")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)")
+                        .HasColumnName("tipo_medida");
+
                     b.Property<int>("UsuarioAlta")
                         .HasColumnType("integer")
                         .HasColumnName("usuario_alta");
@@ -206,7 +212,10 @@ namespace GymBro.Infrastructure.Migrations
                     b.HasKey("Id")
                         .HasName("pk_dosificaciones");
 
-                    b.ToTable("dosificaciones", (string)null);
+                    b.ToTable("dosificaciones", null, t =>
+                        {
+                            t.HasCheckConstraint("CK_Dosificacion_TipoMedida", "tipo_medida IN ('Repeticiones', 'Segundos')");
+                        });
                 });
 
             modelBuilder.Entity("GymBro.Domain.Entities.Ejercicio", b =>
@@ -261,6 +270,12 @@ namespace GymBro.Infrastructure.Migrations
                         .HasColumnType("text")
                         .HasColumnName("nombre");
 
+                    b.Property<string>("Origen")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)")
+                        .HasColumnName("origen");
+
                     b.Property<string>("Preparacion")
                         .IsRequired()
                         .HasColumnType("text")
@@ -270,6 +285,12 @@ namespace GymBro.Infrastructure.Migrations
                         .IsRequired()
                         .HasColumnType("text")
                         .HasColumnName("sinergistas");
+
+                    b.Property<string>("TipoMedida")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)")
+                        .HasColumnName("tipo_medida");
 
                     b.Property<int>("UsuarioAlta")
                         .HasColumnType("integer")
@@ -291,7 +312,12 @@ namespace GymBro.Infrastructure.Migrations
                     b.HasKey("Id")
                         .HasName("pk_ejercicios");
 
-                    b.ToTable("ejercicios", (string)null);
+                    b.ToTable("ejercicios", null, t =>
+                        {
+                            t.HasCheckConstraint("CK_Ejercicio_Origen", "origen IN ('Dataset', 'Proyecto', 'Gimnasio')");
+
+                            t.HasCheckConstraint("CK_Ejercicio_TipoMedida", "tipo_medida IN ('Repeticiones', 'Segundos')");
+                        });
                 });
 
             modelBuilder.Entity("GymBro.Domain.Entities.Gimnasio", b =>

@@ -12,6 +12,7 @@ import { SesionesApi } from '../../core/api/sesiones.api';
 import { ComparacionSesion, Sesion } from '../../core/models/sesion.models';
 import { mensajeDeError } from '../../core/util/api-error';
 import { duracionLegible, oSinDato } from '../../core/util/formato';
+import { columnaMedida, rangoConUnidad } from '../../core/util/rutina-formato';
 
 @Component({
   selector: 'app-sesion-detalle',
@@ -52,7 +53,7 @@ import { duracionLegible, oSinDato } from '../../core/util/formato';
           @if (ej.prescripcion; as p) {
             <p class="objetivo">
               <mat-icon>flag</mat-icon>
-              Prescrito: {{ p.seriesObjetivo }} series de {{ p.repeticionesMinimas }}–{{ p.repeticionesMaximas }} reps
+              Prescrito: {{ p.seriesObjetivo }} series de {{ rango(p.repeticionesMinimas, p.repeticionesMaximas, ej.tipoMedida) }}
               @if (p.rirObjetivo !== null) { · RIR {{ p.rirObjetivo }} }
               · descanso {{ p.descansoObjetivoSegundos }} s
             </p>
@@ -82,7 +83,7 @@ import { duracionLegible, oSinDato } from '../../core/util/formato';
                   <td mat-cell *matCellDef="let r" class="numero">{{ r.pesoLevantadoKg | number: '1.0-2' }}</td>
                 </ng-container>
                 <ng-container matColumnDef="reps">
-                  <th mat-header-cell *matHeaderCellDef class="numero">Reps</th>
+                  <th mat-header-cell *matHeaderCellDef class="numero">{{ columna(ej.tipoMedida) }}</th>
                   <td mat-cell *matCellDef="let r" class="numero">
                     {{ r.repeticiones }}
                     @if (r.repeticionesComparacion; as c) { <ng-container *ngTemplateOutlet="marca; context: { $implicit: c }" /> }
@@ -148,6 +149,9 @@ import { duracionLegible, oSinDato } from '../../core/util/formato';
   `,
 })
 export class SesionDetalle {
+  /** Etapa 9a-1: unidad y encabezado según el tipo de medida del ejercicio. */
+  readonly rango = rangoConUnidad;
+  readonly columna = columnaMedida;
   private readonly sesiones = inject(SesionesApi);
   private readonly ejercicios = inject(EjerciciosApi);
 

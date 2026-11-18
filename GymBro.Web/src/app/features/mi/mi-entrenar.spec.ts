@@ -94,3 +94,46 @@ describe('MiEntrenar (pantalla Entrenar)', () => {
     expect(leerBorrador('s1')).toBeNull();
   });
 });
+
+// Etapa 9a-1: la plancha se carga en segundos y el crunch en repeticiones (datos sintéticos).
+describe('MiEntrenar: tipo de medida', () => {
+  let http: HttpTestingController;
+  const RUTINA_CORE: RutinaPendiente = {
+    ...RUTINA,
+    ejercicios: [
+      { id: 'pe1', ejercicioId: 'ej-plancha', orden: 1, ejercicio: 'Plancha', seriesObjetivo: 2, repeticionesMinimas: 20,
+        repeticionesMaximas: 40, tipoMedida: 'Segundos', rirObjetivo: 2, descansoObjetivoSegundos: 60, observaciones: null },
+      { id: 'pe2', ejercicioId: 'ej-crunch', orden: 2, ejercicio: 'Crunch abdominal', seriesObjetivo: 3, repeticionesMinimas: 10,
+        repeticionesMaximas: 15, tipoMedida: 'Repeticiones', rirObjetivo: 2, descansoObjetivoSegundos: 60, observaciones: null },
+    ],
+  };
+
+  beforeEach(() => {
+    localStorage.clear();
+    localStorage.setItem('gymbro.sesion', JSON.stringify({
+      token: 't', rol: 'Socio', nombreCompleto: 'Ana', gimnasioId: null, socioId: 's1',
+      expiraUtc: new Date(Date.now() + 3_600_000).toISOString(),
+    }));
+    TestBed.configureTestingModule({ providers: [provideHttpClient(), provideHttpClientTesting(), provideRouter([])] });
+    http = TestBed.inject(HttpTestingController);
+  });
+  afterEach(() => { http.verify(); localStorage.clear(); });
+
+  it('muestra segundos para la plancha y repeticiones para el crunch', async () => {
+    const fixture = TestBed.createComponent(MiEntrenar);
+    http.expectOne('/api/Socio/s1/prescripciones').flush([RUTINA_CORE]);
+    http.expectOne((r) => r.method === 'GET' && r.url === '/api/Sesiones').flush([]);
+    fixture.detectChanges();
+    await fixture.whenStable();
+
+    const [plancha, crunch] = Array.from((fixture.nativeElement as HTMLElement).querySelectorAll('section.ejercicio'));
+    expect(plancha.textContent).toContain('2 series × 20–40 s');
+    expect(plancha.querySelector('.encabezado-fila')!.textContent).toContain('Seg.');
+    expect(plancha.querySelector('input[aria-label="Segundos serie 1"]')).not.toBeNull();
+
+    expect(crunch.textContent).toContain('3 series × 10–15 reps');
+    expect(crunch.querySelector('.encabezado-fila')!.textContent).toContain('Reps');
+    expect(crunch.querySelector('input[aria-label="Repeticiones serie 1"]')).not.toBeNull();
+    fixture.destroy();
+  });
+});

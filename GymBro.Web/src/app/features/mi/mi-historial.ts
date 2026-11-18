@@ -10,6 +10,7 @@ import { SesionesApi } from '../../core/api/sesiones.api';
 import { AuthService } from '../../core/auth/auth.service';
 import { ComparacionSesion, Sesion } from '../../core/models/sesion.models';
 import { mensajeDeError } from '../../core/util/api-error';
+import { enSegundos, rangoConUnidad } from '../../core/util/rutina-formato';
 
 /** Historial del Socio: sesiones registradas, de la más reciente a la más antigua. */
 @Component({
@@ -87,7 +88,7 @@ export class MiHistorial {
         <section class="ejercicio">
           <h2>{{ e.orden }}. {{ nombres()[e.ejercicioId] ?? 'Ejercicio' }}</h2>
           @if (e.prescripcion; as p) {
-            <p class="meta">Objetivo: {{ p.seriesObjetivo }} × {{ p.repeticionesMinimas }}–{{ p.repeticionesMaximas }} reps
+            <p class="meta">Objetivo: {{ p.seriesObjetivo }} × {{ rango(p.repeticionesMinimas, p.repeticionesMaximas, e.tipoMedida) }}
               @if (p.rirObjetivo !== null) { · RIR {{ p.rirObjetivo }} } · {{ p.descansoObjetivoSegundos }} s</p>
             <p class="resultado" [class.ok]="e.comparacion.series.diferencia === 0">{{ e.comparacion.series.mensaje }}</p>
           }
@@ -95,13 +96,15 @@ export class MiHistorial {
             @for (d of x.detallesSeries; track d.ordenSerie) {
               <div class="serie">
                 <span>{{ d.ordenSerie }}</span>
-                <span>{{ d.pesoLevantadoKg | number: '1.0-1' }} kg × {{ d.repeticiones }}@if (d.rir !== null) { · RIR {{ d.rir }} }</span>
+                <span>{{ d.pesoLevantadoKg | number: '1.0-1' }} kg × {{ d.repeticiones }}@if (segundos(e.tipoMedida)) { s }@if (d.rir !== null) { · RIR {{ d.rir }} }</span>
                 @if (d.repeticionesComparacion; as c) {
                   <mat-icon [class.ok]="c.cumpleObjetivo" [attr.aria-label]="c.mensaje">{{ c.cumpleObjetivo ? 'check_circle' : 'error' }}</mat-icon>
                 }
               </div>
             }
-            <p class="meta">Volumen efectivo: {{ x.volumenEfectivoKg | number: '1.0-1' }} kg</p>
+            @if (!segundos(e.tipoMedida)) {
+              <p class="meta">Volumen efectivo: {{ x.volumenEfectivoKg | number: '1.0-1' }} kg</p>
+            }
           } @else {
             <p class="meta">No registraste series de este ejercicio.</p>
           }
@@ -121,6 +124,9 @@ export class MiHistorial {
   `,
 })
 export class MiSesionDetalle {
+  /** Etapa 9a-1: unidad según el tipo de medida del ejercicio (sin temporizador). */
+  readonly rango = rangoConUnidad;
+  readonly segundos = enSegundos;
   private readonly api = inject(SesionesApi);
   private readonly ejercicios = inject(EjerciciosApi);
 

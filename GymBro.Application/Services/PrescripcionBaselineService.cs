@@ -1,5 +1,6 @@
 using GymBro.Application.DTOs.Acceso;
 using GymBro.Domain.Entities;
+using GymBro.Domain.Enums;
 using GymBro.Domain.Exceptions;
 using GymBro.Domain.Repositories;
 using GymBro.Domain.Rules;
@@ -60,8 +61,16 @@ namespace GymBro.Application.Services
         public const string Origen = "BASELINE_DETERMINISTA";
         private const int LongitudMaximaObservaciones = 500;
 
-        // Dosis usada solo cuando la dosificación del catálogo no tiene una fila válida para la zona.
+        // Dosis usada solo cuando la dosificación del catálogo no tiene una fila válida para la zona y el tipo de medida.
+        // Repeticiones: 3 x 8-12. Segundos (Etapa 9a-1, propuesta de diseño, no criterio clínico): 3 x 20-40 s.
         private const int SeriesPorDefecto = 3, RepMinPorDefecto = 8, RepMaxPorDefecto = 12;
+        private const int SegMinPorDefecto = 20, SegMaxPorDefecto = 40;
+
+        /// <summary>Dosis por defecto según el tipo de medida: (series, mínimo, máximo, unidad para el texto).</summary>
+        public static (int Series, int Min, int Max, string Unidad) DosisPorDefecto(TipoMedida tipo) =>
+            tipo == TipoMedida.Segundos
+                ? (SeriesPorDefecto, SegMinPorDefecto, SegMaxPorDefecto, "s")
+                : (SeriesPorDefecto, RepMinPorDefecto, RepMaxPorDefecto, "repeticiones");
 
         private readonly IBaselineRepository _repo;
         private readonly ISocioAccessService _acceso;
@@ -129,9 +138,11 @@ namespace GymBro.Application.Services
                                   c.Equipamiento.Contains(p, StringComparison.OrdinalIgnoreCase)))
                               ?? candidatos[0];
 
-                var dosis = await _repo.BuscarDosificacionAsync(zona.Alias);
+                // La dosis se elige según el tipo de medida del ejercicio elegido (Etapa 9a-1).
+                var dosis = await _repo.BuscarDosificacionAsync(zona.Alias, elegido.TipoMedida);
                 var dosisValida = dosis is { SeriesMinimas: > 0, RepeticionesMinimas: > 0 }
                                   && dosis.RepeticionesMaximas >= dosis.RepeticionesMinimas;
+                var porDefecto = DosisPorDefecto(elegido.TipoMedida);
 
                 orden++;
                 prescripcion.EjerciciosPrescritos.Add(new PrescripcionEjercicio
@@ -139,14 +150,15 @@ namespace GymBro.Application.Services
                     PrescripcionEntrenamientoId = prescripcion.Id,
                     EjercicioId = elegido.Id,
                     Orden = orden,
-                    SeriesObjetivo = dosisValida ? dosis!.SeriesMinimas : SeriesPorDefecto,
-                    RepeticionesMinimas = dosisValida ? dosis!.RepeticionesMinimas : RepMinPorDefecto,
-                    RepeticionesMaximas = dosisValida ? dosis!.RepeticionesMaximas : RepMaxPorDefecto,
+                    SeriesObjetivo = dosisValida ? dosis!.SeriesMinimas : porDefecto.Series,
+                    RepeticionesMinimas = dosisValida ? dosis!.RepeticionesMinimas : porDefecto.Min,
+                    RepeticionesMaximas = dosisValida ? dosis!.RepeticionesMaximas : porDefecto.Max,
                     RIRObjetivo = _config.RirPorDefecto,
                     DescansoObjetivoSegundos = _config.DescansoPorDefectoSegundos,
                     Observaciones = dosisValida
                         ? null
-                        : $"Sin dosificación en el catálogo para la zona {zona.Nombre}: se usó {SeriesPorDefecto} x {RepMinPorDefecto}-{RepMaxPorDefecto}.",
+                        : $"Sin dosificación en el catálogo para la zona {zona.Nombre} ({elegido.TipoMedida}): " +
+                          $"se usó {porDefecto.Series} x {porDefecto.Min}-{porDefecto.Max} {porDefecto.Unidad}.",
                 });
             }
 
@@ -236,6 +248,7 @@ namespace GymBro.Application.Services
                 SeriesObjetivo = e.SeriesObjetivo,
                 RepeticionesMinimas = e.RepeticionesMinimas,
                 RepeticionesMaximas = e.RepeticionesMaximas,
+                TipoMedida = (e.Ejercicio?.TipoMedida ?? TipoMedida.Repeticiones).ToString(),
                 RIRObjetivo = e.RIRObjetivo,
                 DescansoObjetivoSegundos = e.DescansoObjetivoSegundos,
                 Observaciones = e.Observaciones

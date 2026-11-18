@@ -158,6 +158,7 @@ namespace GymBro.Application.Services
                 SeriesObjetivo = e.SeriesObjetivo,
                 RepeticionesMinimas = e.RepeticionesMinimas,
                 RepeticionesMaximas = e.RepeticionesMaximas,
+                TipoMedida = (e.Ejercicio?.TipoMedida ?? TipoMedida.Repeticiones).ToString(),
                 RIRObjetivo = e.RIRObjetivo,
                 DescansoObjetivoSegundos = e.DescansoObjetivoSegundos,
                 Observaciones = e.Observaciones

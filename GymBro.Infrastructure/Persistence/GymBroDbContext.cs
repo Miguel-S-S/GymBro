@@ -178,6 +178,22 @@ namespace GymBro.Infrastructure.Persistence
                 t.HasCheckConstraint("CK_Socio_Nivel", GuardaEnums.CondicionTexto<NivelExperiencia>("nivel"));
                 t.HasCheckConstraint("CK_Socio_Objetivo", GuardaEnums.CondicionTexto<ObjetivoEntrenamiento>("objetivo"));
             });
+            // Etapa 9a-1: tipo de medida y origen del ejercicio, como texto y sin valores no definidos.
+            modelBuilder.Entity<Ejercicio>(e =>
+            {
+                e.Property(x => x.TipoMedida).HasConversion<string>().HasMaxLength(20);
+                e.Property(x => x.Origen).HasConversion<string>().HasMaxLength(20);
+                e.ToTable(t =>
+                {
+                    t.HasCheckConstraint("CK_Ejercicio_TipoMedida", GuardaEnums.CondicionTexto<TipoMedida>("tipo_medida"));
+                    t.HasCheckConstraint("CK_Ejercicio_Origen", GuardaEnums.CondicionTexto<OrigenEjercicio>("origen"));
+                });
+            });
+            modelBuilder.Entity<DosificacionVolumetrica>(e =>
+            {
+                e.Property(x => x.TipoMedida).HasConversion<string>().HasMaxLength(20);
+                e.ToTable(t => t.HasCheckConstraint("CK_Dosificacion_TipoMedida", GuardaEnums.CondicionTexto<TipoMedida>("tipo_medida")));
+            });
             modelBuilder.Entity<MedicionFisica>().ToTable(t =>
                 t.HasCheckConstraint("CK_MedicionFisica_TipoEntrenamiento",
                     GuardaEnums.CondicionTexto<TipoEntrenamiento>("tipo_entrenamiento", admiteNulo: true)));

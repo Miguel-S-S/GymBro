@@ -22,6 +22,7 @@ import { SociosApi } from '../../core/api/socios.api';
 import { EjercicioResumen } from '../../core/models/ejercicio.models';
 import { mensajeDeError } from '../../core/util/api-error';
 import { aDatetimeLocal } from '../../core/util/formato';
+import { columnaMedida, etiquetaMedida } from '../../core/util/rutina-formato';
 import { EjercicioSelector } from '../ejercicios/ejercicio-selector';
 import { SesionFormValue, construirRegistrarSesionRequest } from './sesion-request';
 
@@ -154,13 +155,13 @@ function nuevoEjercicio(): EjercicioForm {
 
           <div class="series" formArrayName="series">
             <div class="serie encabezado-series">
-              <span>#</span><span>Peso (kg)</span><span>Reps</span><span>RIR</span><span>Descanso (s)</span><span>Calent.</span><span></span>
+              <span>#</span><span>Peso (kg)</span><span>{{ columna(ej) }}</span><span>RIR</span><span>Descanso (s)</span><span>Calent.</span><span></span>
             </div>
             @for (s of ej.controls.series.controls; track s; let j = $index) {
               <div class="serie" [formGroup]="s">
                 <span class="num">{{ j + 1 }}</span>
                 <mat-form-field><input matInput type="number" min="0" step="0.5" formControlName="pesoLevantadoKg" aria-label="Peso" /></mat-form-field>
-                <mat-form-field><input matInput type="number" min="1" formControlName="repeticiones" aria-label="Repeticiones" /></mat-form-field>
+                <mat-form-field><input matInput type="number" min="1" formControlName="repeticiones" [attr.aria-label]="etiqueta(ej)" /></mat-form-field>
                 <mat-form-field><input matInput type="number" min="0" max="5" formControlName="rir" aria-label="RIR" /></mat-form-field>
                 <mat-form-field><input matInput type="number" min="0" step="5" formControlName="tiempoDescansoSegundos" aria-label="Descanso en segundos" /></mat-form-field>
                 <mat-checkbox formControlName="esCalentamiento" aria-label="Serie de calentamiento" />
@@ -220,6 +221,16 @@ function nuevoEjercicio(): EjercicioForm {
   `,
 })
 export class SesionRegistro {
+  /** Etapa 9a-1: encabezado "Reps"/"Seg." según el ejercicio elegido del catálogo. */
+  columna(ej: EjercicioForm): string {
+    return columnaMedida(ej.controls.ejercicio.value?.tipoMedida);
+  }
+
+  /** Etapa 9a-1: etiqueta accesible "Repeticiones"/"Segundos" según el ejercicio elegido. */
+  etiqueta(ej: EjercicioForm): string {
+    return etiquetaMedida(ej.controls.ejercicio.value?.tipoMedida);
+  }
+
   private readonly sesiones = inject(SesionesApi);
   private readonly socios = inject(SociosApi);
   private readonly router = inject(Router);

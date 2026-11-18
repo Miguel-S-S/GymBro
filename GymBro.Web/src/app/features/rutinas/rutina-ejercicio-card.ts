@@ -2,7 +2,7 @@ import { Component, input } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { RutinaEjercicio } from '../../core/models/acceso.models';
-import { aplicarPaso, CampoRutina, resumenEjercicio } from '../../core/util/rutina-formato';
+import { aplicarPaso, CampoRutina, enSegundos, resumenEjercicio } from '../../core/util/rutina-formato';
 
 interface Control {
   campo: CampoRutina;
@@ -30,7 +30,7 @@ interface Control {
         <div class="resumen">{{ resumen() }}</div>
       } @else {
         <div class="controles">
-          @for (c of controles; track c.campo) {
+          @for (c of controles(); track c.campo) {
             <div class="control">
               <span class="etiqueta">{{ c.etiqueta }}</span>
               <div class="stepper">
@@ -70,13 +70,19 @@ export class RutinaEjercicioCard {
   readonly ejercicio = input.required<RutinaEjercicio>();
   readonly editable = input(false);
 
-  readonly controles: Control[] = [
-    { campo: 'seriesObjetivo', etiqueta: 'Series', paso: 1 },
-    { campo: 'repeticionesMinimas', etiqueta: 'Reps mín.', paso: 1 },
-    { campo: 'repeticionesMaximas', etiqueta: 'Reps máx.', paso: 1 },
-    { campo: 'rirObjetivo', etiqueta: 'RIR', paso: 1 },
-    { campo: 'descansoObjetivoSegundos', etiqueta: 'Descanso', paso: 15, sufijo: ' s' },
-  ];
+  /** Etapa 9a-1: si el ejercicio se mide en segundos, el rango se rotula "Seg." y muestra la unidad. */
+  controles(): Control[] {
+    const seg = enSegundos(this.ejercicio().tipoMedida);
+    return [
+      { campo: 'seriesObjetivo', etiqueta: 'Series', paso: 1 },
+      seg ? { campo: 'repeticionesMinimas', etiqueta: 'Seg. mín.', paso: 1, sufijo: ' s' }
+          : { campo: 'repeticionesMinimas', etiqueta: 'Reps mín.', paso: 1 },
+      seg ? { campo: 'repeticionesMaximas', etiqueta: 'Seg. máx.', paso: 1, sufijo: ' s' }
+          : { campo: 'repeticionesMaximas', etiqueta: 'Reps máx.', paso: 1 },
+      { campo: 'rirObjetivo', etiqueta: 'RIR', paso: 1 },
+      { campo: 'descansoObjetivoSegundos', etiqueta: 'Descanso', paso: 15, sufijo: ' s' },
+    ];
+  }
 
   resumen(): string {
     return resumenEjercicio(this.ejercicio());

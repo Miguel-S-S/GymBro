@@ -128,6 +128,8 @@ namespace GymBro.Application.DTOs.Acceso
         public int SeriesObjetivo { get; set; }
         public int RepeticionesMinimas { get; set; }
         public int RepeticionesMaximas { get; set; }
+        /// <summary>"Repeticiones" o "Segundos" (Etapa 9a-1): con Segundos, RepeticionesMinimas/Maximas son segundos.</summary>
+        public string TipoMedida { get; set; } = "Repeticiones";
         public int? RIRObjetivo { get; set; }
         public int DescansoObjetivoSegundos { get; set; }
         public string? Observaciones { get; set; }

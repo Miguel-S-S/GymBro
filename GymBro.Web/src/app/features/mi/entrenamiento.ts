@@ -1,4 +1,5 @@
 import { RutinaPendiente } from '../../core/models/acceso.models';
+import { TipoMedida } from '../../core/models/ejercicio.models';
 import { RegistrarSesionRequest, Sesion } from '../../core/models/sesion.models';
 import { EstadoTemporizador, iniciarDescanso } from '../../core/util/temporizador';
 
@@ -31,6 +32,11 @@ export interface EjercicioEnCurso {
   seriesObjetivo: number;
   repeticionesMinimas: number;
   repeticionesMaximas: number;
+  /**
+   * Etapa 9a-1: con 'Segundos', "repeticiones" son segundos. Opcional: los borradores guardados antes de la
+   * etapa no lo tienen y siguen siendo válidos (se asume 'Repeticiones'; el valor sigue siendo un entero).
+   */
+  tipoMedida?: TipoMedida;
   rirObjetivo: number | null;
   descansoObjetivoSegundos: number;
   /** Última ejecución de este ejercicio (series efectivas), para la columna "Anterior". */
@@ -120,6 +126,7 @@ export function crearEntrenamiento(
           seriesObjetivo: e.seriesObjetivo,
           repeticionesMinimas: e.repeticionesMinimas,
           repeticionesMaximas: e.repeticionesMaximas,
+          tipoMedida: e.tipoMedida ?? 'Repeticiones',
           rirObjetivo: e.rirObjetivo,
           descansoObjetivoSegundos: e.descansoObjetivoSegundos,
           anterior: previas,
@@ -155,10 +162,11 @@ export function editarSerie(
   return conSerie(e, iEj, iSerie, (s) => ({ ...s, ...cambios }));
 }
 
-/** Motivo por el que una serie no puede marcarse con ✔, o null si es válida. */
-export function motivoSerieInvalida(s: SerieEnCurso): string | null {
+/** Motivo por el que una serie no puede marcarse con ✔, o null si es válida. El texto usa la unidad del ejercicio (Etapa 9a-1). */
+export function motivoSerieInvalida(s: SerieEnCurso, tipoMedida?: TipoMedida): string | null {
   if (s.pesoKg === null || Number.isNaN(s.pesoKg) || s.pesoKg < 0) return 'Indicá el peso (0 o más kg).';
-  if (s.repeticiones === null || !Number.isInteger(s.repeticiones) || s.repeticiones < 1) return 'Indicá las repeticiones (1 o más).';
+  if (s.repeticiones === null || !Number.isInteger(s.repeticiones) || s.repeticiones < 1)
+    return tipoMedida === 'Segundos' ? 'Indicá los segundos (1 o más).' : 'Indicá las repeticiones (1 o más).';
   if (s.rir !== null && (!Number.isInteger(s.rir) || s.rir < RIR_MINIMO || s.rir > RIR_MAXIMO))
     return `El RIR debe estar entre ${RIR_MINIMO} y ${RIR_MAXIMO}.`;
   return null;
@@ -230,7 +238,7 @@ export function construirSesionDesdeEntrenamiento(e: Entrenamiento, fin: Date = 
         orden: ej.orden,
         observaciones: null,
         seriesRealizadas: hechas.map((s, i) => {
-          const motivo = motivoSerieInvalida(s);
+          const motivo = motivoSerieInvalida(s, ej.tipoMedida);
           if (motivo) throw new Error(`${ej.nombre}, serie ${i + 1}: ${motivo}`);
           const previa = hechas[i - 1];
           return {

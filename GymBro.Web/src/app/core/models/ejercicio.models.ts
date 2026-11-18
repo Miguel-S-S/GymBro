@@ -1,3 +1,12 @@
+/**
+ * Unidad de medida del ejercicio (Etapa 9a-1). Con 'Segundos', los campos de "repeticiones" de la prescripción,
+ * la dosificación y la serie guardan segundos: el cliente solo cambia la unidad y la etiqueta.
+ */
+export type TipoMedida = 'Repeticiones' | 'Segundos';
+
+/** Procedencia del ejercicio (Etapa 9a-1). */
+export type OrigenEjercicio = 'Dataset' | 'Proyecto' | 'Gimnasio';
+
 /** GymBro.Application.DTOs.EjercicioResumenDto */
 export interface EjercicioResumen {
   id: string;
@@ -6,6 +15,9 @@ export interface EjercicioResumen {
   musculoPrincipal: string;
   equipamiento: string;
   dificultad: number;
+  /** Etapa 9a-1. Opcional para tolerar respuestas anteriores (se asume 'Repeticiones'). */
+  tipoMedida?: TipoMedida;
+  origen?: OrigenEjercicio;
 }
 
 /** GymBro.Application.DTOs.EjercicioDetalleDto */

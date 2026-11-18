@@ -1,3 +1,5 @@
+import { TipoMedida } from './ejercicio.models';
+
 // ---- Request: GymBro.Application.DTOs.RegistrarSesionEntrenamientoRequest ----
 
 export interface SerieRealizadaRequest {
@@ -94,6 +96,8 @@ export interface EjecucionResumen {
 export interface EjercicioComparado {
   ejercicioId: string;
   orden: number;
+  /** Etapa 9a-1: tomado del ejercicio. Con 'Segundos', "repeticiones" son segundos y el volumen en kg es 0. */
+  tipoMedida?: TipoMedida;
   prescripcion: PrescripcionResumen | null;
   ejecucion: EjecucionResumen | null;
   comparacion: {

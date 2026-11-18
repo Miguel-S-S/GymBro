@@ -10,6 +10,10 @@ namespace GymBro.Application.DTOs
         public string MusculoPrincipal { get; set; } = string.Empty;
         public string Equipamiento { get; set; } = string.Empty;
         public int Dificultad { get; set; }
+        /// <summary>"Repeticiones" o "Segundos" (Etapa 9a-1).</summary>
+        public string TipoMedida { get; set; } = "Repeticiones";
+        /// <summary>"Dataset", "Proyecto" o "Gimnasio" (Etapa 9a-1).</summary>
+        public string Origen { get; set; } = "Dataset";
     }
 
     public class EjercicioDetalleDto
@@ -24,5 +28,9 @@ namespace GymBro.Application.DTOs
         public string Preparacion { get; set; } = string.Empty;
         public string Ejecucion { get; set; } = string.Empty;
         public int Dificultad { get; set; }
+        /// <summary>"Repeticiones" o "Segundos" (Etapa 9a-1).</summary>
+        public string TipoMedida { get; set; } = "Repeticiones";
+        /// <summary>"Dataset", "Proyecto" o "Gimnasio" (Etapa 9a-1).</summary>
+        public string Origen { get; set; } = "Dataset";
     }
 }

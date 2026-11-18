@@ -10,7 +10,7 @@ import { SesionesApi } from '../../core/api/sesiones.api';
 import { AuthService } from '../../core/auth/auth.service';
 import { mensajeDeError } from '../../core/util/api-error';
 import { borrarBorrador, guardarBorrador, leerBorrador } from '../../core/util/borrador-sesion';
-import { resumenEjercicio } from '../../core/util/rutina-formato';
+import { columnaMedida, etiquetaMedida, resumenEjercicio, unidadCorta } from '../../core/util/rutina-formato';
 import { formatoMmSs, progreso, segundosRestantes } from '../../core/util/temporizador';
 import {
   EjercicioEnCurso, Entrenamiento, RIR_MAXIMO, RIR_MINIMO, SerieEnCurso, agregarSerie, alternarSerie, borradorValido,
@@ -45,7 +45,7 @@ interface WakeLockSentinelMin { release(): Promise<void>; }
           </header>
 
           <div class="fila encabezado-fila" aria-hidden="true">
-            <span>Serie</span><span>Anterior</span><span>kg</span><span>Reps</span><span>RIR</span><span></span>
+            <span>Serie</span><span>Anterior</span><span>kg</span><span>{{ columna(ej) }}</span><span>RIR</span><span></span>
           </div>
           @for (s of ej.series; track $index; let j = $index) {
             <div class="fila" [class.hecha]="s.hecha">
@@ -53,7 +53,7 @@ interface WakeLockSentinelMin { release(): Promise<void>; }
               <span class="anterior">{{ anterior(ej, j) }}</span>
               <input type="number" inputmode="decimal" min="0" step="0.5" [attr.aria-label]="'Peso serie ' + (j + 1)"
                      [value]="s.pesoKg ?? ''" [disabled]="s.hecha" (change)="cambiar(i, j, 'pesoKg', $event)" />
-              <input type="number" inputmode="numeric" min="1" step="1" [attr.aria-label]="'Repeticiones serie ' + (j + 1)"
+              <input type="number" inputmode="numeric" min="1" step="1" [attr.aria-label]="etiqueta(ej) + ' serie ' + (j + 1)"
                      [value]="s.repeticiones ?? ''" [disabled]="s.hecha" (change)="cambiar(i, j, 'repeticiones', $event)" />
               <select [attr.aria-label]="'RIR serie ' + (j + 1)" [disabled]="s.hecha" (change)="cambiarRir(i, j, $event)">
                 <option value="" [selected]="s.rir === null">–</option>
@@ -203,7 +203,19 @@ export class MiEntrenar {
 
   anterior(ej: EjercicioEnCurso, j: number): string {
     const a = ej.anterior[j];
-    return a ? `${a.pesoLevantadoKg} kg × ${a.repeticiones}` : '–';
+    if (!a) return '–';
+    // Etapa 9a-1: por tiempo se muestra la unidad (`0 kg × 30 s`); por repeticiones, como antes.
+    return unidadCorta(ej.tipoMedida) === 's' ? `${a.pesoLevantadoKg} kg × ${a.repeticiones} s` : `${a.pesoLevantadoKg} kg × ${a.repeticiones}`;
+  }
+
+  /** Encabezado de la columna del valor: "Reps" o "Seg." (Etapa 9a-1). */
+  columna(ej: EjercicioEnCurso): string {
+    return columnaMedida(ej.tipoMedida);
+  }
+
+  /** Etiqueta accesible del campo: "Repeticiones" o "Segundos" (Etapa 9a-1). */
+  etiqueta(ej: EjercicioEnCurso): string {
+    return etiquetaMedida(ej.tipoMedida);
   }
 
   cambiar(i: number, j: number, campo: 'pesoKg' | 'repeticiones', ev: Event): void {
@@ -218,7 +230,7 @@ export class MiEntrenar {
   }
 
   marcar(i: number, j: number, s: SerieEnCurso): void {
-    const motivo = s.hecha ? null : motivoSerieInvalida(s);
+    const motivo = s.hecha ? null : motivoSerieInvalida(s, this.estado()?.ejercicios[i]?.tipoMedida);
     if (motivo) {
       this.snack.open(motivo, 'Cerrar', { duration: 3000 });
       return;

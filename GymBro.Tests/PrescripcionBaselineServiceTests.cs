@@ -212,6 +212,106 @@ namespace GymBro.Tests
             Assert.Equal(esperada, PrescripcionBaselineService.CalcularEdad(DateTime.Parse(nacimiento), DateTime.Parse(hoy)));
         }
 
+        // ---- Etapa 9a-1: Core y tipo de medida ----
+
+        /// <summary>Catálogo con las 5 zonas; Core con un ejercicio por segundos (dificultad 1) y su fila de segundos.</summary>
+        private static FakeBaselineRepository RepoConCoreEnSegundos()
+        {
+            var repo = RepoCompleto();
+            repo.Ejercicios.RemoveAll(e => e.ZonaObjetivo == "Core");
+            repo.Ejercicios.Add(new EjercicioCandidato(Guid.NewGuid(), "Plancha", "Body Weight", "Core", "Recto abdominal", 1, TipoMedida.Segundos));
+            repo.Ejercicios.Add(new EjercicioCandidato(Guid.NewGuid(), "Crunch", "Body Weight", "Core", "Recto abdominal", 2, TipoMedida.Repeticiones));
+            repo.Dosificaciones.RemoveAll(d => d.ZonaObjetivo == "Core");
+            repo.Dosificaciones.Add(new DosificacionVolumetrica
+            {
+                Id = Guid.NewGuid(), ZonaObjetivo = "Core", SeriesMinimas = 3, SeriesMaximas = 4,
+                RepeticionesMinimas = 10, RepeticionesMaximas = 15, TipoMedida = TipoMedida.Repeticiones,
+            });
+            repo.Dosificaciones.Add(new DosificacionVolumetrica
+            {
+                Id = Guid.NewGuid(), ZonaObjetivo = "Core", SeriesMinimas = 2, SeriesMaximas = 3,
+                RepeticionesMinimas = 20, RepeticionesMaximas = 40, TipoMedida = TipoMedida.Segundos,
+            });
+            return repo;
+        }
+
+        [Fact]
+        public async Task ConLasCincoZonasEnElCatalogo_GeneraCincoEjercicios_YCoreNoFiguraComoOmitida()
+        {
+            var rutina = await Servicio(RepoConCoreEnSegundos()).GenerarAsync(SocioId);
+
+            Assert.Equal(5, rutina.Ejercicios.Count);
+            Assert.DoesNotContain("omitidas", rutina.Observaciones);
+        }
+
+        [Fact]
+        public async Task EjercicioEnSegundos_TomaLaDosisDeLaFilaDeSegundos()
+        {
+            var repo = RepoConCoreEnSegundos();
+
+            var rutina = await Servicio(repo).GenerarAsync(SocioId);
+
+            var plancha = rutina.Ejercicios.Single(e => e.Ejercicio == "Plancha");
+            Assert.Equal("Segundos", plancha.TipoMedida);
+            Assert.Equal(2, plancha.SeriesObjetivo);
+            Assert.Equal(20, plancha.RepeticionesMinimas);
+            Assert.Equal(40, plancha.RepeticionesMaximas);
+            Assert.Null(plancha.Observaciones);
+            Assert.Contains(TipoMedida.Segundos, repo.TiposPedidos);
+        }
+
+        [Fact]
+        public async Task EjercicioEnRepeticiones_TomaLaDosisDeLaFilaDeRepeticiones()
+        {
+            var repo = RepoConCoreEnSegundos();
+            repo.Ejercicios.RemoveAll(e => e.Nombre == "Plancha"); // Core queda con el crunch (repeticiones)
+
+            var rutina = await Servicio(repo).GenerarAsync(SocioId);
+
+            var crunch = rutina.Ejercicios.Single(e => e.Ejercicio == "Crunch");
+            Assert.Equal("Repeticiones", crunch.TipoMedida);
+            Assert.Equal(3, crunch.SeriesObjetivo);
+            Assert.Equal(10, crunch.RepeticionesMinimas);
+            Assert.Equal(15, crunch.RepeticionesMaximas);
+            Assert.All(rutina.Ejercicios.Where(e => e.Ejercicio != "Crunch"), e => Assert.Equal("Repeticiones", e.TipoMedida));
+        }
+
+        [Fact]
+        public async Task SinFilaDeSegundos_UsaLaDosisPorDefectoDeSegundos_YLoDejaEnObservaciones()
+        {
+            var repo = RepoConCoreEnSegundos();
+            repo.Dosificaciones.RemoveAll(d => d.TipoMedida == TipoMedida.Segundos);
+
+            var rutina = await Servicio(repo).GenerarAsync(SocioId);
+
+            var plancha = rutina.Ejercicios.Single(e => e.Ejercicio == "Plancha");
+            Assert.Equal(3, plancha.SeriesObjetivo);
+            Assert.Equal(20, plancha.RepeticionesMinimas);
+            Assert.Equal(40, plancha.RepeticionesMaximas);
+            Assert.Equal("Sin dosificación en el catálogo para la zona Core (Segundos): se usó 3 x 20-40 s.", plancha.Observaciones);
+        }
+
+        [Fact]
+        public async Task SinFilaDeRepeticiones_UsaLaDosisPorDefectoDeRepeticiones_YLoDejaEnObservaciones()
+        {
+            var repo = RepoConCoreEnSegundos();
+            repo.Ejercicios.RemoveAll(e => e.Nombre == "Plancha");
+            repo.Dosificaciones.RemoveAll(d => d.ZonaObjetivo == "Core" && d.TipoMedida == TipoMedida.Repeticiones);
+
+            var rutina = await Servicio(repo).GenerarAsync(SocioId);
+
+            var crunch = rutina.Ejercicios.Single(e => e.Ejercicio == "Crunch");
+            Assert.Equal((3, 8, 12), (crunch.SeriesObjetivo, crunch.RepeticionesMinimas, crunch.RepeticionesMaximas));
+            Assert.Equal("Sin dosificación en el catálogo para la zona Core (Repeticiones): se usó 3 x 8-12 repeticiones.", crunch.Observaciones);
+        }
+
+        [Fact]
+        public async Task LaObservacionGeneral_NoSuperaLos500Caracteres()
+        {
+            var rutina = await Servicio(RepoConCoreEnSegundos()).GenerarAsync(SocioId);
+            Assert.True(rutina.Observaciones!.Length <= 500);
+        }
+
         // ---- Dobles de prueba ----
         private sealed class FakeBaselineRepository : IBaselineRepository
         {
@@ -234,8 +334,14 @@ namespace GymBro.Tests
 
             public Task<bool> HayDosificacionesAsync() => Task.FromResult(Dosificaciones.Count > 0);
 
-            public Task<DosificacionVolumetrica?> BuscarDosificacionAsync(IReadOnlyCollection<string> aliasZona) =>
-                Task.FromResult(Dosificaciones.FirstOrDefault(d => aliasZona.Contains(d.ZonaObjetivo, StringComparer.OrdinalIgnoreCase)));
+            public List<TipoMedida> TiposPedidos { get; } = new();
+
+            public Task<DosificacionVolumetrica?> BuscarDosificacionAsync(IReadOnlyCollection<string> aliasZona, TipoMedida tipoMedida)
+            {
+                TiposPedidos.Add(tipoMedida);
+                return Task.FromResult(Dosificaciones.FirstOrDefault(d =>
+                    aliasZona.Contains(d.ZonaObjetivo, StringComparer.OrdinalIgnoreCase) && d.TipoMedida == tipoMedida));
+            }
 
             public Task<IReadOnlyList<EjercicioCandidato>> GetEjerciciosDeZonaAsync(IReadOnlyCollection<string> aliasZona)
             {
@@ -254,7 +360,7 @@ namespace GymBro.Tests
                 foreach (var pe in prescripcion.EjerciciosPrescritos)
                 {
                     var c = Ejercicios.First(e => e.Id == pe.EjercicioId);
-                    pe.Ejercicio = new Ejercicio { Id = c.Id, Nombre = c.Nombre, Equipamiento = c.Equipamiento, ZonaObjetivo = c.ZonaObjetivo };
+                    pe.Ejercicio = new Ejercicio { Id = c.Id, Nombre = c.Nombre, Equipamiento = c.Equipamiento, ZonaObjetivo = c.ZonaObjetivo, TipoMedida = c.TipoMedida };
                 }
                 _guardadas.Add(prescripcion);
                 return Task.CompletedTask;

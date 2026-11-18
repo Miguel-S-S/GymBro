@@ -55,13 +55,13 @@ namespace GymBro.Infrastructure.Repositories
 
         public Task<bool> HayDosificacionesAsync() => _context.Dosificaciones.AnyAsync();
 
-        public async Task<DosificacionVolumetrica?> BuscarDosificacionAsync(IReadOnlyCollection<string> aliasZona)
+        public async Task<DosificacionVolumetrica?> BuscarDosificacionAsync(IReadOnlyCollection<string> aliasZona, TipoMedida tipoMedida)
         {
             var alias = aliasZona.Select(a => a.ToLower()).ToArray();
-            // Anomalía del catálogo (verificada el 16/11/2026): las filas con parte_cuerpo = 'Abs' están cargadas
-            // con zona_objetivo = 'Legs' (y alguna con series 30-60). Se excluyen para que no contaminen a Piernas.
+            // Etapa 9a-1: ya no se excluyen las filas 'abs'. La migración Etapa9a1_CatalogoCore las pasó a la zona Core
+            // (antes figuraban en Legs) y dio de baja la fila 30-60 x 1; excluirlas ahora dejaría a Core sin su dosis.
             return await _context.Dosificaciones.AsNoTracking()
-                .Where(d => alias.Contains(d.ZonaObjetivo.ToLower()) && d.ParteCuerpo.ToLower() != "abs")
+                .Where(d => alias.Contains(d.ZonaObjetivo.ToLower()) && d.TipoMedida == tipoMedida)
                 .OrderBy(d => d.ParteCuerpo).ThenBy(d => d.SubzonaObjetivo).ThenBy(d => d.Id)
                 .FirstOrDefaultAsync();
         }
@@ -73,7 +73,7 @@ namespace GymBro.Infrastructure.Repositories
             return await _context.Ejercicios.AsNoTracking()
                 .Where(e => alias.Contains(e.ZonaObjetivo.ToLower()))
                 .OrderBy(e => e.Dificultad).ThenBy(e => e.Nombre).ThenBy(e => e.Id)
-                .Select(e => new EjercicioCandidato(e.Id, e.Nombre, e.Equipamiento, e.ZonaObjetivo, e.MusculoPrincipal, e.Dificultad))
+                .Select(e => new EjercicioCandidato(e.Id, e.Nombre, e.Equipamiento, e.ZonaObjetivo, e.MusculoPrincipal, e.Dificultad, e.TipoMedida))
                 .ToListAsync();
         }
 

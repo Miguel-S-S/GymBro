@@ -14,7 +14,12 @@ namespace GymBro.Domain.Entities
 
         public int Orden { get; set; }
         public int SeriesObjetivo { get; set; }
+        /// <summary>
+        /// Repeticiones mínimas. Si el ejercicio se mide en segundos (<c>Ejercicio.TipoMedida</c>), guarda segundos:
+        /// decisión de diseño de la Etapa 9a-1 para no renombrar columnas; el cliente muestra la unidad según el tipo.
+        /// </summary>
         public int RepeticionesMinimas { get; set; }
+        /// <summary>Repeticiones máximas; segundos si el ejercicio se mide en segundos (ver <see cref="RepeticionesMinimas"/>).</summary>
         public int RepeticionesMaximas { get; set; }
         public int? RIRObjetivo { get; set; }
         public int DescansoObjetivoSegundos { get; set; }

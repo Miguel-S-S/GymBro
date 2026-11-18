@@ -135,6 +135,67 @@ namespace GymBro.Tests
             Assert.Equal(esperado, new PrescripcionEntrenamiento { Estado = estado }.EsVigente());
         }
 
+        // ---- Etapa 9a-1: ejercicios medidos en segundos ----
+
+        /// <summary>Sesión SINTÉTICA con una serie de calentamiento y dos efectivas del ejercicio dado, vinculada a su prescripción.</summary>
+        private SesionEntrenamiento SesionCon(TipoMedida medida, int min, int max, params (decimal Kg, int Valor, bool Calentamiento)[] series)
+        {
+            var ejercicio = new Ejercicio { Id = EjercicioId, Nombre = "Ejercicio de prueba", TipoMedida = medida };
+            var p = Prescripcion(SocioA, EstadoPrescripcion.Aprobada);
+            p.EjerciciosPrescritos.Add(new PrescripcionEjercicio
+            {
+                EjercicioId = EjercicioId, Ejercicio = ejercicio, Orden = 1, SeriesObjetivo = 2,
+                RepeticionesMinimas = min, RepeticionesMaximas = max, DescansoObjetivoSegundos = 60,
+            });
+            var sesion = new SesionEntrenamiento { SocioId = SocioA, PrescripcionEntrenamientoId = p.Id };
+            var ej = new SesionEjercicio { EjercicioId = EjercicioId, Ejercicio = ejercicio, Orden = 1 };
+            var orden = 0;
+            foreach (var (kg, valor, cal) in series)
+                ej.SeriesRealizadas.Add(new SerieRealizada { OrdenSerie = ++orden, PesoLevantadoKg = kg, Repeticiones = valor, EsCalentamiento = cal });
+            sesion.EjerciciosEjecutados.Add(ej);
+            _sesiones.Items.Add(sesion);
+            return sesion;
+        }
+
+        [Fact]
+        public async Task EjercicioEnSegundos_TieneVolumenCero_YElMensajeNoDiceRepeticiones()
+        {
+            // Plancha con lastre de 10 kg: 15 s de calentamiento, 25 s y 50 s efectivos (rango 20-40 s).
+            var sesion = SesionCon(TipoMedida.Segundos, 20, 40, (10m, 15, true), (10m, 25, false), (10m, 50, false));
+
+            var c = await Servicio().GetComparacionAsync(sesion.Id);
+
+            var e = Assert.Single(c!.Ejercicios);
+            Assert.Equal("Segundos", e.TipoMedida);
+            Assert.Equal(0m, e.Ejecucion!.VolumenTotalKg);
+            Assert.Equal(0m, e.Ejecucion.VolumenEfectivoKg);
+            Assert.Equal(0m, e.Ejecucion.VolumenCalentamientoKg);
+            Assert.All(e.Ejecucion.DetallesSeries, d => Assert.Equal(0m, d.Volumen));
+
+            // La comparación de rango sigue igual; solo cambia la unidad del mensaje.
+            var excedida = e.Ejecucion.DetallesSeries.Single(d => d.Repeticiones == 50);
+            Assert.False(excedida.RepeticionesComparacion!.CumpleObjetivo);
+            Assert.Equal(10, excedida.RepeticionesComparacion.Desviacion);
+            Assert.Equal("Excedieron 10 s.", excedida.RepeticionesComparacion.Mensaje);
+            Assert.DoesNotContain("rep", excedida.RepeticionesComparacion.Mensaje);
+            Assert.True(e.Ejecucion.DetallesSeries.Single(d => d.Repeticiones == 25).RepeticionesComparacion!.CumpleObjetivo);
+        }
+
+        [Fact]
+        public async Task EjercicioEnRepeticiones_MantieneElVolumenEnKg()
+        {
+            var sesion = SesionCon(TipoMedida.Repeticiones, 8, 12, (20m, 10, true), (40m, 10, false), (40m, 6, false));
+
+            var c = await Servicio().GetComparacionAsync(sesion.Id);
+
+            var e = Assert.Single(c!.Ejercicios);
+            Assert.Equal("Repeticiones", e.TipoMedida);
+            Assert.Equal(840m, e.Ejecucion!.VolumenTotalKg);
+            Assert.Equal(640m, e.Ejecucion.VolumenEfectivoKg);
+            Assert.Equal(200m, e.Ejecucion.VolumenCalentamientoKg);
+            Assert.Equal("Faltaron 2 reps.", e.Ejecucion.DetallesSeries.Single(d => d.Repeticiones == 6).RepeticionesComparacion!.Mensaje);
+        }
+
         // ---- Dobles de prueba ----
         private sealed class FakeAcceso : ISocioAccessService
         {

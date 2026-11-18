@@ -1,0 +1,87 @@
+Etapa 9a-1 (Core, tipo de medida, reclasificacion de Abs) - evidencia: migracion Etapa9a1_CatalogoCore
+Comando: dotnet ef migrations script 20261117230626_Fix_EnumsNoDefinidos 20261118001101_Etapa9a1_CatalogoCore
+         aplicado a gymbro-db con: docker exec -i gymbro-db psql -v ON_ERROR_STOP=1 (una transaccion)
+Commit: 89a35533eec3f7f9a1f3a518420f3854f385bff5
+Fecha de aplicacion: 2026-11-17 (hora local -03:00); archivo generado: 2026-11-17 21:26:04 -03:00
+Codigo de salida: 0
+Filas afectadas en gymbro-db: UPDATE 1 (baja logica de Abs/Lower 30-60 x 1, la plancha 'Tablon' de series.csv) y UPDATE 6 (filas Abs: zona Legs -> Core).
+Los 8 ejercicios y las 2 dosificaciones de Core no los inserta la migracion: los agrega CatalogoProyectoSeeder en el proximo arranque de la API.
+------------------------------------------------------------
+Script SQL:
+START TRANSACTION;
+ALTER TABLE ejercicios ADD origen character varying(20) NOT NULL DEFAULT 'Dataset';
+
+ALTER TABLE ejercicios ADD tipo_medida character varying(20) NOT NULL DEFAULT 'Repeticiones';
+
+ALTER TABLE dosificaciones ADD tipo_medida character varying(20) NOT NULL DEFAULT 'Repeticiones';
+
+UPDATE dosificaciones
+SET fecha_baja = now(), usuario_baja = 1
+WHERE lower(parte_cuerpo) IN ('abs', 'abdominales')
+  AND series_minimas = 30 AND series_maximas = 60
+  AND repeticiones_minimas = 1 AND repeticiones_maximas = 1
+  AND fecha_baja IS NULL;
+
+UPDATE dosificaciones
+SET zona_objetivo = 'Core', fecha_modificacion = now(), usuario_modificacion = 1
+WHERE lower(parte_cuerpo) IN ('abs', 'abdominales')
+  AND zona_objetivo <> 'Core';
+
+ALTER TABLE ejercicios ADD CONSTRAINT "CK_Ejercicio_Origen" CHECK (origen IN ('Dataset', 'Proyecto', 'Gimnasio'));
+
+ALTER TABLE ejercicios ADD CONSTRAINT "CK_Ejercicio_TipoMedida" CHECK (tipo_medida IN ('Repeticiones', 'Segundos'));
+
+ALTER TABLE dosificaciones ADD CONSTRAINT "CK_Dosificacion_TipoMedida" CHECK (tipo_medida IN ('Repeticiones', 'Segundos'));
+
+INSERT INTO "__EFMigrationsHistory" (migration_id, product_version)
+VALUES ('20261118001101_Etapa9a1_CatalogoCore', '10.0.11');
+
+COMMIT;
+
+------------------------------------------------------------
+Salida de la aplicacion (antes / aplicacion / despues):
+-- Antes
+ parte_cuerpo | subzona_objetivo | zona_objetivo | series_minimas | series_maximas | repeticiones_minimas | repeticiones_maximas | dada_de_baja 
+--------------+------------------+---------------+----------------+----------------+----------------------+----------------------+--------------
+ Abs          | Lower            | Legs          |              3 |              4 |                   10 |                   15 | f
+ Abs          | Lower            | Legs          |             30 |             60 |                    1 |                    1 | f
+ Abs          | Middle           | Legs          |              3 |              4 |                   10 |                   15 | f
+ Abs          | Middle           | Legs          |              3 |              4 |                   10 |                   15 | f
+ Abs          | Upper            | Legs          |              3 |              4 |                   10 |                   15 | f
+ Abs          | Upper            | Legs          |              3 |              4 |                   10 |                   15 | f
+(6 rows)
+
+-- Aplicacion (ON_ERROR_STOP, una transaccion)
+START TRANSACTION
+ALTER TABLE
+ALTER TABLE
+ALTER TABLE
+UPDATE 1
+UPDATE 6
+ALTER TABLE
+ALTER TABLE
+ALTER TABLE
+INSERT 0 1
+COMMIT
+codigo de salida: 0
+-- Despues
+ parte_cuerpo | subzona_objetivo | zona_objetivo | series_minimas | series_maximas | repeticiones_minimas | repeticiones_maximas | dada_de_baja 
+--------------+------------------+---------------+----------------+----------------+----------------------+----------------------+--------------
+ Abs          | Lower            | Core          |              3 |              4 |                   10 |                   15 | f
+ Abs          | Lower            | Core          |             30 |             60 |                    1 |                    1 | t
+ Abs          | Middle           | Core          |              3 |              4 |                   10 |                   15 | f
+ Abs          | Middle           | Core          |              3 |              4 |                   10 |                   15 | f
+ Abs          | Upper            | Core          |              3 |              4 |                   10 |                   15 | f
+ Abs          | Upper            | Core          |              3 |              4 |                   10 |                   15 | f
+(6 rows)
+
+ origen  | tipo_medida  | count 
+---------+--------------+-------
+ Dataset | Repeticiones |   688
+(1 row)
+
+ tipo_medida  | count 
+--------------+-------
+ Repeticiones |    52
+(1 row)
+

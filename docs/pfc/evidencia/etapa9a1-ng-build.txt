@@ -1,0 +1,36 @@
+Etapa 9a-1 (Core, tipo de medida, reclasificacion de Abs) - evidencia
+Comando: cd GymBro.Web && npx ng build
+Commit: 89a35533eec3f7f9a1f3a518420f3854f385bff5
+Fecha: 2026-11-17 21:25:44 -03:00
+Codigo de salida: 0
+------------------------------------------------------------
+❯ Building...
+✔ Building...
+Initial chunk files | Names               |  Raw size | Estimated transfer size
+main-IYDPZMQL.js    | main                | 361.22 kB |                70.17 kB
+chunk-ClddjZx3.js   | -                   | 337.78 kB |                86.70 kB
+styles-56MVVM6I.css | styles              |  25.10 kB |                 3.46 kB
+
+                    | Initial total       | 724.10 kB |               160.33 kB
+
+Lazy chunk files    | Names               |  Raw size | Estimated transfer size
+chunk-Cds_eIU5.js   | -                   |  44.72 kB |                 9.54 kB
+chunk-D4Tib4W8.js   | -                   |  40.99 kB |                 8.71 kB
+chunk-CJyCTIMh.js   | -                   |  35.89 kB |                 8.85 kB
+chunk-C_8In56I.js   | sesion-registro     |  34.34 kB |                 9.86 kB
+chunk-Dl5A4SnP.js   | -                   |  30.07 kB |                 7.10 kB
+chunk-B9FVEzUw.js   | -                   |  29.39 kB |                 4.93 kB
+chunk-BdP1eQhM.js   | mi-layout           |  29.20 kB |                 7.99 kB
+chunk-CqM7KzkQ.js   | socio-detalle       |  28.30 kB |                 7.17 kB
+chunk-CEEAWr0H.js   | -                   |  26.53 kB |                 4.48 kB
+chunk-DkOUSCnZ.js   | ejercicios-catalogo |  26.12 kB |                 7.08 kB
+chunk-CVJ6i878.js   | -                   |  15.21 kB |                 4.18 kB
+chunk-Tsc30Pm7.js   | mi-bienestar        |  14.12 kB |                 4.50 kB
+chunk-Cex4Irtt.js   | -                   |  12.05 kB |                 2.54 kB
+chunk-DjnCi4uJ.js   | socios-lista        |  11.32 kB |                 3.63 kB
+chunk--9gXIdPA.js   | mi-entrenar         |  11.15 kB |                 3.69 kB
+...and 28 more lazy chunks files. Use "--verbose" to show all the files.
+
+Application bundle generation complete. [4.161 seconds] - 2026-11-18T00:25:44.229Z
+
+Output location: C:\Users\miguel\source\repos\GymBro\GymBro.Web\dist\gymbro-web

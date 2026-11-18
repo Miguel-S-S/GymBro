@@ -4,11 +4,12 @@
 **Evidencia:** `docs/pfc/evidencia/etapa9a1-*.txt`:
 - estado previo de la base local;
 - SQL de la migración y filas afectadas;
+- embeddings de los ejercicios de Core (`etapa9a1-embeddings.txt`, agregada después del merge);
 - build y pruebas de .NET y Angular, con fecha y commit.
 
 ## Texto propuesto para 4.5 (implementación)
 
-**Estado: Implementado y verificado con pruebas automáticas. Quedan pendientes la prueba manual en pantalla y la generación de embeddings de los ejercicios nuevos.**
+**Estado: Implementado y verificado con pruebas automáticas; embeddings de los ejercicios nuevos generados y verificados en la base local (17/11/2026). Queda pendiente la prueba manual en pantalla.**
 
 El catálogo de ejercicios del dataset no tenía ejercicios de la zona Core, por lo que la rutina baseline omitía siempre esa zona y quedaba con cuatro ejercicios. Se incorporó un catálogo propio del proyecto con ocho ejercicios de Core en español:
 
@@ -81,10 +82,13 @@ En la PWA, las pantallas de entrenamiento, registro y detalle de sesión, histor
   - `EjercicioRepository`: proyecta el ejercicio campo por campo para no traer el embedding; hubo que agregarle `TipoMedida` y `Origen`. Sin eso, el catálogo devolvía `Origen = Dataset` para los ejercicios de Core; una prueba de integración lo detectó.
 - **Pruebas existentes ajustadas.** Solo `SiembraDatasetsTests`. Esperaba 0 dosificaciones en Production y ahora existen las 2 de Core. Los conteos "del dataset" ahora excluyen las filas del proyecto, de modo que se sigue verificando lo mismo. Se agregaron un CSV sintético de ejercicios y los casos (a) y (b). Ninguna otra prueba se modificó.
 - **Dosis de Piernas.** Con el orden determinista, la dosis de Piernas que toma el baseline en `gymbro-db` es Legs/Calves (3 × 15–20). Ya era así antes de esta etapa, porque la exclusión de `Abs` dejaba primero a Calves. No se cambió; queda informado para la Etapa 10.
-- **Embeddings.** Los 8 ejercicios de Core entran con `embedding = NULL`. Hasta ejecutar `GymBro.IA/generador_embeddings.py`, que procesa los ejercicios sin embedding, la búsqueda semántica no los encuentra. **No se ejecutó en esta etapa.**
-- **Base local (`gymbro-db`).** La migración se aplicó con su script SQL, en una transacción: 1 fila dada de baja y 6 reclasificadas a Core (evidencia `etapa9a1-migracion.sql.txt`). Los ejercicios y las dosificaciones de Core se insertan en el próximo arranque de la API; eso no se verificó contra `gymbro-db`, solo en los contenedores de prueba.
+- **Embeddings.** El seeder inserta los 8 ejercicios de Core con `embedding = NULL`; la búsqueda semántica no los encuentra hasta ejecutar `GymBro.IA/generador_embeddings.py`, que procesa los ejercicios sin embedding.
+  - **Ejecutado el 17/11/2026, después del merge** (evidencia `etapa9a1-embeddings.txt`). El autor lo ejecutó en su terminal con la contraseña de la base definida solo para esa ejecución; la contraseña no figura en la evidencia.
+  - Resultado en `gymbro-db`: los 8 ejercicios de Core tienen un vector de 768 dimensiones (`nomic-embed-text`), y ningún ejercicio del catálogo queda sin embedding (688 del dataset y 8 del proyecto). Ollama registró 8 solicitudes del script, una por ejercicio.
+  - Control: la consulta "ejercicio para fortalecer los abdominales en el suelo", ordenada por distancia coseno, devuelve primero seis ejercicios de Core. Es una consulta suelta por SQL; no se probó el endpoint `busqueda-inteligente` ni se evaluó la calidad de la búsqueda.
+  - Nota operativa: si se vuelve a sembrar una base, hay que ejecutar de nuevo el script; el embedding no se genera al arrancar.
+- **Base local (`gymbro-db`).** La migración se aplicó con su script SQL, en una transacción: 1 fila dada de baja y 6 reclasificadas a Core (evidencia `etapa9a1-migracion.sql.txt`). Los ejercicios y las dosificaciones de Core se insertaron en el arranque posterior al merge (17/11/2026): el seeder informó 8 ejercicios y 2 dosificaciones, verificados por consulta (`etapa9a1-embeddings.txt`).
 - **Build transitorio.** La primera `dotnet build` de la línea base informó 6 errores sin detalle guardado; al repetirla, 0. No volvió a ocurrir en esta etapa, y la causa no está verificada.
 - **Sin verificar:**
   - la prueba manual en pantalla y en un celular (plancha y bote en segundos, el resto en repeticiones);
-  - la ejecución de `generador_embeddings.py`;
   - la revisión de los ejercicios y las dosis de Core por un Personal Trainer.

@@ -1,0 +1,64 @@
+Etapa 9a-1 - evidencia: embeddings de los ejercicios de Core (generador_embeddings.py)
+Commit del codigo: 2fd5e38e2ff495620ee0b855b8b1805371e68863
+Fecha: 2026-11-17 21:45:15 -03:00
+Codigo de salida de las consultas: 0 / 0
+Base: gymbro-db (base local). Modelo: nomic-embed-text en Ollama local (http://localhost:11434).
+
+Pasos:
+1. Arranque de la API (dotnet run --project GymBro.Api): CatalogoProyectoSeeder informo
+   "[OK] Catalogo del proyecto: 8 ejercicios y 2 dosificaciones de Core agregados."
+2. El autor ejecuto GymBro.IA/generador_embeddings.py en su terminal, con POSTGRES_PASSWORD definida solo para esa
+   ejecucion (la contrasena no paso por Claude Code ni figura en esta evidencia). Primer intento: el script termino con
+   "Faltan variables de entorno: POSTGRES_PASSWORD" porque la variable se borro antes de ejecutarlo; segundo intento: correcto.
+3. Verificacion por docker exec psql (sin contrasena) y registro de Ollama.
+------------------------------------------------------------
+Consultas de verificacion:
+  origen  | total | sin_embedding 
+----------+-------+---------------
+ Dataset  |   688 |             0
+ Proyecto |     8 |             0
+(2 rows)
+
+           nombre           | tipo_medida  | dims | norma  
+----------------------------+--------------+------+--------
+ Bicicleta (cross bicycles) | Repeticiones |  768 | 18.832
+ Bote (boat)                | Segundos     |  768 | 18.544
+ Crunch abdominal           | Repeticiones |  768 | 19.521
+ Crunch en polea            | Repeticiones |  768 | 19.294
+ Elevación de piernas       | Repeticiones |  768 | 19.301
+ Mountain climber           | Repeticiones |  768 | 18.650
+ Plancha                    | Segundos     |  768 | 18.533
+ Tijera de piernas          | Repeticiones |  768 | 19.021
+(8 rows)
+
+ parte_cuerpo | subzona_objetivo | zona_objetivo | tipo_medida  | series_minimas | series_maximas | repeticiones_minimas | repeticiones_maximas 
+--------------+------------------+---------------+--------------+----------------+----------------+----------------------+----------------------
+ Core         | General          | Core          | Repeticiones |              3 |              4 |                   10 |                   15
+ Core         | General          | Core          | Segundos     |              2 |              3 |                   20 |                   40
+(2 rows)
+------------------------------------------------------------
+Solicitudes de embeddings registradas por Ollama (formato GIN). Las 8 de 21:42:38 a 21:42:53 son del script (una por ejercicio);
+la de 21:44:32 es la primera busqueda de control de Claude Code (la de este archivo es posterior y no se lista):
+2026/11/17 - 21:42:38 | 200 |    652.1156ms |       127.0.0.1 | POST     "/api/embeddings"
+2026/11/17 - 21:42:41 | 200 |     87.6561ms |       127.0.0.1 | POST     "/api/embeddings"
+2026/11/17 - 21:42:43 | 200 |     81.1949ms |       127.0.0.1 | POST     "/api/embeddings"
+2026/11/17 - 21:42:45 | 200 |     87.3409ms |       127.0.0.1 | POST     "/api/embeddings"
+2026/11/17 - 21:42:47 | 200 |    103.0821ms |       127.0.0.1 | POST     "/api/embeddings"
+2026/11/17 - 21:42:49 | 200 |     84.2308ms |       127.0.0.1 | POST     "/api/embeddings"
+2026/11/17 - 21:42:51 | 200 |    111.8725ms |       127.0.0.1 | POST     "/api/embeddings"
+2026/11/17 - 21:42:53 | 200 |     72.7807ms |       127.0.0.1 | POST     "/api/embeddings"
+2026/11/17 - 21:44:32 | 200 |     31.3185ms |       127.0.0.1 | POST     "/api/embeddings"
+------------------------------------------------------------
+Busqueda semantica de control (consulta suelta por SQL, no por el endpoint ni una evaluacion de calidad):
+Consulta: "ejercicio para fortalecer los abdominales en el suelo" -> vector de Ollama -> orden por distancia coseno (<=>).
+          nombre          | zona_objetivo |  origen  | distancia 
+--------------------------+---------------+----------+-----------
+ Crunch abdominal         | Core          | Proyecto |    0.2275
+ Plancha                  | Core          | Proyecto |    0.2327
+ Bote (boat)              | Core          | Proyecto |    0.2627
+ Crunch en polea          | Core          | Proyecto |    0.2677
+ Tijera de piernas        | Core          | Proyecto |    0.2678
+ Elevación de piernas     | Core          | Proyecto |    0.2759
+ Seated Groin             | Movilidad     | Dataset  |    0.3041
+ Seated Groin:  Apparatus | Movilidad     | Dataset  |    0.3098
+(8 rows)

@@ -1,0 +1,45 @@
+Etapa 9a-2b - SQL de la migracion Etapa9a2b_AdminCatalogo (generado con dotnet ef migrations script, sin conexion a ninguna base)
+Commit: 3dd168320a2c3fbbbd4a6d1268f9395b9a32f7dc (rama etapa9a2b; generado despues del commit, sobre ese commit)
+Fecha: 2026-11-19 14:02:36 -0300
+Codigos de salida: Up=0 Down=0
+Base local gymbro-db: la migracion NO se aplico (sin autorizacion del autor). Se aplica al levantar GymBro.Api (Program.cs: MigrateAsync).
+Verificacion de Up y Down contra PostgreSQL descartable: MigracionAdminCatalogoTests (ver etapa9a2b-dotnet-test.txt).
+============================== UP (Etapa9a2_CatalogoGimnasio -> Etapa9a2b_AdminCatalogo) ==============================
+﻿START TRANSACTION;
+ALTER TABLE socios ADD estado character varying(20) NOT NULL DEFAULT 'Activo';
+
+ALTER TABLE ejercicios ADD activo boolean NOT NULL DEFAULT TRUE;
+
+ALTER TABLE ejercicios ADD creado_por_usuario_id uuid;
+
+ALTER TABLE socios ADD CONSTRAINT "CK_Socio_Estado" CHECK (estado IN ('Activo', 'Inactivo'));
+
+CREATE INDEX ix_ejercicios_creado_por_usuario_id ON ejercicios (creado_por_usuario_id);
+
+ALTER TABLE ejercicios ADD CONSTRAINT fk_ejercicios_usuarios_creado_por_usuario_id FOREIGN KEY (creado_por_usuario_id) REFERENCES usuarios (id) ON DELETE RESTRICT;
+
+INSERT INTO "__EFMigrationsHistory" (migration_id, product_version)
+VALUES ('20261119122415_Etapa9a2b_AdminCatalogo', '10.0.11');
+
+COMMIT;
+
+
+============================== DOWN (Etapa9a2b_AdminCatalogo -> Etapa9a2_CatalogoGimnasio) ==============================
+﻿START TRANSACTION;
+ALTER TABLE ejercicios DROP CONSTRAINT fk_ejercicios_usuarios_creado_por_usuario_id;
+
+ALTER TABLE socios DROP CONSTRAINT "CK_Socio_Estado";
+
+DROP INDEX ix_ejercicios_creado_por_usuario_id;
+
+ALTER TABLE socios DROP COLUMN estado;
+
+ALTER TABLE ejercicios DROP COLUMN activo;
+
+ALTER TABLE ejercicios DROP COLUMN creado_por_usuario_id;
+
+DELETE FROM "__EFMigrationsHistory"
+WHERE migration_id = '20261119122415_Etapa9a2b_AdminCatalogo';
+
+COMMIT;
+

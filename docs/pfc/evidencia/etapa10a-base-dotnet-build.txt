@@ -1,0 +1,26 @@
+Etapa 10a - linea base sobre main
+Comando: dotnet build GymBro.slnx --no-incremental
+Commit: 5503cb1566b0aa325a2456475060a2755d68c6b4 (main, arbol sin cambios en archivos versionados; rama etapa10a recien creada)
+Fecha: 2026-11-19 14:44:55 -0300
+Codigo de salida: 0
+------------------------------------------------------------
+  Determinando los proyectos que se van a restaurar...
+  Todos los proyectos están actualizados para la restauración.
+  WorkingDirectory: C:\Users\miguel\source\repos\GymBro\GymBro.Web
+  ProcessStartInfo.WorkingDirectory: C:\Users\miguel\source\repos\GymBro\GymBro.Web\
+CSC : warning CS2008: No se especificaron archivos de código fuente. [C:\Users\miguel\source\repos\GymBro\GymBro.IA\GymBro.IA.csproj]
+  GymBro.IA -> C:\Users\miguel\source\repos\GymBro\GymBro.IA\bin\Debug\net10.0\GymBro.IA.dll
+  GymBro.Domain -> C:\Users\miguel\source\repos\GymBro\GymBro.Domain\bin\Debug\net10.0\GymBro.Domain.dll
+  GymBro.Application -> C:\Users\miguel\source\repos\GymBro\GymBro.Application\bin\Debug\net10.0\GymBro.Application.dll
+  GymBro.Tests -> C:\Users\miguel\source\repos\GymBro\GymBro.Tests\bin\Debug\net10.0\GymBro.Tests.dll
+  GymBro.Infrastructure -> C:\Users\miguel\source\repos\GymBro\GymBro.Infrastructure\bin\Debug\net10.0\GymBro.Infrastructure.dll
+  GymBro.Api -> C:\Users\miguel\source\repos\GymBro\GymBro.Api\bin\Debug\net10.0\GymBro.Api.dll
+  GymBro.Tests.Integration -> C:\Users\miguel\source\repos\GymBro\GymBro.Tests.Integration\bin\Debug\net10.0\GymBro.Tests.Integration.dll
+
+Compilación correcta.
+
+CSC : warning CS2008: No se especificaron archivos de código fuente. [C:\Users\miguel\source\repos\GymBro\GymBro.IA\GymBro.IA.csproj]
+    1 Advertencia(s)
+    0 Errores
+
+Tiempo transcurrido 00:00:11.64

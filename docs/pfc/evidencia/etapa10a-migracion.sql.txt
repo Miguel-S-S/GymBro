@@ -1,0 +1,63 @@
+Etapa 10a - SQL de la migracion Etapa10a_ReglasSeguridad (dotnet ef migrations script, sin conexion a ninguna base)
+Commit: 7ac55c2af262abc0f5ccbf8c65376fa29cf09c0b (rama etapa10a; generado despues del commit, sobre ese commit)
+Fecha: 2026-11-19 15:35:53 -0300
+Codigos de salida: Up=0 Down=0
+Base local gymbro-db: no se aplico desde Claude Code. Se aplica al levantar GymBro.Api (Program.cs: MigrateAsync).
+Verificacion de Up y Down contra PostgreSQL descartable: MigracionReglasSeguridadTests (ver etapa10a-dotnet-test.txt).
+============================== UP ==============================
+﻿START TRANSACTION;
+ALTER TABLE revisiones_prescripcion ADD violaciones_limites jsonb;
+
+CREATE TABLE alertas_seguridad (
+    id uuid NOT NULL,
+    socio_id uuid NOT NULL,
+    gimnasio_id uuid,
+    sesion_id uuid,
+    sesion_ejercicio_id uuid,
+    registro_bienestar_id uuid,
+    regla_codigo character varying(20) NOT NULL,
+    clave_origen character varying(64) NOT NULL,
+    tipo character varying(20) NOT NULL,
+    severidad character varying(20) NOT NULL,
+    mensaje character varying(300) NOT NULL,
+    detalle jsonb NOT NULL,
+    estado character varying(20) NOT NULL,
+    vista_por_usuario_id uuid,
+    vista_en timestamp with time zone,
+    fecha_alta timestamp with time zone NOT NULL,
+    usuario_alta integer NOT NULL,
+    fecha_modificacion timestamp with time zone,
+    usuario_modificacion integer,
+    fecha_baja timestamp with time zone,
+    usuario_baja integer,
+    CONSTRAINT pk_alertas_seguridad PRIMARY KEY (id),
+    CONSTRAINT "CK_AlertaSeguridad_Estado" CHECK (estado IN ('Pendiente', 'Vista')),
+    CONSTRAINT "CK_AlertaSeguridad_ReglaCodigo" CHECK (regla_codigo IN ('R-RIR-1', 'R-PROG-1', 'R-FC-1')),
+    CONSTRAINT "CK_AlertaSeguridad_Severidad" CHECK (severidad IN ('Informativa', 'Advertencia')),
+    CONSTRAINT "CK_AlertaSeguridad_Tipo" CHECK (tipo IN ('Alerta', 'Sugerencia')),
+    CONSTRAINT fk_alertas_seguridad_socios_socio_id FOREIGN KEY (socio_id) REFERENCES socios (id) ON DELETE RESTRICT
+);
+
+CREATE INDEX ix_alertas_seguridad_registro_bienestar_id ON alertas_seguridad (registro_bienestar_id);
+
+CREATE INDEX ix_alertas_seguridad_sesion_id ON alertas_seguridad (sesion_id);
+
+CREATE UNIQUE INDEX ix_alertas_seguridad_socio_id_regla_codigo_clave_origen ON alertas_seguridad (socio_id, regla_codigo, clave_origen);
+
+INSERT INTO "__EFMigrationsHistory" (migration_id, product_version)
+VALUES ('20261119181539_Etapa10a_ReglasSeguridad', '10.0.11');
+
+COMMIT;
+
+
+============================== DOWN ==============================
+﻿START TRANSACTION;
+DROP TABLE alertas_seguridad;
+
+ALTER TABLE revisiones_prescripcion DROP COLUMN violaciones_limites;
+
+DELETE FROM "__EFMigrationsHistory"
+WHERE migration_id = '20261119181539_Etapa10a_ReglasSeguridad';
+
+COMMIT;
+

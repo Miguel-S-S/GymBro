@@ -1,0 +1,14 @@
+Etapa 10a (reglas deterministas de seguridad) - evidencia
+Comando: dotnet test GymBro.slnx --no-build
+Commit: 7ac55c2af262abc0f5ccbf8c65376fa29cf09c0b (rama etapa10a; evidencia generada despues del commit, sobre ese commit)
+Fecha: 2026-11-19 15:34:00 -0300
+Codigo de salida: 0
+------------------------------------------------------------
+Serie de pruebas para C:\Users\miguel\source\repos\GymBro\GymBro.Tests\bin\Debug\net10.0\GymBro.Tests.dll (.NETCoreApp,Version=v10.0)
+Serie de pruebas para C:\Users\miguel\source\repos\GymBro\GymBro.Tests.Integration\bin\Debug\net10.0\GymBro.Tests.Integration.dll (.NETCoreApp,Version=v10.0)
+1 archivos de prueba en total coincidieron con el patrón especificado.1 archivos de prueba en total coincidieron con el patrón especificado.
+
+
+Correctas! - Con error:     0, Superado:   250, Omitido:     0, Total:   250, Duración: 230 ms - GymBro.Tests.dll (net10.0)
+
+Correctas! - Con error:     0, Superado:   391, Omitido:     0, Total:   391, Duración: 15 s - GymBro.Tests.Integration.dll (net10.0)

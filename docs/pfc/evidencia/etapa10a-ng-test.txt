@@ -1,0 +1,19 @@
+Etapa 10a (reglas deterministas de seguridad) - evidencia
+Comando: npx ng test --watch=false
+Commit: 7ac55c2af262abc0f5ccbf8c65376fa29cf09c0b (rama etapa10a; evidencia generada despues del commit, sobre ese commit)
+Fecha: 2026-11-19 15:34:20 -0300
+Codigo de salida: 0
+------------------------------------------------------------
+❯ Building...
+✔ Building...
+Application bundle generation complete. [3.919 seconds] - 2026-11-19T18:34:13.327Z
+
+
+[1m[30m[46m RUN [49m[39m[22m [36mv5.1.0 [39m[90mC:/Users/miguel/source/repos/GymBro/GymBro.Web[39m
+
+
+[2m Test Files [22m [1m[32m30 passed[39m[22m[90m (30)[39m
+[2m      Tests [22m [1m[32m191 passed[39m[22m[90m (191)[39m
+[2m   Start at [22m 15:34:13
+[2m   Duration [22m 7.18s[2m (environment 72%, tests 11%, import 8%, setup 7%, transform 2%)[22m
+

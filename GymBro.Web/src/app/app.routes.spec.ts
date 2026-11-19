@@ -117,6 +117,19 @@ describe('rutas por rol (Etapa 8c, T2)', () => {
       expect(navegar(ruta)).toBe(true);
     });
 
+  // Etapa 9a-2c (D1): Vinculaciones y Mi gimnasio, para el Dueño y el Administrador de la Plataforma.
+  it.each<Rol>(['AdministradorGimnasio', 'SuperAdministrador'])('%s abre /gimnasio/vinculaciones y /gimnasio/configuracion', (rol) => {
+    guardar(rol);
+    expect(navegar('gimnasio/vinculaciones')).toBe(true);
+    expect(navegar('gimnasio/configuracion')).toBe(true);
+  });
+
+  it.each<Rol>(['Entrenador', 'Socio'])('%s no abre /gimnasio/vinculaciones ni /gimnasio/configuracion', (rol) => {
+    guardar(rol);
+    expect(navegar('gimnasio/vinculaciones')).not.toBe(true);
+    expect(navegar('gimnasio/configuracion')).not.toBe(true);
+  });
+
   it('un Socio que abre /gimnasio/equipamiento es redirigido a /mi', () => {
     guardar('Socio');
     expect(navegar('gimnasio/equipamiento')).toBe('/mi');

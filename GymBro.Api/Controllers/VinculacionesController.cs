@@ -10,6 +10,8 @@ namespace GymBro.Api.Controllers
     [Route("api/vinculaciones")]
     public class VinculacionesController : ControllerBase
     {
+        private const string Gestores = Roles.SuperAdministrador + "," + Roles.AdministradorGimnasio;
+
         private readonly IVinculacionService _vinculaciones;
         public VinculacionesController(IVinculacionService vinculaciones) { _vinculaciones = vinculaciones; }
 
@@ -23,13 +25,18 @@ StatusCode(StatusCodes.Status201Created, await _vinculaciones.SolicitarAsync(req
         [Authorize(Roles = Roles.Socio)]
         public async Task<IActionResult> Mias() => Ok(await _vinculaciones.ListarMisSolicitudesAsync());
 
+        /// <summary>
+        /// Etapa 9a-2c (D1): también el Administrador de la Plataforma, indicando gimnasioId (sin él, 400). El Dueño opera
+        /// sobre su gimnasio; un gimnasioId ajeno responde 404. Las solicitudes no contienen datos de salud.
+        /// </summary>
         [HttpGet("pendientes")]
-        [Authorize(Roles = Roles.AdministradorGimnasio)]
-        public async Task<IActionResult> Pendientes() => Ok(await _vinculaciones.ListarPendientesAsync());
+        [Authorize(Roles = Gestores)]
+        public async Task<IActionResult> Pendientes([FromQuery] Guid? gimnasioId) => Ok(await _vinculaciones.ListarPendientesAsync(gimnasioId));
 
+        /// <summary>Etapa 9a-2c (D1): aprobar o rechazar; el Administrador de la Plataforma indica gimnasioId en el cuerpo.</summary>
         [HttpPost("{id:guid}/resolver")]
-        [Authorize(Roles = Roles.AdministradorGimnasio)]
+        [Authorize(Roles = Gestores)]
         public async Task<IActionResult> Resolver(Guid id, [FromBody] ResolverSolicitudRequest request) =>
-Ok(await _vinculaciones.ResolverAsync(id, request.Aprobar, request.Motivo));
+            Ok(await _vinculaciones.ResolverAsync(id, request.Aprobar, request.Motivo, request.GimnasioId));
     }
 }

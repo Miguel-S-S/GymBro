@@ -31,10 +31,11 @@ namespace GymBro.Tests.Integration
         private const string AttrSesiones = "SesionesController: [Authorize(AdministradorGimnasio,Entrenador,Socio)]";
         private const string AttrMedicion = "MedicionController: [Authorize(AdministradorGimnasio,Entrenador,Socio)]";
         private const string AttrVincSocio = "VinculacionesController: [Authorize(Roles = Socio)]";
-        private const string AttrVincDueno = "VinculacionesController: [Authorize(Roles = AdministradorGimnasio)]";
+        private const string AttrVincDueno = "VinculacionesController: [Authorize(SuperAdministrador,AdministradorGimnasio)] en la acción (Etapa 9a-2c)";
         private const string AttrPersonal = "PersonalController: [Authorize(Roles = AdministradorGimnasio)]";
         private const string AttrGimnasios = "GimnasiosController: [Authorize(Roles = SuperAdministrador)]";
-        private const string AttrMiGimnasio = "MiGimnasioController: [Authorize(Roles = AdministradorGimnasio)]";
+        private const string AttrMiGimnasio = "MiGimnasioController: [Authorize(SuperAdministrador,AdministradorGimnasio)] (Etapa 9a-2c)";
+        private const string OtroGimnasio = "GimnasioDestino: gimnasioId ajeno al Dueño -> RecursoNoEncontrado (404)";
         private const string AttrAuditoria = "AuditoriaController: [Authorize(Roles = SuperAdministrador)]";
         private const string Fallback = "Program.cs: FallbackPolicy RequireAuthenticatedUser / JwtBearer";
         private const string AccesoSocio = "SocioAccessService.AsegurarAccesoAsync";
@@ -109,9 +110,13 @@ namespace GymBro.Tests.Integration
             Fila("GET", "/api/vinculaciones/mias", AttrVincSocio,
                 (Anonimo, 401, Fallback), (SuperAdmin, 403, null), (Dueno, 403, null), (Trainer, 403, null), (Socio, 200, null));
             Fila("POST", "/api/vinculaciones", AttrVincSocio, (Anonimo, 401, Fallback), (SuperAdmin, 403, null), (Dueno, 403, null), (Trainer, 403, null));
+            // Etapa 9a-2c (D1): el Administrador de la Plataforma gestiona las vinculaciones del gimnasio que indica.
             Fila("GET", "/api/vinculaciones/pendientes", AttrVincDueno,
-                (Anonimo, 401, Fallback), (SuperAdmin, 403, null), (Dueno, 200, null), (Trainer, 403, null), (Socio, 403, null));
-            Fila("POST", "/api/vinculaciones/{X}/resolver", AttrVincDueno, (Anonimo, 401, Fallback), (SuperAdmin, 403, null), (Trainer, 403, null), (Socio, 403, null));
+                (Anonimo, 401, Fallback), (SuperAdmin, 400, SinGimnasio), (Dueno, 200, null), (Trainer, 403, null), (Socio, 403, null));
+            Fila("GET", "/api/vinculaciones/pendientes?gimnasioId={G1}", AttrVincDueno, (SuperAdmin, 200, null), (Dueno, 200, null));
+            Fila("GET", "/api/vinculaciones/pendientes?gimnasioId={G2}", OtroGimnasio, (SuperAdmin, 200, AttrVincDueno), (Dueno, 404, null));
+            Fila("POST", "/api/vinculaciones/{X}/resolver", AttrVincDueno, (Anonimo, 401, Fallback), (SuperAdmin, 400, SinGimnasio),
+                (Dueno, 404, "VinculacionService: solicitud inexistente -> RecursoNoEncontrado"), (Trainer, 403, null), (Socio, 403, null));
 
             // ---- Personal ----
             Fila("GET", "/api/personal/entrenadores", AttrPersonal,
@@ -124,9 +129,11 @@ namespace GymBro.Tests.Integration
                 (Anonimo, 401, Fallback), (SuperAdmin, 200, null), (Dueno, 403, null), (Trainer, 403, null), (Socio, 403, null));
             Fila("POST", "/api/gimnasios", AttrGimnasios, (Anonimo, 401, Fallback), (Dueno, 403, null), (Trainer, 403, null), (Socio, 403, null));
             Fila("PUT", "/api/gimnasios/{X}/estado", AttrGimnasios, (Anonimo, 401, Fallback), (Dueno, 403, null), (Trainer, 403, null), (Socio, 403, null));
+            // Etapa 9a-2c (D1): el Administrador de la Plataforma lee y cambia la política del gimnasio que indica.
             Fila("GET", "/api/mi-gimnasio", AttrMiGimnasio,
-                (Anonimo, 401, Fallback), (SuperAdmin, 403, null), (Dueno, 200, null), (Trainer, 403, null), (Socio, 403, null));
-            Fila("PUT", "/api/mi-gimnasio/politica-revision", AttrMiGimnasio, (Anonimo, 401, Fallback), (SuperAdmin, 403, null), (Trainer, 403, null), (Socio, 403, null));
+                (Anonimo, 401, Fallback), (SuperAdmin, 400, SinGimnasio), (Dueno, 200, null), (Trainer, 403, null), (Socio, 403, null));
+            Fila("GET", "/api/mi-gimnasio?gimnasioId={G2}", OtroGimnasio, (SuperAdmin, 200, AttrMiGimnasio), (Dueno, 404, null));
+            Fila("PUT", "/api/mi-gimnasio/politica-revision", AttrMiGimnasio, (Anonimo, 401, Fallback), (SuperAdmin, 400, SinGimnasio), (Trainer, 403, null), (Socio, 403, null));
 
             // ---- Catálogo de ejercicios (sin datos de salud; T8: también para el Administrador de la Plataforma) ----
             Fila("GET", "/api/Ejercicios", "EjerciciosController: sin [Authorize] propio -> FallbackPolicy (usuario autenticado)",

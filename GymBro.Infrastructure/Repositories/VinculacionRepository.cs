@@ -19,6 +19,15 @@ namespace GymBro.Infrastructure.Repositories
                 .Where(s => s.GimnasioId == gimnasioId && s.Estado == EstadoSolicitudVinculacion.Pendiente)
                 .OrderBy(s => s.FechaAlta).ToListAsync();
 
+        public async Task<IEnumerable<SolicitudVinculacion>> GetPendientesDeGimnasioExplicitoAsync(Guid gimnasioId) =>
+            await _context.SolicitudesVinculacion.IgnoreQueryFilters().AsNoTracking()
+                .Where(s => s.FechaBaja == null && s.GimnasioId == gimnasioId && s.Estado == EstadoSolicitudVinculacion.Pendiente)
+                .OrderBy(s => s.FechaAlta).ToListAsync();
+
+        public Task<SolicitudVinculacion?> GetEnGimnasioExplicitoAsync(Guid id, Guid gimnasioId) =>
+            _context.SolicitudesVinculacion.IgnoreQueryFilters()
+                .FirstOrDefaultAsync(s => s.Id == id && s.FechaBaja == null && s.GimnasioId == gimnasioId);
+
         public async Task<IEnumerable<SolicitudVinculacion>> GetDeSocioAsync(Guid socioId) =>
             await _context.SolicitudesVinculacion.AsNoTracking()
                 .Where(s => s.SocioId == socioId).OrderByDescending(s => s.FechaAlta).ToListAsync();

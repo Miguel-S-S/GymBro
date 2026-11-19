@@ -11,8 +11,9 @@ namespace GymBro.Application.Services
     {
         Task<GimnasioResponseDto> CrearAsync(GimnasioCreateDto dto);
         Task<IEnumerable<GimnasioResponseDto>> ListarAsync();
-        Task<GimnasioResponseDto> ObtenerPropioAsync();
-        Task<GimnasioResponseDto> ActualizarPoliticaRevisionAsync(bool requiereAprobacion);
+        /// <summary>Etapa 9a-2c: el Administrador de la Plataforma indica el gimnasio; el Dueño opera sobre el suyo.</summary>
+        Task<GimnasioResponseDto> ObtenerPropioAsync(Guid? gimnasioId = null);
+        Task<GimnasioResponseDto> ActualizarPoliticaRevisionAsync(bool requiereAprobacion, Guid? gimnasioId = null);
         /// <summary>Habilita o deshabilita una institución (solo SuperAdministrador). Un gimnasio deshabilitado no permite iniciar sesión a su personal.</summary>
         Task<GimnasioResponseDto> CambiarEstadoAsync(Guid id, bool activo);
     }
@@ -70,20 +71,20 @@ namespace GymBro.Application.Services
         public async Task<IEnumerable<GimnasioResponseDto>> ListarAsync() =>
             (await _gimnasios.GetAllAsync()).Select(Mapear);
 
-        public async Task<GimnasioResponseDto> ObtenerPropioAsync()
+        public async Task<GimnasioResponseDto> ObtenerPropioAsync(Guid? gimnasioId = null)
         {
-            var gimnasio = await _gimnasios.GetByIdAsync(GimnasioActual());
+            var gimnasio = await _gimnasios.GetByIdAsync(await GimnasioDestino.ResolverAsync(_actual, _gimnasios, gimnasioId));
             return Mapear(gimnasio ?? throw new RecursoNoEncontradoException("Gimnasio no encontrado."));
         }
 
-        public async Task<GimnasioResponseDto> ActualizarPoliticaRevisionAsync(bool requiereAprobacion)
+        public async Task<GimnasioResponseDto> ActualizarPoliticaRevisionAsync(bool requiereAprobacion, Guid? gimnasioId = null)
         {
-            var gimnasio = await _gimnasios.GetByIdAsync(GimnasioActual())
+            var gimnasio = await _gimnasios.GetByIdAsync(await GimnasioDestino.ResolverAsync(_actual, _gimnasios, gimnasioId))
                 ?? throw new RecursoNoEncontradoException("Gimnasio no encontrado.");
             gimnasio.RequiereAprobacionRutinas = requiereAprobacion;
             gimnasio.FechaModificacion = DateTime.UtcNow;
             await _gimnasios.SaveChangesAsync();
-            await _audit.RegistrarAsync("POLITICA_REVISION", nameof(Gimnasio), gimnasio.Id.ToString(), $"RequiereAprobacion={requiereAprobacion}");
+            await _audit.RegistrarEnGimnasioAsync("POLITICA_REVISION", nameof(Gimnasio), gimnasio.Id.ToString(), gimnasio.Id, $"RequiereAprobacion={requiereAprobacion}");
             return Mapear(gimnasio);
         }
 
@@ -97,9 +98,6 @@ namespace GymBro.Application.Services
             await _audit.RegistrarAsync(activo ? "ACTIVAR_GIMNASIO" : "DESACTIVAR_GIMNASIO", nameof(Gimnasio), gimnasio.Id.ToString(), gimnasio.Nombre);
             return Mapear(gimnasio);
         }
-
-        private Guid GimnasioActual() =>
-            _actual.GimnasioId ?? throw new AccesoDenegadoException("El usuario no pertenece a un gimnasio.");
 
         private async Task<string> GenerarCodigoAsync()
         {

@@ -68,7 +68,8 @@
         public DateTime FechaAlta { get; set; }
     }
 
-    public record PoliticaRevisionRequest(bool RequiereAprobacionRutinas);
+    /// <summary>Etapa 9a-2c: GimnasioId lo indica solo el Administrador de la Plataforma; el Dueño usa el de su sesión.</summary>
+    public record PoliticaRevisionRequest(bool RequiereAprobacionRutinas, Guid? GimnasioId = null);
 
     public record EstadoGimnasioRequest(bool Activo);
 
@@ -103,7 +104,8 @@
         public string? Motivo { get; set; }
     }
 
-    public record ResolverSolicitudRequest(bool Aprobar, string? Motivo);
+    /// <summary>Etapa 9a-2c: GimnasioId lo indica solo el Administrador de la Plataforma; el Dueño usa el de su sesión.</summary>
+    public record ResolverSolicitudRequest(bool Aprobar, string? Motivo, Guid? GimnasioId = null);
 
     public class RutinaPendienteDto
     {

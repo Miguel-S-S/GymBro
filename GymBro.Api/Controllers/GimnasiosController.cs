@@ -26,20 +26,23 @@ namespace GymBro.Api.Controllers
             Ok(await _gimnasios.CambiarEstadoAsync(id, request.Activo));
     }
 
-    /// <summary>Configuración del propio gimnasio: Dueño de Gimnasio.</summary>
+    /// <summary>
+    /// Configuración del propio gimnasio: Dueño de Gimnasio. Etapa 9a-2c (D1): también el Administrador de la Plataforma,
+    /// indicando gimnasioId (sin él, 400); un gimnasioId ajeno al Dueño responde 404.
+    /// </summary>
     [ApiController]
     [Route("api/mi-gimnasio")]
-    [Authorize(Roles = Roles.AdministradorGimnasio)]
+    [Authorize(Roles = Roles.SuperAdministrador + "," + Roles.AdministradorGimnasio)]
     public class MiGimnasioController : ControllerBase
     {
         private readonly IGimnasioService _gimnasios;
         public MiGimnasioController(IGimnasioService gimnasios) { _gimnasios = gimnasios; }
 
         [HttpGet]
-        public async Task<IActionResult> Get() => Ok(await _gimnasios.ObtenerPropioAsync());
+        public async Task<IActionResult> Get([FromQuery] Guid? gimnasioId) => Ok(await _gimnasios.ObtenerPropioAsync(gimnasioId));
 
         /// <summary>Activa/desactiva la revisión humana obligatoria de las rutinas generadas por la IA.</summary>
         [HttpPut("politica-revision")]
-        public async Task<IActionResult> PutPolitica([FromBody] PoliticaRevisionRequest request) => Ok(await _gimnasios.ActualizarPoliticaRevisionAsync(request.RequiereAprobacionRutinas));
+        public async Task<IActionResult> PutPolitica([FromBody] PoliticaRevisionRequest request) => Ok(await _gimnasios.ActualizarPoliticaRevisionAsync(request.RequiereAprobacionRutinas, request.GimnasioId));
     }
 }

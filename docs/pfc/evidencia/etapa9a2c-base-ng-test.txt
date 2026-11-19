@@ -1,0 +1,19 @@
+Etapa 9a-2c - linea base sobre main
+Comando: npx ng test --watch=false
+Commit: cfef78c8237596199fd40b19c7f33f3a1580b56c (main, arbol sin cambios en archivos versionados; rama etapa9a2c recien creada)
+Fecha: 2026-11-19 17:36:23 -0300
+Codigo de salida: 0
+------------------------------------------------------------
+❯ Building...
+✔ Building...
+Application bundle generation complete. [5.217 seconds] - 2026-11-19T20:36:31.149Z
+
+
+[1m[30m[46m RUN [49m[39m[22m [36mv5.1.0 [39m[90mC:/Users/miguel/source/repos/GymBro/GymBro.Web[39m
+
+
+[2m Test Files [22m [1m[32m30 passed[39m[22m[90m (30)[39m
+[2m      Tests [22m [1m[32m191 passed[39m[22m[90m (191)[39m
+[2m   Start at [22m 17:36:31
+[2m   Duration [22m 7.32s[2m (environment 72%, tests 11%, import 8%, setup 6%, transform 3%)[22m
+

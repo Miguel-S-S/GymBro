@@ -1,0 +1,14 @@
+Etapa 9a-2c - linea base sobre main
+Comando: dotnet test GymBro.slnx --no-build
+Commit: cfef78c8237596199fd40b19c7f33f3a1580b56c (main, arbol sin cambios en archivos versionados; rama etapa9a2c recien creada)
+Fecha: 2026-11-19 17:35:28 -0300
+Codigo de salida: 0
+------------------------------------------------------------
+Serie de pruebas para C:\Users\miguel\source\repos\GymBro\GymBro.Tests.Integration\bin\Debug\net10.0\GymBro.Tests.Integration.dll (.NETCoreApp,Version=v10.0)
+Serie de pruebas para C:\Users\miguel\source\repos\GymBro\GymBro.Tests\bin\Debug\net10.0\GymBro.Tests.dll (.NETCoreApp,Version=v10.0)
+1 archivos de prueba en total coincidieron con el patrón especificado.
+1 archivos de prueba en total coincidieron con el patrón especificado.
+
+Correctas! - Con error:     0, Superado:   250, Omitido:     0, Total:   250, Duración: 270 ms - GymBro.Tests.dll (net10.0)
+
+Correctas! - Con error:     0, Superado:   391, Omitido:     0, Total:   391, Duración: 21 s - GymBro.Tests.Integration.dll (net10.0)

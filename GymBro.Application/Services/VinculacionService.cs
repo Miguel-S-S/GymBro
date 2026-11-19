@@ -1,5 +1,6 @@
 ﻿using GymBro.Application.DTOs.Acceso;
 using GymBro.Domain.Entities;
+using GymBro.Domain.Enums;
 using GymBro.Domain.Exceptions;
 using GymBro.Domain.Repositories;
 using GymBro.Domain.Security;
@@ -10,8 +11,9 @@ namespace GymBro.Application.Services
     {
         Task<SolicitudVinculacionDto> SolicitarAsync(string codigoGimnasio);
         Task<IEnumerable<SolicitudVinculacionDto>> ListarMisSolicitudesAsync();
-        Task<IEnumerable<SolicitudVinculacionDto>> ListarPendientesAsync();
-        Task<SolicitudVinculacionDto> ResolverAsync(Guid solicitudId, bool aprobar, string? motivo);
+        /// <summary>Etapa 9a-2c: el Administrador de la Plataforma indica el gimnasio; el Dueño opera sobre el suyo.</summary>
+        Task<IEnumerable<SolicitudVinculacionDto>> ListarPendientesAsync(Guid? gimnasioId = null);
+        Task<SolicitudVinculacionDto> ResolverAsync(Guid solicitudId, bool aprobar, string? motivo, Guid? gimnasioId = null);
     }
 
     /// <summary>Vinculación socio–gimnasio con validación cruzada por DNI (Anexo II, objetivo específico 2).</summary>
@@ -67,18 +69,23 @@ namespace GymBro.Application.Services
             return (await _solicitudes.GetDeSocioAsync(socioId)).Select(Mapear);
         }
 
-        public async Task<IEnumerable<SolicitudVinculacionDto>> ListarPendientesAsync()
+        public async Task<IEnumerable<SolicitudVinculacionDto>> ListarPendientesAsync(Guid? gimnasioId = null)
         {
-            var gimnasioId = _actual.GimnasioId ?? throw new AccesoDenegadoException();
-            return (await _solicitudes.GetPendientesDeGimnasioAsync(gimnasioId)).Select(Mapear);
+            var destino = await GimnasioDestino.ResolverAsync(_actual, _gimnasios, gimnasioId);
+            var lista = EsPlataforma
+                ? await _solicitudes.GetPendientesDeGimnasioExplicitoAsync(destino)
+                : await _solicitudes.GetPendientesDeGimnasioAsync(destino);
+            return lista.Select(Mapear);
         }
 
-        public async Task<SolicitudVinculacionDto> ResolverAsync(Guid solicitudId, bool aprobar, string? motivo)
+        public async Task<SolicitudVinculacionDto> ResolverAsync(Guid solicitudId, bool aprobar, string? motivo, Guid? gimnasioIndicado = null)
         {
-            var gimnasioId = _actual.GimnasioId ?? throw new AccesoDenegadoException();
+            var gimnasioId = await GimnasioDestino.ResolverAsync(_actual, _gimnasios, gimnasioIndicado);
             var usuarioId = _actual.UsuarioId ?? throw new AccesoDenegadoException();
 
-            var solicitud = await _solicitudes.GetByIdAsync(solicitudId);
+            var solicitud = EsPlataforma
+                ? await _solicitudes.GetEnGimnasioExplicitoAsync(solicitudId, gimnasioId)
+                : await _solicitudes.GetByIdAsync(solicitudId);
             if (solicitud is null || solicitud.GimnasioId != gimnasioId)
                 throw new RecursoNoEncontradoException("Solicitud no encontrada.");
 
@@ -99,10 +106,12 @@ namespace GymBro.Application.Services
 
             solicitud.Resolver(aprobar, usuarioId, motivo);
             await _solicitudes.SaveChangesAsync(); // misma unidad de trabajo: socio  solicitud
-            await _audit.RegistrarAsync(aprobar ? "VINCULACION_APROBADA" : "VINCULACION_RECHAZADA",
-                nameof(SolicitudVinculacion), solicitud.Id.ToString(), motivo);
+            await _audit.RegistrarEnGimnasioAsync(aprobar ? "VINCULACION_APROBADA" : "VINCULACION_RECHAZADA",
+                nameof(SolicitudVinculacion), solicitud.Id.ToString(), gimnasioId, motivo);
             return Mapear(solicitud);
         }
+
+        private bool EsPlataforma => _actual.Rol == RolUsuario.SuperAdministrador;
 
         private static SolicitudVinculacionDto Mapear(SolicitudVinculacion s) => new()
         {

@@ -99,13 +99,14 @@ export const routes: Routes = [
       {
         path: 'gimnasio/vinculaciones',
         title: 'Vinculaciones · GymBro',
-        canActivate: [rolGuard('AdministradorGimnasio')],
+        // Etapa 9a-2c (D1): también el Administrador de la Plataforma, eligiendo el gimnasio.
+        canActivate: [rolGuard('AdministradorGimnasio', 'SuperAdministrador')],
         loadComponent: () => import('./features/gimnasio/vinculaciones').then((m) => m.Vinculaciones),
       },
       {
         path: 'gimnasio/configuracion',
         title: 'Mi gimnasio · GymBro',
-        canActivate: [rolGuard('AdministradorGimnasio')],
+        canActivate: [rolGuard('AdministradorGimnasio', 'SuperAdministrador')],
         loadComponent: () => import('./features/gimnasio/mi-gimnasio').then((m) => m.MiGimnasio),
       },
 

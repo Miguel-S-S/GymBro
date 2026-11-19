@@ -65,7 +65,8 @@ import { map } from 'rxjs';
               <span matListItemTitle>Rutinas a revisar</span>
             </a>
           }
-          @if (auth.tieneRol('AdministradorGimnasio')) {
+          <!-- Etapa 9a-2c (D1): Vinculaciones y Mi gimnasio también para el Administrador de la Plataforma. -->
+          @if (auth.tieneRol('AdministradorGimnasio', 'SuperAdministrador')) {
             <a mat-list-item routerLink="/gimnasio/vinculaciones" routerLinkActive="activo" (click)="esMovil() && nav.close()">
               <mat-icon matListItemIcon>how_to_reg</mat-icon>
               <span matListItemTitle>Vinculaciones</span>

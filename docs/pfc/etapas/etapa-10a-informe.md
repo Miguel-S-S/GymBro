@@ -1,6 +1,6 @@
 # Etapa 10a — Reglas deterministas de seguridad (RIR, progresión de cargas y FC de reposo): texto para el informe y registro de decisiones
 
-**Fecha:** 19/11/2026. **Rama:** `etapa10a`, creada desde `main` en `5503cb1`. **Sin merge ni push a `main`:** la integración la decide el autor después de la revisión de Claude Web.
+**Fecha:** 19/11/2026. **Rama de trabajo:** `etapa10a`, creada desde `main` en `5503cb1`. **Integración (actualizado en la Etapa 9a-2c):** el autor autorizó el merge; los commits `69fd0ae`, `7ac55c2` y `cfef78c` se integraron en `main` por avance rápido y se subieron a `origin` el 19/11/2026. La rama `etapa10a` se borró después del merge.
 **Commits:** código, migración y pruebas en `69fd0ae`; corrección de 5 advertencias nuevas que generaban las pruebas (xUnit2031 y EF1002) en `7ac55c2`; evidencia (generada sobre `7ac55c2`) y este informe en el commit siguiente.
 **Evidencia:** `docs/pfc/evidencia/etapa10a-*.txt`:
 - `etapa10a-base-*.txt`: línea base sobre `main` (`5503cb1`), antes de cualquier cambio;

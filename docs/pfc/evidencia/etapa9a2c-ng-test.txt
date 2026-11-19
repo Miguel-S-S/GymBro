@@ -1,0 +1,19 @@
+Etapa 9a-2c - build y pruebas sobre el commit de codigo
+Comando: npx ng test --watch=false
+Commit: 6acfd3531c5eb0ba44d640aa219dad57b2472a20 (etapa9a2c, commit de codigo; arbol con cambios solo en docs/pfc/etapas/etapa-10a-informe.md (sin efecto en build ni pruebas))
+Fecha: 2026-11-19 17:55:07 -0300
+Codigo de salida: 0
+------------------------------------------------------------
+❯ Building...
+✔ Building...
+Application bundle generation complete. [5.042 seconds] - 2026-11-19T20:55:15.142Z
+
+
+[1m[30m[46m RUN [49m[39m[22m [36mv5.1.0 [39m[90mC:/Users/miguel/source/repos/GymBro/GymBro.Web[39m
+
+
+[2m Test Files [22m [1m[32m32 passed[39m[22m[90m (32)[39m
+[2m      Tests [22m [1m[32m204 passed[39m[22m[90m (204)[39m
+[2m   Start at [22m 17:55:15
+[2m   Duration [22m 8.85s[2m (environment 70%, tests 13%, import 8%, setup 6%, transform 3%)[22m
+

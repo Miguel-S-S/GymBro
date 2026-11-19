@@ -1,0 +1,14 @@
+Etapa 9a-2c - build y pruebas sobre el commit de codigo
+Comando: dotnet test GymBro.slnx --no-build
+Commit: 6acfd3531c5eb0ba44d640aa219dad57b2472a20 (etapa9a2c, commit de codigo; arbol con cambios solo en docs/pfc/etapas/etapa-10a-informe.md (sin efecto en build ni pruebas))
+Fecha: 2026-11-19 17:54:23 -0300
+Codigo de salida: 0
+------------------------------------------------------------
+Serie de pruebas para C:\Users\miguel\source\repos\GymBro\GymBro.Tests\bin\Debug\net10.0\GymBro.Tests.dll (.NETCoreApp,Version=v10.0)
+Serie de pruebas para C:\Users\miguel\source\repos\GymBro\GymBro.Tests.Integration\bin\Debug\net10.0\GymBro.Tests.Integration.dll (.NETCoreApp,Version=v10.0)
+1 archivos de prueba en total coincidieron con el patrón especificado.
+1 archivos de prueba en total coincidieron con el patrón especificado.
+
+Correctas! - Con error:     0, Superado:   250, Omitido:     0, Total:   250, Duración: 295 ms - GymBro.Tests.dll (net10.0)
+
+Correctas! - Con error:     0, Superado:   406, Omitido:     0, Total:   406, Duración: 30 s - GymBro.Tests.Integration.dll (net10.0)

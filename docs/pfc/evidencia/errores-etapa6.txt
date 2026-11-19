@@ -1,0 +1,10 @@
+﻿C:\Users\miguel\source\repos\GymBro\GymBro.Application\Services\InvitacionService.cs(34,14): error CS0246: El nombre del tipo o del espacio de nombres 'InvitacionInfoDto' no se encontr├│ (┬┐falta una directiva using o una referencia de ensamblado?) [C:\Users\miguel\source\repos\GymBro\GymBro.Application\GymBro.Application.csproj]
+C:\Users\miguel\source\repos\GymBro\GymBro.Application\Services\InvitacionService.cs(37,42): error CS0246: El nombre del tipo o del espacio de nombres 'ActivarInvitacionRequest' no se encontr├│ (┬┐falta una directiva using o una referencia de ensamblado?) [C:\Users\miguel\source\repos\GymBro\GymBro.Application\GymBro.Application.csproj]
+C:\Users\miguel\source\repos\GymBro\GymBro.Application\Services\InvitacionService.cs(89,27): error CS0246: El nombre del tipo o del espacio de nombres 'InvitacionInfoDto' no se encontr├│ (┬┐falta una directiva using o una referencia de ensamblado?) [C:\Users\miguel\source\repos\GymBro\GymBro.Application\GymBro.Application.csproj]
+C:\Users\miguel\source\repos\GymBro\GymBro.Application\Services\InvitacionService.cs(102,55): error CS0246: El nombre del tipo o del espacio de nombres 'ActivarInvitacionRequest' no se encontr├│ (┬┐falta una directiva using o una referencia de ensamblado?) [C:\Users\miguel\source\repos\GymBro\GymBro.Application\GymBro.Application.csproj]
+
+ERROR al compilar.
+    14 Advertencia(s)
+    4 Errores
+
+Tiempo transcurrido 00:00:07.12

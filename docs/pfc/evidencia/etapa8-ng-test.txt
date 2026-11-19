@@ -1,0 +1,13 @@
+﻿> Building...
+√ Building...
+Application bundle generation complete. [2.189 seconds] - 2026-11-17T00:49:43.753Z
+
+
+ RUN  v5.1.0 C:/Users/miguel/source/repos/GymBro/GymBro.Web
+
+
+ Test Files  14 passed (14)
+      Tests  82 passed (82)
+   Start at  21:49:44
+   Duration  4.35s (environment 75%, setup 14%, import 5%, tests 3%, transform 3%)
+

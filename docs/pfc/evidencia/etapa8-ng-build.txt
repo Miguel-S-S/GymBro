@@ -1,0 +1,31 @@
+﻿> Building...
+√ Building...
+Initial chunk files | Names               |  Raw size | Estimated transfer size
+main-QKG3I4LK.js    | main                | 360.54 kB |                70.11 kB
+chunk-ClddjZx3.js   | -                   | 337.78 kB |                86.70 kB
+styles-56MVVM6I.css | styles              |  25.10 kB |                 3.46 kB
+
+                    | Initial total       | 723.41 kB |               160.27 kB
+
+Lazy chunk files    | Names               |  Raw size | Estimated transfer size
+chunk-stqc-tx5.js   | -                   |  44.72 kB |                 9.57 kB
+chunk-BmndP0oR.js   | -                   |  40.99 kB |                 8.70 kB
+chunk-B7OY6hQ1.js   | -                   |  35.89 kB |                 8.84 kB
+chunk-JidCkCQW.js   | sesion-registro     |  34.11 kB |                 9.78 kB
+chunk-BQjWd6HV.js   | -                   |  30.07 kB |                 7.10 kB
+chunk-C_r2HZQQ.js   | -                   |  29.39 kB |                 4.93 kB
+chunk-Drx0xX-C.js   | mi-layout           |  29.20 kB |                 8.01 kB
+chunk-BRuzkmaJ.js   | socio-detalle       |  28.30 kB |                 7.19 kB
+chunk-DWlGbsIp.js   | -                   |  26.53 kB |                 4.50 kB
+chunk-D_AUF_YT.js   | ejercicios-catalogo |  26.12 kB |                 7.07 kB
+chunk-DNfKSRLX.js   | -                   |  15.21 kB |                 4.18 kB
+chunk-Cex4Irtt.js   | -                   |  12.05 kB |                 2.54 kB
+chunk-DaDaf81b.js   | socios-lista        |  11.32 kB |                 3.62 kB
+chunk-rh-DTGG9.js   | -                   |  11.11 kB |                 3.19 kB
+chunk-D0Xh4Vid.js   | mi-entrenar         |  10.93 kB |                 3.62 kB
+...and 26 more lazy chunks files. Use "--verbose" to show all the files.
+
+Application bundle generation complete. [4.643 seconds] - 2026-11-17T00:49:39.444Z
+
+Output location: C:\Users\miguel\source\repos\GymBro\GymBro.Web\dist\gymbro-web
+

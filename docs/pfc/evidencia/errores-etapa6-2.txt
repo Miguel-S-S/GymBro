@@ -1,0 +1,9 @@
+﻿C:\Users\miguel\source\repos\GymBro\GymBro.Application\Services\SocioService.cs(163,42): error CS1061: "IUsuarioRepository" no contiene una definici├│n para "GetBySocioIdAsync" ni un m├®todo de extensi├│n accesible "GetBySocioIdAsync" que acepte un primer argumento del tipo "IUsuarioRepository" (┬┐falta alguna directiva using o una referencia de ensamblado?) [C:\Users\miguel\source\repos\GymBro\GymBro.Application\GymBro.Application.csproj]
+C:\Users\miguel\source\repos\GymBro\GymBro.Application\Services\SocioService.cs(203,33): error CS1061: "IUsuarioRepository" no contiene una definici├│n para "GetBySocioIdAsync" ni un m├®todo de extensi├│n accesible "GetBySocioIdAsync" que acepte un primer argumento del tipo "IUsuarioRepository" (┬┐falta alguna directiva using o una referencia de ensamblado?) [C:\Users\miguel\source\repos\GymBro\GymBro.Application\GymBro.Application.csproj]
+C:\Users\miguel\source\repos\GymBro\GymBro.Application\Services\SocioService.cs(225,45): error CS1061: "IUsuarioRepository" no contiene una definici├│n para "GetSocioIdsConCuentaAsync" ni un m├®todo de extensi├│n accesible "GetSocioIdsConCuentaAsync" que acepte un primer argumento del tipo "IUsuarioRepository" (┬┐falta alguna directiva using o una referencia de ensamblado?) [C:\Users\miguel\source\repos\GymBro\GymBro.Application\GymBro.Application.csproj]
+
+ERROR al compilar.
+    14 Advertencia(s)
+    3 Errores
+
+Tiempo transcurrido 00:00:03.35

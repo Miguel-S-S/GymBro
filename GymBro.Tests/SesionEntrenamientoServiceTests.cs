@@ -23,7 +23,8 @@ namespace GymBro.Tests
         private readonly FakeAcceso _acceso = new();
 
         private SesionEntrenamientoService Servicio() => new(
-            _sesiones, new FakeSocioRepository(SocioA, SocioB), new FakeEjercicioRepository(EjercicioId), _prescripciones, _acceso);
+            _sesiones, new FakeSocioRepository(SocioA, SocioB), new FakeEjercicioRepository(EjercicioId), _prescripciones, _acceso,
+            new ReglasSeguridadDoble(), new RegistroEventosDoble());
 
         private PrescripcionEntrenamiento Prescripcion(Guid socioId, EstadoPrescripcion estado)
         {

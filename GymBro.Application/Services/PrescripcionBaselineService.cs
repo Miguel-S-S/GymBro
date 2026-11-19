@@ -1,4 +1,5 @@
-﻿using GymBro.Application.DTOs.Acceso;
+﻿using GymBro.Application.Abstractions;
+using GymBro.Application.DTOs.Acceso;
 using GymBro.Domain.Entities;
 using GymBro.Domain.Enums;
 using GymBro.Domain.Exceptions;
@@ -78,9 +79,15 @@ namespace GymBro.Application.Services
         private readonly IAuditService _audit;
         private readonly BaselineConfig _config;
 
+        private readonly IValidadorPrescripcionService _validador;
+        private readonly IRegistroEventos _eventos;
+
         public PrescripcionBaselineService(IBaselineRepository repo, ISocioAccessService acceso,
-            IRevisionPrescripcionService revision, IAuditService audit, BaselineConfig config)
+            IRevisionPrescripcionService revision, IAuditService audit, BaselineConfig config,
+            IValidadorPrescripcionService validador, IRegistroEventos eventos)
         {
+            _validador = validador;
+            _eventos = eventos;
             _repo = repo;
             _acceso = acceso;
             _revision = revision;
@@ -129,6 +136,7 @@ namespace GymBro.Application.Services
             var omitidas = new List<string>();
             var omitidasPorEquipamiento = new List<string>();
             var orden = 0;
+            var tiposMedida = new Dictionary<Guid, TipoMedida>();   // Etapa 10a: para validar segundos o repeticiones
 
             // Etapa 9a-2: se usa el gimnasio del socio (no el de quien llama). Si el gimnasio declaró equipamiento, solo
             // son factibles los ejercicios cuyo tipo está marcado o es siempre disponible; si no declaró nada, o el socio
@@ -158,6 +166,7 @@ namespace GymBro.Application.Services
                 var porDefecto = DosisPorDefecto(elegido.TipoMedida);
 
                 orden++;
+                tiposMedida[elegido.Id] = elegido.TipoMedida;
                 prescripcion.EjerciciosPrescritos.Add(new PrescripcionEjercicio
                 {
                     PrescripcionEntrenamientoId = prescripcion.Id,
@@ -180,6 +189,22 @@ namespace GymBro.Application.Services
                     "Con el equipamiento declarado por el gimnasio no hay ejercicios factibles para ninguna zona del baseline.");
             if (prescripcion.EjerciciosPrescritos.Count == 0)
                 throw new CatalogosIncompletosException("El catálogo no tiene ejercicios para ninguna de las zonas del baseline.");
+
+            // Etapa 10a (R-LIM, decisión P4): el baseline debe cumplir siempre los límites duros. Si no los cumple es un
+            // problema de configuración o de datos del catálogo: no se genera (para que no quede aprobada sola en un socio
+            // independiente). En el log van solo los códigos, sin datos de salud.
+            var lineas = prescripcion.EjerciciosPrescritos.Select(e => new LineaPrescripcion(e.EjercicioId, e.Orden, null,
+                e.SeriesObjetivo, e.RepeticionesMinimas, e.RepeticionesMaximas, tiposMedida[e.EjercicioId], e.RIRObjetivo,
+                e.DescansoObjetivoSegundos)).ToList();
+            var violaciones = _validador.Validar(lineas, socio.Nivel);
+            if (violaciones.Count > 0)
+            {
+                var codigos = string.Join(", ", violaciones.Select(v => v.Codigo).Distinct());
+                _eventos.Advertencia($"Baseline rechazado por limites de seguridad: {codigos}.");
+                throw new CatalogosIncompletosException(
+                    $"La rutina generada no cumple los límites de seguridad configurados ({codigos}). " +
+                    "Revise la configuración del baseline y la dosificación del catálogo.");
+            }
 
             prescripcion.Observaciones = ArmarObservaciones(edad, genero, categoriaImc, medicion.TieneHipertension,
                 medicion.TieneDiabetes, socio.Objetivo.ToString(), matriz, omitidas, omitidasPorEquipamiento,

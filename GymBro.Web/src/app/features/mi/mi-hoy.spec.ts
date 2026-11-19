@@ -24,6 +24,8 @@ describe('MiHoy: tarjeta ¿Cómo estás hoy? (Etapa 8b)', () => {
     http.expectOne('/api/bienestar/hoy').flush({ fechaLocal: '2026-11-17', registro });
     http.expectOne('/api/Socio/s1/prescripciones').flush([]);
     fixture.detectChanges();
+    // Etapa 10a: la tarjeta de avisos consulta las alertas pendientes del socio.
+    http.expectOne('/api/alertas?estado=Pendiente').flush([]);
     await fixture.whenStable();
     const tarjeta = (fixture.nativeElement as HTMLElement).querySelector('.bienestar')!;
     return { texto: tarjeta.textContent ?? '', enlace: tarjeta.querySelector('a')!.getAttribute('href') };

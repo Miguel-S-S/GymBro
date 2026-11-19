@@ -51,5 +51,33 @@ namespace GymBro.Tests.Integration
             Assert.Equal("http://localhost:4200", cfg["DemoData:UrlFront"]);
             Assert.Equal("http://127.0.0.1:8000", cfg["Ia:UrlBase"]);
         }
+
+        /// <summary>Etapa 10a: los umbrales de las reglas de seguridad se vinculan desde "ReglasSeguridad" y coinciden con el código.</summary>
+        [Fact]
+        public void Los_umbrales_de_ReglasSeguridad_se_vinculan_y_coinciden_con_los_valores_por_defecto()
+        {
+            var cfg = Ejemplo().GetSection("ReglasSeguridad").Get<GymBro.Domain.Rules.ReglasSeguridadConfig>()!;
+            var d = new GymBro.Domain.Rules.ReglasSeguridadConfig();
+            Assert.Equal((d.Rir.DiferenciaMinima, d.Rir.SeriesMinimasConDato), (cfg.Rir.DiferenciaMinima, cfg.Rir.SeriesMinimasConDato));
+            Assert.Equal((d.Progresion.IncrementoPorcentaje, d.Progresion.DecrementoPorcentaje, d.Progresion.RedondeoKg, d.Progresion.CambioMinimoKg, d.Progresion.TopePorcentaje),
+                (cfg.Progresion.IncrementoPorcentaje, cfg.Progresion.DecrementoPorcentaje, cfg.Progresion.RedondeoKg, cfg.Progresion.CambioMinimoKg, cfg.Progresion.TopePorcentaje));
+            Assert.Equal((d.FcReposo.DiasLineaBase, d.FcReposo.RegistrosMinimos, d.FcReposo.UmbralPorcentaje, d.FcReposo.UmbralLpm),
+                (cfg.FcReposo.DiasLineaBase, cfg.FcReposo.RegistrosMinimos, cfg.FcReposo.UmbralPorcentaje, cfg.FcReposo.UmbralLpm));
+            Assert.Equivalent(d.Limites, cfg.Limites, strict: true);
+        }
+
+        /// <summary>Etapa 10a: un umbral cambiado en la configuración llega a las reglas (no hay valores fijos en el código).</summary>
+        [Fact]
+        public void Un_umbral_cambiado_en_la_configuracion_se_usa()
+        {
+            var cfg = new ConfigurationBuilder().AddInMemoryCollection(new Dictionary<string, string?>
+            {
+                ["ReglasSeguridad:FcReposo:UmbralLpm"] = "8",
+                ["ReglasSeguridad:Limites:SeriesMax"] = "4",
+            }).Build().GetSection("ReglasSeguridad").Get<GymBro.Domain.Rules.ReglasSeguridadConfig>()!;
+            Assert.Equal((8, 4), (cfg.FcReposo.UmbralLpm, cfg.Limites.SeriesMax));
+            // 60 -> 66: +10 % y +6 lpm. Con UmbralLpm = 8 ya no alerta.
+            Assert.False(GymBro.Domain.Rules.ReglaFcReposo.Evaluar(66, Enumerable.Repeat((short?)60, 5), cfg.FcReposo)!.Alerta);
+        }
     }
 }

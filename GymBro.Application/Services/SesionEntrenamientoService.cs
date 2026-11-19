@@ -19,15 +19,21 @@ namespace GymBro.Application.Services
         private readonly IEjercicioRepository _ejercicioRepo;
         private readonly IPrescripcionEntrenamientoRepository _prescripcionRepo;
         private readonly ISocioAccessService _acceso;
+        private readonly IReglasSeguridadService _reglas;
+        private readonly IRegistroEventos _eventos;
 
         public SesionEntrenamientoService(
             ISesionEntrenamientoRepository sesionRepo,
             ISocioRepository socioRepo,
             IEjercicioRepository ejercicioRepo,
             IPrescripcionEntrenamientoRepository prescripcionRepo,
-            ISocioAccessService acceso)
+            ISocioAccessService acceso,
+            IReglasSeguridadService reglas,
+            IRegistroEventos eventos)
         {
             _acceso = acceso;
+            _reglas = reglas;
+            _eventos = eventos;
             _sesionRepo = sesionRepo;
             _socioRepo = socioRepo;
             _ejercicioRepo = ejercicioRepo;
@@ -102,6 +108,17 @@ namespace GymBro.Application.Services
             };
 
             await _sesionRepo.AddAsync(nuevaSesion);
+
+            // Etapa 10a: reglas de seguridad (R-RIR-1 y R-PROG-1), síncronas y tolerantes a fallos (decisión D6):
+            // un error se registra (sin datos de salud) y la sesión queda guardada igual.
+            try
+            {
+                await _reglas.EvaluarSesionAsync(nuevaSesion.Id);
+            }
+            catch (Exception ex)
+            {
+                _eventos.Error($"Fallo la evaluacion de reglas de seguridad de la sesion {nuevaSesion.Id}.", ex);
+            }
 
             return await GetByIdAsync(nuevaSesion.Id) ?? throw new InvalidOperationException("Error al recuperar la sesión tras ser creada.");
         }

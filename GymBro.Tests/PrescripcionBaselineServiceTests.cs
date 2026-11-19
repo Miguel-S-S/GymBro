@@ -45,7 +45,88 @@ namespace GymBro.Tests
         }
 
         private static PrescripcionBaselineService Servicio(FakeBaselineRepository repo) =>
-            new(repo, new FakeAcceso(), new FakeRevision(), new FakeAudit(), new BaselineConfig());
+            new(repo, new FakeAcceso(), new FakeRevision(), new FakeAudit(), new BaselineConfig(),
+                new ValidadorPrescripcionService(new GymBro.Domain.Rules.ReglasSeguridadConfig()), new RegistroEventosDoble());
+
+        private static PrescripcionBaselineService Servicio(FakeBaselineRepository repo, BaselineConfig config, RegistroEventosDoble eventos) =>
+            new(repo, new FakeAcceso(), new FakeRevision(), new FakeAudit(), config,
+                new ValidadorPrescripcionService(new GymBro.Domain.Rules.ReglasSeguridadConfig()), eventos);
+
+        /// <summary>Repositorio que fuerza las dosis por defecto (sin dosificación válida salvo Pecho) y Core en segundos.</summary>
+        private static FakeBaselineRepository RepoConDosisPorDefecto()
+        {
+            var repo = RepoCompleto();
+            repo.Dosificaciones.RemoveAll(d => d.ZonaObjetivo != "Chest");
+            repo.Ejercicios.RemoveAll(e => e.ZonaObjetivo == "Core");
+            repo.Ejercicios.Add(new EjercicioCandidato(Guid.NewGuid(), "Plancha de prueba", "Body Weight", "Core", "Core", 1, TipoMedida.Segundos));
+            return repo;
+        }
+
+        // ---- Etapa 10a: el baseline debe cumplir siempre los límites duros (R-LIM) ----
+
+        public static TheoryData<NivelExperiencia, ObjetivoEntrenamiento, bool> CombinacionesNivelObjetivo()
+        {
+            var d = new TheoryData<NivelExperiencia, ObjetivoEntrenamiento, bool>();
+            foreach (var n in Enum.GetValues<NivelExperiencia>())
+                foreach (var o in Enum.GetValues<ObjetivoEntrenamiento>())
+                    foreach (var porDefecto in new[] { false, true })
+                        d.Add(n, o, porDefecto);
+            return d;
+        }
+
+        [Theory]
+        [MemberData(nameof(CombinacionesNivelObjetivo))]
+        public async Task Baseline_cumple_los_limites_en_todas_las_combinaciones_de_nivel_y_objetivo(
+            NivelExperiencia nivel, ObjetivoEntrenamiento objetivo, bool dosisPorDefecto)
+        {
+            var repo = dosisPorDefecto ? RepoConDosisPorDefecto() : RepoCompleto();
+            repo.SocioActual!.Nivel = nivel;
+            repo.SocioActual.Objetivo = objetivo;
+            var eventos = new RegistroEventosDoble();
+
+            var rutina = await Servicio(repo, new BaselineConfig(), eventos).GenerarAsync(SocioId);
+
+            var lineas = rutina.Ejercicios.Select(e => new LineaPrescripcion(e.EjercicioId, e.Orden, e.Ejercicio, e.SeriesObjetivo,
+                e.RepeticionesMinimas, e.RepeticionesMaximas, Enum.Parse<TipoMedida>(e.TipoMedida), e.RIRObjetivo, e.DescansoObjetivoSegundos)).ToList();
+            Assert.Empty(ValidadorPrescripcion.Validar(lineas, nivel, new LimitesPrescripcion()));
+            Assert.Empty(eventos.Mensajes);
+        }
+
+        [Fact]
+        public void La_configuracion_por_defecto_del_baseline_y_las_dosis_del_proyecto_pasan_el_validador()
+        {
+            var cfg = new BaselineConfig();
+            // Dosis por defecto del baseline (3 x 8-12 repeticiones y 3 x 20-40 s) y de Core del proyecto (3 x 10-15 y 2 x 20-40 s).
+            var lineas = new[]
+            {
+                new LineaPrescripcion(Guid.NewGuid(), 1, "a", 3, 8, 12, TipoMedida.Repeticiones, cfg.RirPorDefecto, cfg.DescansoPorDefectoSegundos),
+                new LineaPrescripcion(Guid.NewGuid(), 2, "b", 3, 20, 40, TipoMedida.Segundos, cfg.RirPorDefecto, cfg.DescansoPorDefectoSegundos),
+                new LineaPrescripcion(Guid.NewGuid(), 3, "c", 3, 10, 15, TipoMedida.Repeticiones, cfg.RirPorDefecto, cfg.DescansoPorDefectoSegundos),
+                new LineaPrescripcion(Guid.NewGuid(), 4, "d", 2, 20, 40, TipoMedida.Segundos, cfg.RirPorDefecto, cfg.DescansoPorDefectoSegundos),
+                new LineaPrescripcion(Guid.NewGuid(), 5, "e", 3, 8, 12, TipoMedida.Repeticiones, cfg.RirPorDefecto, cfg.DescansoPorDefectoSegundos),
+            };
+            foreach (var nivel in Enum.GetValues<NivelExperiencia>())
+                Assert.Empty(ValidadorPrescripcion.Validar(lineas, nivel, new GymBro.Domain.Rules.ReglasSeguridadConfig().Limites));
+        }
+
+        [Theory]
+        [InlineData(1, 90, "LIM-RIR-PRINCIPIANTE")]
+        [InlineData(2, 10, "LIM-DESCANSO")]
+        public async Task Si_el_baseline_viola_un_limite_no_se_genera_y_se_registran_solo_los_codigos(int rir, int descanso, string codigo)
+        {
+            var repo = RepoCompleto();
+            var eventos = new RegistroEventosDoble();
+
+            var ex = await Assert.ThrowsAsync<CatalogosIncompletosException>(() =>
+                Servicio(repo, new BaselineConfig { RirPorDefecto = rir, DescansoPorDefectoSegundos = descanso }, eventos).GenerarAsync(SocioId));
+
+            Assert.Contains(codigo, ex.Message);
+            Assert.Contains("límites de seguridad", ex.Message);
+            Assert.Empty(await repo.GetPrescripcionesDeSocioAsync(SocioId));
+            var log = Assert.Single(eventos.Mensajes);
+            Assert.Contains(codigo, log);
+            Assert.DoesNotContain("Lucas", log);   // sin datos del socio
+        }
 
         // ---- Pruebas ----
         [Fact]

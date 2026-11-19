@@ -10,6 +10,7 @@ import { PrescripcionesApi } from '../../core/api/prescripciones.api';
 import { AuthService } from '../../core/auth/auth.service';
 import { RutinaPendiente } from '../../core/models/acceso.models';
 import { mensajeDeError } from '../../core/util/api-error';
+import { MisAvisos } from '../alertas/mis-avisos';
 import { leerBorrador } from '../../core/util/borrador-sesion';
 import { etiquetaEstado } from '../../core/util/rutina-formato';
 import { borradorValido, Entrenamiento, rutinaEnRevision, rutinaVigente } from './entrenamiento';
@@ -17,9 +18,12 @@ import { borradorValido, Entrenamiento, rutinaEnRevision, rutinaVigente } from '
 /** Inicio del Socio: rutina vigente y acceso a entrenar; si no tiene rutina, la puede generar. */
 @Component({
   selector: 'app-mi-hoy',
-  imports: [DatePipe, RouterLink, MatButtonModule, MatIconModule, MatProgressBarModule],
+  imports: [DatePipe, RouterLink, MatButtonModule, MatIconModule, MatProgressBarModule, MisAvisos],
   template: `
     <h1 class="titulo">Hoy</h1>
+
+    <!-- Etapa 10a: avisos de las reglas de seguridad y sugerencias de carga. -->
+    <app-mis-avisos />
 
     <!-- Etapa 8b: registro de bienestar del día. -->
     <section class="tarjeta-mi bienestar">

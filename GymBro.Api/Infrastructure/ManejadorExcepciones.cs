@@ -1,4 +1,5 @@
-﻿using GymBro.Domain.Exceptions;
+﻿using GymBro.Application.Services;
+using GymBro.Domain.Exceptions;
 using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
 
@@ -18,10 +19,16 @@ namespace GymBro.Api.Infrastructure
                 NoAutenticadoException => (StatusCodes.Status401Unauthorized, "No autenticado"),
                 AccesoDenegadoException => (StatusCodes.Status403Forbidden, "Acceso denegado"),
                 RecursoNoEncontradoException => (StatusCodes.Status404NotFound, "No encontrado"),
+                // Etapa 10a: problema de datos o configuración del sistema; el mensaje es propio (sin detalle interno).
+                CatalogosIncompletosException => (StatusCodes.Status500InternalServerError, "Catálogo incompleto"),
                 _ => (StatusCodes.Status500InternalServerError, "Error interno")
             };
 
-            if (status == StatusCodes.Status500InternalServerError)
+            if (ex is CatalogosIncompletosException)
+            {
+                _logger.LogError(ex, "Catalogo incompleto");
+            }
+            else if (status == StatusCodes.Status500InternalServerError)
             {
                 _logger.LogError(ex, "Error no controlado");
                 // No se expone el detalle interno al cliente.

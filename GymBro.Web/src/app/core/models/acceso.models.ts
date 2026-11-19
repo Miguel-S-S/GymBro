@@ -1,3 +1,4 @@
+import { ViolacionLimite } from './alertas.models';
 import { TipoMedida } from './ejercicio.models';
 
 /** GymBro.Application.DTOs.Acceso.* */
@@ -71,6 +72,8 @@ export interface RutinaPendiente {
   estado: string;
   fechaAlta: string;
   ejercicios: RutinaEjercicio[];
+  /** Etapa 10a (R-LIM): violaciones de los límites duros; vacía si cumple. Opcional para respuestas anteriores. */
+  advertenciasLimites?: ViolacionLimite[];
 }
 
 export type DecisionRevision = 'Aprobada' | 'Editada' | 'Rechazada';

@@ -1,4 +1,4 @@
-namespace GymBro.Application.DTOs.Acceso
+﻿namespace GymBro.Application.DTOs.Acceso
 {
     public record LoginRequest(string Email, string Password);
 
@@ -115,6 +115,12 @@ namespace GymBro.Application.DTOs.Acceso
         public string Estado { get; set; } = string.Empty;
         public DateTime FechaAlta { get; set; }
         public List<RutinaEjercicioDto> Ejercicios { get; set; } = new();
+
+        /// <summary>
+        /// Etapa 10a (R-LIM): violaciones de los límites duros, para el revisor. Advierten; no bloquean (decisión D3).
+        /// Vacía si la rutina cumple los límites.
+        /// </summary>
+        public List<GymBro.Application.DTOs.ViolacionLimiteDto> AdvertenciasLimites { get; set; } = new();
     }
 
     public class RutinaEjercicioDto

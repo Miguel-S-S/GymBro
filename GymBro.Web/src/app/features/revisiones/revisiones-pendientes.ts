@@ -11,11 +11,12 @@ import { AccesoApi } from '../../core/api/acceso.api';
 import { AjusteEjercicio, DecisionRevision, RutinaEjercicio, RutinaPendiente } from '../../core/models/acceso.models';
 import { mensajeDeError } from '../../core/util/api-error';
 import { RutinaEjercicioCard } from '../rutinas/rutina-ejercicio-card';
+import { AdvertenciasLimites } from './advertencias-limites';
 
 /** Dueño y Personal Trainer: aprueban, editan o rechazan las rutinas generadas por la IA. */
 @Component({
   selector: 'app-revisiones-pendientes',
-  imports: [DatePipe, FormsModule, MatButtonModule, MatFormFieldModule, MatIconModule, MatInputModule, MatProgressBarModule, RutinaEjercicioCard],
+  imports: [DatePipe, FormsModule, MatButtonModule, MatFormFieldModule, MatIconModule, MatInputModule, MatProgressBarModule, RutinaEjercicioCard, AdvertenciasLimites],
   template: `
     <div class="encabezado">
       <div><h1>Rutinas para revisar</h1><p class="subtitulo">{{ rutinas().length }} pendientes</p></div>
@@ -33,6 +34,8 @@ import { RutinaEjercicioCard } from '../rutinas/rutina-ejercicio-card';
             <span class="meta">{{ r.fechaAlta | date: 'dd/MM/yyyy HH:mm' }} · origen: {{ r.origenGeneracion || 'IA' }}</span>
           </header>
           @if (r.observaciones) { <p class="meta">{{ r.observaciones }}</p> }
+          <!-- Etapa 10a (R-LIM): solo aparece si hay violaciones; no bloquea. -->
+          <app-advertencias-limites [violaciones]="r.advertenciasLimites ?? []" />
 
           @for (e of r.ejercicios; track e.id) {
             <app-rutina-ejercicio-card [ejercicio]="e" [editable]="editando() === r.id" />

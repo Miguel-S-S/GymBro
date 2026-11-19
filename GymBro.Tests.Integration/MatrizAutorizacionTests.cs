@@ -50,6 +50,7 @@ namespace GymBro.Tests.Integration
         private const string EjercicioNoVisible = "EjercicioGimnasioService: ejercicio no visible -> RecursoNoEncontrado (T7)";
         private const string TipoNoVisible = "EquipamientoService: tipo no visible -> RecursoNoEncontrado (T7)";
         private const string CuerpoInvalido = "validación del cuerpo vacío -> ReglaNegocio (400), sin efectos";
+        private const string AttrAlertas = "AlertasController: [Authorize(AdministradorGimnasio,Entrenador,Socio)] (Etapa 10a; datos de salud)";
 
         public static TheoryData<string, string, string, int, string> Celdas()
         {
@@ -189,6 +190,16 @@ namespace GymBro.Tests.Integration
                 (Anonimo, 401, Fallback), (SuperAdmin, 403, null), (Dueno, 200, AccesoSocio), (Trainer, 200, AccesoSocio + " (asignado)"), (Socio, 200, AccesoSocio + " (propio)"));
             Fila("GET", "/api/bienestar?socioId={B}", NoVisible, (Trainer, 404, NoVisible + " (no asignado)"), (Socio, 404, NoVisible + " (ajeno)"));
             Fila("GET", "/api/bienestar?socioId={C}", NoVisible, (Dueno, 404, Tenant + " + " + NoVisible));
+
+            // ---- Etapa 10a: alertas de seguridad (datos de salud: el Administrador de la Plataforma no accede) ----
+            Fila("GET", "/api/alertas", AttrAlertas,
+                (Anonimo, 401, Fallback), (SuperAdmin, 403, null), (Dueno, 200, null), (Trainer, 200, null), (Socio, 200, null));
+            Fila("GET", "/api/alertas?socioId={A}", AttrAlertas,
+                (Anonimo, 401, Fallback), (SuperAdmin, 403, null), (Dueno, 200, AccesoSocio), (Trainer, 200, AccesoSocio + " (asignado)"), (Socio, 200, "propio"));
+            Fila("GET", "/api/alertas?socioId={B}", NoVisible, (Trainer, 404, NoVisible + " (no asignado)"), (Socio, 404, "AlertasService: otro socio -> RecursoNoEncontrado"));
+            Fila("GET", "/api/alertas?socioId={C}", NoVisible, (Dueno, 404, Tenant + " + " + NoVisible));
+            Fila("PUT", "/api/alertas/{X}/vista", AttrAlertas,
+                (Anonimo, 401, Fallback), (SuperAdmin, 403, null), (Dueno, 404, "AlertasService: alerta no visible"), (Trainer, 404, "AlertasService: alerta no visible"), (Socio, 404, "AlertasService: alerta no visible"));
 
             // ---- Auditoría ----
             Fila("GET", "/api/auditoria", AttrAuditoria,

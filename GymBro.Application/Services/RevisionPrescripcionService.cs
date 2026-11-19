@@ -4,6 +4,9 @@ using GymBro.Domain.Enums;
 using GymBro.Domain.Exceptions;
 using GymBro.Domain.Repositories;
 using GymBro.Domain.Security;
+using System.Text.Json;
+using GymBro.Application.DTOs;
+using GymBro.Domain.Rules;
 
 namespace GymBro.Application.Services
 {
@@ -28,11 +31,13 @@ namespace GymBro.Application.Services
         private readonly ISocioAccessService _acceso;
         private readonly IUsuarioActual _actual;
         private readonly IAuditService _audit;
+        private readonly IValidadorPrescripcionService _validador;
 
         public RevisionPrescripcionService(IPrescripcionEntrenamientoRepository prescripciones, ISocioRepository socios,
             IGimnasioRepository gimnasios, IAsignacionRepository asignaciones, ISocioAccessService acceso,
-            IUsuarioActual actual, IAuditService audit)
+            IUsuarioActual actual, IAuditService audit, IValidadorPrescripcionService validador)
         {
+            _validador = validador;
             _prescripciones = prescripciones;
             _socios = socios;
             _gimnasios = gimnasios;
@@ -105,6 +110,15 @@ namespace GymBro.Application.Services
             }
 
             var revision = rutina.Revisar(decision, revisorId, request.Comentario);
+
+            // Etapa 10a (R-LIM, decisión D3): al aprobar o editar, las violaciones de límites quedan registradas en la
+            // revisión y se muestran al revisor; no bloquean (los valores imposibles ya se rechazaron en AplicarAjustes).
+            if (decision != EstadoPrescripcion.Rechazada)
+            {
+                var violaciones = _validador.Validar(rutina, rutina.Socio?.Nivel);
+                if (violaciones.Count > 0)
+                    revision.ViolacionesLimites = JsonSerializer.Serialize(violaciones.Select(v => new { codigo = v.Codigo, mensaje = v.Mensaje, orden = v.Orden }));
+            }
             await _prescripciones.AddRevisionAsync(revision);
             await _prescripciones.SaveChangesAsync();
             await _audit.RegistrarAsync("REVISION_RUTINA", nameof(PrescripcionEntrenamiento), rutina.Id.ToString(), decision.ToString());
@@ -140,7 +154,7 @@ namespace GymBro.Application.Services
             }
         }
 
-        private static RutinaPendienteDto Mapear(PrescripcionEntrenamiento p) => new()
+        private RutinaPendienteDto Mapear(PrescripcionEntrenamiento p) => new()
         {
             Id = p.Id,
             SocioId = p.SocioId,
@@ -162,7 +176,9 @@ namespace GymBro.Application.Services
                 RIRObjetivo = e.RIRObjetivo,
                 DescansoObjetivoSegundos = e.DescansoObjetivoSegundos,
                 Observaciones = e.Observaciones
-            }).ToList()
+            }).ToList(),
+            AdvertenciasLimites = _validador.Validar(p, p.Socio?.Nivel)
+                .Select(v => new ViolacionLimiteDto { Codigo = v.Codigo, Mensaje = v.Mensaje, Orden = v.Orden }).ToList()
         };
     }
 }

@@ -1,3 +1,4 @@
+﻿using GymBro.Application.Abstractions;
 using GymBro.Application.DTOs.Bienestar;
 using GymBro.Domain.Entities;
 using GymBro.Domain.Enums;
@@ -35,10 +36,15 @@ namespace GymBro.Application.Services
         private readonly ISocioAccessService _acceso;
         private readonly IUsuarioActual _actual;
         private readonly TimeProvider _reloj;
+        private readonly IReglasSeguridadService _reglas;
+        private readonly IRegistroEventos _eventos;
 
         public BienestarService(IRegistroBienestarRepository registros, ISocioRepository socios,
-            ISocioAccessService acceso, IUsuarioActual actual, TimeProvider reloj)
+            ISocioAccessService acceso, IUsuarioActual actual, TimeProvider reloj, IReglasSeguridadService reglas,
+            IRegistroEventos eventos)
         {
+            _reglas = reglas;
+            _eventos = eventos;
             _registros = registros;
             _socios = socios;
             _acceso = acceso;
@@ -69,6 +75,7 @@ namespace GymBro.Application.Services
             var valores = Validar(request);
 
             var registro = await _registros.GetDelDiaAsync(socio.Id, fecha);
+            var fcAnterior = registro?.FrecuenciaCardiacaReposo;
             if (registro is null)
             {
                 registro = new RegistroBienestarDiario { SocioId = socio.Id, Fecha = fecha, FechaAlta = _reloj.GetUtcNow().UtcDateTime };
@@ -81,6 +88,19 @@ namespace GymBro.Application.Services
 
             Aplicar(valores, registro);
             await _registros.GuardarCambiosAsync();
+
+            // Etapa 10a (R-FC-1): cuando hay FC de reposo, o cuando se corrige o se borra. Tolerante a fallos (D6).
+            if (fcAnterior is not null || registro.FrecuenciaCardiacaReposo is not null)
+            {
+                try
+                {
+                    await _reglas.EvaluarBienestarAsync(registro.Id);
+                }
+                catch (Exception ex)
+                {
+                    _eventos.Error($"Fallo la evaluacion de reglas de seguridad del registro de bienestar {registro.Id}.", ex);
+                }
+            }
             return Mapear(registro);
         }
 

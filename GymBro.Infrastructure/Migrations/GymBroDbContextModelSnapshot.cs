@@ -24,6 +24,131 @@ namespace GymBro.Infrastructure.Migrations
             NpgsqlModelBuilderExtensions.HasPostgresExtension(modelBuilder, "vector");
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
 
+            modelBuilder.Entity("GymBro.Domain.Entities.AlertaSeguridad", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<string>("ClaveOrigen")
+                        .IsRequired()
+                        .HasMaxLength(64)
+                        .HasColumnType("character varying(64)")
+                        .HasColumnName("clave_origen");
+
+                    b.Property<string>("Detalle")
+                        .IsRequired()
+                        .HasColumnType("jsonb")
+                        .HasColumnName("detalle");
+
+                    b.Property<string>("Estado")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)")
+                        .HasColumnName("estado");
+
+                    b.Property<DateTime>("FechaAlta")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("fecha_alta");
+
+                    b.Property<DateTime?>("FechaBaja")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("fecha_baja");
+
+                    b.Property<DateTime?>("FechaModificacion")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("fecha_modificacion");
+
+                    b.Property<Guid?>("GimnasioId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("gimnasio_id");
+
+                    b.Property<string>("Mensaje")
+                        .IsRequired()
+                        .HasMaxLength(300)
+                        .HasColumnType("character varying(300)")
+                        .HasColumnName("mensaje");
+
+                    b.Property<Guid?>("RegistroBienestarId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("registro_bienestar_id");
+
+                    b.Property<string>("ReglaCodigo")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)")
+                        .HasColumnName("regla_codigo");
+
+                    b.Property<Guid?>("SesionEjercicioId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("sesion_ejercicio_id");
+
+                    b.Property<Guid?>("SesionId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("sesion_id");
+
+                    b.Property<string>("Severidad")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)")
+                        .HasColumnName("severidad");
+
+                    b.Property<Guid>("SocioId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("socio_id");
+
+                    b.Property<string>("Tipo")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)")
+                        .HasColumnName("tipo");
+
+                    b.Property<int>("UsuarioAlta")
+                        .HasColumnType("integer")
+                        .HasColumnName("usuario_alta");
+
+                    b.Property<int?>("UsuarioBaja")
+                        .HasColumnType("integer")
+                        .HasColumnName("usuario_baja");
+
+                    b.Property<int?>("UsuarioModificacion")
+                        .HasColumnType("integer")
+                        .HasColumnName("usuario_modificacion");
+
+                    b.Property<DateTime?>("VistaEn")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("vista_en");
+
+                    b.Property<Guid?>("VistaPorUsuarioId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("vista_por_usuario_id");
+
+                    b.HasKey("Id")
+                        .HasName("pk_alertas_seguridad");
+
+                    b.HasIndex("RegistroBienestarId")
+                        .HasDatabaseName("ix_alertas_seguridad_registro_bienestar_id");
+
+                    b.HasIndex("SesionId")
+                        .HasDatabaseName("ix_alertas_seguridad_sesion_id");
+
+                    b.HasIndex("SocioId", "ReglaCodigo", "ClaveOrigen")
+                        .IsUnique()
+                        .HasDatabaseName("ix_alertas_seguridad_socio_id_regla_codigo_clave_origen");
+
+                    b.ToTable("alertas_seguridad", null, t =>
+                        {
+                            t.HasCheckConstraint("CK_AlertaSeguridad_Estado", "estado IN ('Pendiente', 'Vista')");
+
+                            t.HasCheckConstraint("CK_AlertaSeguridad_ReglaCodigo", "regla_codigo IN ('R-RIR-1', 'R-PROG-1', 'R-FC-1')");
+
+                            t.HasCheckConstraint("CK_AlertaSeguridad_Severidad", "severidad IN ('Informativa', 'Advertencia')");
+
+                            t.HasCheckConstraint("CK_AlertaSeguridad_Tipo", "tipo IN ('Alerta', 'Sugerencia')");
+                        });
+                });
+
             modelBuilder.Entity("GymBro.Domain.Entities.AsignacionEntrenadorSocio", b =>
                 {
                     b.Property<Guid>("Id")
@@ -1012,6 +1137,10 @@ namespace GymBro.Infrastructure.Migrations
                         .HasColumnType("uuid")
                         .HasColumnName("revisor_usuario_id");
 
+                    b.Property<string>("ViolacionesLimites")
+                        .HasColumnType("jsonb")
+                        .HasColumnName("violaciones_limites");
+
                     b.HasKey("Id")
                         .HasName("pk_revisiones_prescripcion");
 
@@ -1575,6 +1704,18 @@ namespace GymBro.Infrastructure.Migrations
                         {
                             t.HasCheckConstraint("CK_Usuario_Rol_Alcance", "(rol = 'SuperAdministrador' AND gimnasio_id IS NULL AND socio_id IS NULL) OR (rol IN ('AdministradorGimnasio','Entrenador') AND gimnasio_id IS NOT NULL AND socio_id IS NULL) OR (rol = 'Socio' AND socio_id IS NOT NULL AND gimnasio_id IS NULL)");
                         });
+                });
+
+            modelBuilder.Entity("GymBro.Domain.Entities.AlertaSeguridad", b =>
+                {
+                    b.HasOne("GymBro.Domain.Entities.Socio", "Socio")
+                        .WithMany()
+                        .HasForeignKey("SocioId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired()
+                        .HasConstraintName("fk_alertas_seguridad_socios_socio_id");
+
+                    b.Navigation("Socio");
                 });
 
             modelBuilder.Entity("GymBro.Domain.Entities.AsignacionEntrenadorSocio", b =>

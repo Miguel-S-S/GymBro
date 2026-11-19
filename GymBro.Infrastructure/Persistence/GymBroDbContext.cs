@@ -34,6 +34,7 @@ namespace GymBro.Infrastructure.Persistence
         public DbSet<PrescripcionEjercicio> PrescripcionesEjercicios { get; set; }
         public DbSet<SerieRealizada> SeriesRealizadas { get; set; }
         public DbSet<RegistroBienestarDiario> RegistrosBienestarDiario { get; set; }
+        public DbSet<AlertaSeguridad> AlertasSeguridad { get; set; }
         public DbSet<TipoEquipamiento> TiposEquipamiento { get; set; }
         public DbSet<EquipamientoGimnasio> EquipamientosGimnasio { get; set; }
 
@@ -175,6 +176,7 @@ namespace GymBro.Infrastructure.Persistence
 
             ConfigurarAccesoYTenants(modelBuilder);
             ConfigurarBienestarDiario(modelBuilder);
+            ConfigurarAlertasSeguridad(modelBuilder);
             ConfigurarCatalogoGimnasio(modelBuilder);
 
             // 5. Conversión de Enums a texto puro en la base de datos
@@ -274,6 +276,42 @@ namespace GymBro.Infrastructure.Persistence
                 e.HasIndex(x => x.CreadoPorUsuarioId);
                 e.ToTable(t => t.HasCheckConstraint("CK_Ejercicio_OrigenGimnasio",
                     "(origen = 'Gimnasio' AND gimnasio_id IS NOT NULL) OR (origen <> 'Gimnasio' AND gimnasio_id IS NULL)"));
+            });
+        }
+
+        /// <summary>
+        /// Alertas de las reglas de seguridad (Etapa 10a). Datos de salud: mismo alcance que las sesiones (el propio socio o
+        /// el personal del gimnasio actual del socio; la restricción del Personal Trainer a sus asignados la aplica
+        /// SocioAccessService). El Administrador de la Plataforma no está en el filtro: no las ve.
+        /// </summary>
+        private void ConfigurarAlertasSeguridad(ModelBuilder modelBuilder)
+        {
+            modelBuilder.Entity<AlertaSeguridad>(e =>
+            {
+                e.ToTable("alertas_seguridad", t =>
+                {
+                    t.HasCheckConstraint("CK_AlertaSeguridad_ReglaCodigo",
+                        "regla_codigo IN (" + string.Join(", ", CodigosRegla.Todos.Select(c => $"'{c}'")) + ")");
+                    t.HasCheckConstraint("CK_AlertaSeguridad_Tipo", GuardaEnums.CondicionTexto<TipoAlerta>("tipo"));
+                    t.HasCheckConstraint("CK_AlertaSeguridad_Severidad", GuardaEnums.CondicionTexto<SeveridadAlerta>("severidad"));
+                    t.HasCheckConstraint("CK_AlertaSeguridad_Estado", GuardaEnums.CondicionTexto<EstadoAlerta>("estado"));
+                });
+                e.HasQueryFilter(a => a.FechaBaja == null && (
+                    _actual.EsProcesoDeSistema
+                    || (_actual.GimnasioId != null && a.Socio.GimnasioId == _actual.GimnasioId)
+                    || (_actual.SocioId != null && a.SocioId == _actual.SocioId)));
+                e.Property(a => a.ReglaCodigo).HasMaxLength(20).IsRequired();
+                e.Property(a => a.ClaveOrigen).HasMaxLength(64).IsRequired();
+                e.Property(a => a.Tipo).HasConversion<string>().HasMaxLength(20);
+                e.Property(a => a.Severidad).HasConversion<string>().HasMaxLength(20);
+                e.Property(a => a.Estado).HasConversion<string>().HasMaxLength(20);
+                e.Property(a => a.Mensaje).HasMaxLength(300).IsRequired();
+                e.Property(a => a.Detalle).HasColumnType("jsonb").IsRequired();
+                e.HasOne(a => a.Socio).WithMany().HasForeignKey(a => a.SocioId).OnDelete(DeleteBehavior.Restrict);
+                // Una sola fila por socio, regla y origen (idempotencia). No es parcial: la fila dada de baja se reactiva.
+                e.HasIndex(a => new { a.SocioId, a.ReglaCodigo, a.ClaveOrigen }).IsUnique();
+                e.HasIndex(a => a.SesionId);
+                e.HasIndex(a => a.RegistroBienestarId);
             });
         }
 
@@ -416,6 +454,8 @@ namespace GymBro.Infrastructure.Persistence
                 e.HasOne(r => r.PrescripcionEntrenamiento).WithMany(p => p.Revisiones)
                     .HasForeignKey(r => r.PrescripcionEntrenamientoId).OnDelete(DeleteBehavior.Cascade);
                 e.HasIndex(r => r.PrescripcionEntrenamientoId);
+                // Etapa 10a (R-LIM): violaciones de límites registradas en la revisión.
+                e.Property(r => r.ViolacionesLimites).HasColumnType("jsonb");
             });
 
             // Auditoría (append-only)

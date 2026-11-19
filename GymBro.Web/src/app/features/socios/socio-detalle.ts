@@ -17,6 +17,7 @@ import {
 import { ConfirmarDialog } from '../../core/ui/confirmar-dialog';
 import { mensajeDeError } from '../../core/util/api-error';
 import { SesionesPanel } from '../sesiones/sesiones-panel';
+import { AlertasPanel } from '../alertas/alertas-panel';
 import { InvitacionDialog } from './invitacion-dialog';
 import { RutinasPanel } from '../rutinas/rutinas-panel';
 import { MedicionesPanel } from './mediciones-panel';
@@ -24,7 +25,7 @@ import { SocioEditarDialog } from './socio-editar-dialog';
 
 @Component({
   selector: 'app-socio-detalle',
-  imports: [DatePipe, RouterLink, MatButtonModule, MatIconModule, MatProgressBarModule, MatTabsModule, MedicionesPanel, RutinasPanel, SesionesPanel],
+  imports: [DatePipe, RouterLink, MatButtonModule, MatIconModule, MatProgressBarModule, MatTabsModule, MedicionesPanel, RutinasPanel, SesionesPanel, AlertasPanel],
   template: `
     <a mat-button routerLink="/socios" class="volver"><mat-icon>arrow_back</mat-icon> Socios</a>
 
@@ -82,6 +83,10 @@ import { SocioEditarDialog } from './socio-editar-dialog';
         </mat-tab>
         <mat-tab label="Sesiones de entrenamiento">
           <app-sesiones-panel [socioId]="s.id" />
+        </mat-tab>
+        <!-- Etapa 10a: alertas de las reglas de seguridad (datos de salud). -->
+        <mat-tab label="Alertas">
+          <app-alertas-panel [socioId]="s.id" />
         </mat-tab>
       </mat-tab-group>
     }

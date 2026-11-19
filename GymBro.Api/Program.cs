@@ -5,6 +5,7 @@ using GymBro.Api.Security;
 using GymBro.Application.Abstractions;
 using GymBro.Application.Services;
 using GymBro.Domain.Repositories;
+using GymBro.Domain.Rules;
 using GymBro.Domain.Security;
 using GymBro.Infrastructure.ExternalServices;
 using GymBro.Infrastructure.Persistence;
@@ -74,6 +75,14 @@ builder.Services.AddSingleton(builder.Configuration.GetSection("Embeddings").Get
 builder.Services.AddScoped<IEquipamientoRepository, EquipamientoRepository>();
 builder.Services.AddScoped<IEquipamientoService, EquipamientoService>();
 builder.Services.AddScoped<IEjercicioGimnasioService, EjercicioGimnasioService>();
+
+// Etapa 10a: reglas deterministas de seguridad. Umbrales en "ReglasSeguridad" (valores por defecto en código).
+builder.Services.AddSingleton(builder.Configuration.GetSection("ReglasSeguridad").Get<ReglasSeguridadConfig>() ?? new ReglasSeguridadConfig());
+builder.Services.AddSingleton<IRegistroEventos, RegistroEventos>();
+builder.Services.AddScoped<IAlertaSeguridadRepository, AlertaSeguridadRepository>();
+builder.Services.AddScoped<IValidadorPrescripcionService, ValidadorPrescripcionService>();
+builder.Services.AddScoped<IReglasSeguridadService, ReglasSeguridadService>();
+builder.Services.AddScoped<IAlertasService, AlertasService>();
 
 builder.Services.Configure<JwtOptions>(builder.Configuration.GetSection(JwtOptions.Seccion));
 var jwt = builder.Configuration.GetSection(JwtOptions.Seccion).Get<JwtOptions>() ?? new JwtOptions();

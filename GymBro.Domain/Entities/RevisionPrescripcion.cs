@@ -12,5 +12,11 @@ namespace GymBro.Domain.Entities
         public EstadoPrescripcion Decision { get; set; }
         public string? Comentario { get; set; }
         public DateTime Fecha { get; set; } = DateTime.UtcNow;
+
+        /// <summary>
+        /// Etapa 10a (R-LIM): violaciones de los límites duros al aprobar o editar, en JSON (jsonb). Advierten y quedan
+        /// registradas; no bloquean (decisión D3). Null si no hubo violaciones o si la rutina se rechazó.
+        /// </summary>
+        public string? ViolacionesLimites { get; set; }
     }
 }

@@ -1,0 +1,114 @@
+Etapa 9a-2 (ejercicios y equipamiento propios del gimnasio) - evidencia: migracion Etapa9a2_CatalogoGimnasio
+Comando: dotnet ef migrations script 20261118001101_Etapa9a1_CatalogoCore 20261119011431_Etapa9a2_CatalogoGimnasio
+         aplicado a gymbro-db con: docker exec -i gymbro-db psql -U postgres -d gymbro_db -v ON_ERROR_STOP=1 (una transaccion)
+Commit: b447cd2b0336b66095a7ce4f3d889b3748f3153a (evidencia generada sobre el arbol de trabajo de la rama etapa9a2 antes del commit; el contenido del codigo es identico al de ese commit)
+Fecha de aplicacion: 2026-11-18 22:32:51 -0300
+Codigo de salida: 0
+Salida de psql:
+  START TRANSACTION
+  ALTER TABLE
+  ALTER TABLE
+  CREATE TABLE
+  CREATE TABLE
+  CREATE INDEX
+  CREATE INDEX
+  ALTER TABLE
+  CREATE INDEX
+  CREATE INDEX
+  CREATE INDEX
+  CREATE INDEX
+  ALTER TABLE
+  ALTER TABLE
+  INSERT 0 1
+  COMMIT
+La migracion no inserta tipos ni asigna tipo_equipamiento_id: lo hace EquipamientoSeeder en el arranque de la API.
+Reversible: el script Down (abajo) elimina las dos tablas, las FK, los indices, el CHECK y las dos columnas nuevas.
+------------------------------------------------------------
+Script SQL (Up):
+﻿START TRANSACTION;
+ALTER TABLE ejercicios ADD gimnasio_id uuid;
+
+ALTER TABLE ejercicios ADD tipo_equipamiento_id uuid;
+
+CREATE TABLE tipos_equipamiento (
+    id uuid NOT NULL,
+    clave character varying(60) NOT NULL,
+    nombre character varying(80) NOT NULL,
+    siempre_disponible boolean NOT NULL,
+    gimnasio_id uuid,
+    fecha_alta timestamp with time zone NOT NULL,
+    usuario_alta integer NOT NULL,
+    fecha_modificacion timestamp with time zone,
+    usuario_modificacion integer,
+    fecha_baja timestamp with time zone,
+    usuario_baja integer,
+    CONSTRAINT pk_tipos_equipamiento PRIMARY KEY (id),
+    CONSTRAINT fk_tipos_equipamiento_gimnasios_gimnasio_id FOREIGN KEY (gimnasio_id) REFERENCES gimnasios (id) ON DELETE RESTRICT
+);
+
+CREATE TABLE equipamientos_gimnasio (
+    id uuid NOT NULL,
+    gimnasio_id uuid NOT NULL,
+    tipo_equipamiento_id uuid NOT NULL,
+    cantidad integer,
+    fecha_alta timestamp with time zone NOT NULL,
+    usuario_alta integer NOT NULL,
+    fecha_modificacion timestamp with time zone,
+    usuario_modificacion integer,
+    fecha_baja timestamp with time zone,
+    usuario_baja integer,
+    CONSTRAINT pk_equipamientos_gimnasio PRIMARY KEY (id),
+    CONSTRAINT "CK_EquipamientoGimnasio_Cantidad" CHECK (cantidad IS NULL OR cantidad >= 1),
+    CONSTRAINT fk_equipamientos_gimnasio_gimnasios_gimnasio_id FOREIGN KEY (gimnasio_id) REFERENCES gimnasios (id) ON DELETE RESTRICT,
+    CONSTRAINT fk_equipamientos_gimnasio_tipos_equipamiento_tipo_equipamiento FOREIGN KEY (tipo_equipamiento_id) REFERENCES tipos_equipamiento (id) ON DELETE RESTRICT
+);
+
+CREATE INDEX ix_ejercicios_gimnasio_id ON ejercicios (gimnasio_id);
+
+CREATE INDEX ix_ejercicios_tipo_equipamiento_id ON ejercicios (tipo_equipamiento_id);
+
+ALTER TABLE ejercicios ADD CONSTRAINT "CK_Ejercicio_OrigenGimnasio" CHECK ((origen = 'Gimnasio' AND gimnasio_id IS NOT NULL) OR (origen <> 'Gimnasio' AND gimnasio_id IS NULL));
+
+CREATE UNIQUE INDEX ix_equipamientos_gimnasio_gimnasio_id_tipo_equipamiento_id ON equipamientos_gimnasio (gimnasio_id, tipo_equipamiento_id) WHERE fecha_baja IS NULL;
+
+CREATE INDEX ix_equipamientos_gimnasio_tipo_equipamiento_id ON equipamientos_gimnasio (tipo_equipamiento_id);
+
+CREATE UNIQUE INDEX ix_tipos_equipamiento_clave_global ON tipos_equipamiento (clave) WHERE gimnasio_id IS NULL;
+
+CREATE UNIQUE INDEX ix_tipos_equipamiento_gimnasio_id_clave ON tipos_equipamiento (gimnasio_id, clave) WHERE gimnasio_id IS NOT NULL;
+
+ALTER TABLE ejercicios ADD CONSTRAINT fk_ejercicios_gimnasios_gimnasio_id FOREIGN KEY (gimnasio_id) REFERENCES gimnasios (id) ON DELETE RESTRICT;
+
+ALTER TABLE ejercicios ADD CONSTRAINT fk_ejercicios_tipos_equipamiento_tipo_equipamiento_id FOREIGN KEY (tipo_equipamiento_id) REFERENCES tipos_equipamiento (id) ON DELETE RESTRICT;
+
+INSERT INTO "__EFMigrationsHistory" (migration_id, product_version)
+VALUES ('20261119011431_Etapa9a2_CatalogoGimnasio', '10.0.11');
+
+COMMIT;
+
+------------------------------------------------------------
+Script SQL (Down, no aplicado):
+﻿START TRANSACTION;
+ALTER TABLE ejercicios DROP CONSTRAINT fk_ejercicios_gimnasios_gimnasio_id;
+
+ALTER TABLE ejercicios DROP CONSTRAINT fk_ejercicios_tipos_equipamiento_tipo_equipamiento_id;
+
+DROP TABLE equipamientos_gimnasio;
+
+DROP TABLE tipos_equipamiento;
+
+DROP INDEX ix_ejercicios_gimnasio_id;
+
+DROP INDEX ix_ejercicios_tipo_equipamiento_id;
+
+ALTER TABLE ejercicios DROP CONSTRAINT "CK_Ejercicio_OrigenGimnasio";
+
+ALTER TABLE ejercicios DROP COLUMN gimnasio_id;
+
+ALTER TABLE ejercicios DROP COLUMN tipo_equipamiento_id;
+
+DELETE FROM "__EFMigrationsHistory"
+WHERE migration_id = '20261119011431_Etapa9a2_CatalogoGimnasio';
+
+COMMIT;
+

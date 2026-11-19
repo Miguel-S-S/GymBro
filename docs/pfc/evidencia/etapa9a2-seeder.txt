@@ -1,0 +1,77 @@
+Etapa 9a-2 - evidencia: EquipamientoSeeder sobre la base local (primer arranque de la API despues de la migracion)
+Arranque: dotnet run --project GymBro.Api --no-build --launch-profile http (detenido despues de 'Now listening')
+Linea del seeder en la salida de la API:
+  [OK] Equipamiento: 13 tipos globales agregados y 696 ejercicios con tipo asignado.
+Consulta de verificacion (solo lectura): docker exec gymbro-db psql -U postgres -d gymbro_db -c "SELECT t.clave, t.nombre, t.siempre_disponible, count(e.id) AS ejercicios FROM tipos_equipamiento t LEFT JOIN ejercicios e ON e.tipo_equipamiento_id = t.id WHERE t.gimnasio_id IS NULL GROUP BY 1,2,3 ORDER BY 1; SELECT count(*) FILTER (WHERE tipo_equipamiento_id IS NULL) AS sin_tipo, count(*) AS total FROM ejercicios; SELECT e.equipamiento, length(e.equipamiento) AS largo, t.clave, count(*) FROM ejercicios e JOIN tipos_equipamiento t ON t.id = e.tipo_equipamiento_id GROUP BY 1,2,3 ORDER BY 1; SELECT count(*) AS embeddings_nulos FROM ejercicios WHERE embedding IS NULL;"
+Commit: b447cd2b0336b66095a7ce4f3d889b3748f3153a (evidencia generada sobre el arbol de trabajo de la rama etapa9a2 antes del commit; el contenido del codigo es identico al de ese commit)
+Fecha: 2026-11-18 22:33:24 -0300
+Codigo de salida: 0
+Base: gymbro-db (catalogo de datasets publicos y del proyecto, sin datos personales)
+------------------------------------------------------------
+         clave         |              nombre              | siempre_disponible | ejercicios 
+-----------------------+----------------------------------+--------------------+------------
+ BANDA                 | Banda elástica                   | f                  |          7
+ BARRA                 | Barra                            | f                  |         57
+ ESTIRAMIENTO          | Estiramiento (sin equipo)        | t                  |         91
+ MANCUERNA             | Mancuernas                       | f                  |         62
+ MAQUINA_ASISTIDA      | Máquina asistida                 | f                  |          8
+ MAQUINA_DISCOS        | Máquina de discos                | f                  |         74
+ MAQUINA_OTRA          | Máquina (sin especificar)        | f                  |         34
+ MAQUINA_SELECTORIZADA | Máquina con selector de peso     | f                  |         83
+ PESO_ADICIONAL        | Peso adicional (cinturón, disco) | f                  |         31
+ PESO_CORPORAL         | Peso corporal                    | t                  |         95
+ POLEA                 | Polea / cable                    | f                  |        102
+ SMITH                 | Máquina Smith                    | f                  |         22
+ SUSPENSION            | Suspensión (TRX o similar)       | f                  |         30
+(13 rows)
+
+ sin_tipo | total 
+----------+-------
+        0 |   696
+(1 row)
+
+            equipamiento            | largo |         clave         | count 
+------------------------------------+-------+-----------------------+-------
+ Assisted                           |     8 | MAQUINA_ASISTIDA      |     4
+ Assisted  Chest Dip                |    21 | MAQUINA_ASISTIDA      |     1
+ Assisted (machine)                 |    18 | MAQUINA_ASISTIDA      |     3
+ Assisted (partner)                 |    18 | PESO_CORPORAL         |     2
+ Band-assisted                      |    13 | BANDA                 |     7
+ Barbell                            |     7 | BARRA                 |    57
+ Body Weight                        |    11 | PESO_CORPORAL         |    80
+ Cable                              |     5 | POLEA                 |   100
+ Cable (pull side)                  |    17 | POLEA                 |     1
+ Cable  Standing Fly                |    21 | POLEA                 |     1
+ Dumbbell                           |     8 | MANCUERNA             |    62
+ Dynamic Stretch                    |    15 | ESTIRAMIENTO          |     2
+ Lever                              |     5 | MAQUINA_OTRA          |     3
+ Lever (plate loaded)               |    20 | MAQUINA_DISCOS        |    73
+ Lever (selectorized)               |    20 | MAQUINA_SELECTORIZADA |    77
+ Lever (selectorized)​​​​​​​               |    27 | MAQUINA_SELECTORIZADA |     4
+ Lever (selectorized)  Chest Dip    |    33 | MAQUINA_SELECTORIZADA |     1
+ Plyometric                         |    10 | PESO_CORPORAL         |     2
+ Self-assisted                      |    13 | PESO_CORPORAL         |     6
+ Self-assisted​​​​​​​                      |    20 | PESO_CORPORAL         |     5
+ Sled                               |     4 | MAQUINA_OTRA          |    31
+ Sled (plate loaded)                |    19 | MAQUINA_DISCOS        |     1
+ Sled (selectorized)                |    19 | MAQUINA_SELECTORIZADA |     1
+ Smith                              |     5 | SMITH                 |    21
+ Smith​​​​​​​                              |    12 | SMITH                 |     1
+ Stretch                            |     7 | ESTIRAMIENTO          |    70
+ StretchBroomstickDoorway           |    25 | ESTIRAMIENTO          |     2
+ Stretch  Fixed Bar Hugging         |    28 | ESTIRAMIENTO          |     2
+ Stretch (Gluteus Medius & Minimus) |    34 | ESTIRAMIENTO          |     5
+ Stretch (Iliopsoas)                |    19 | ESTIRAMIENTO          |     4
+ Stretch (Piriformis)               |    20 | ESTIRAMIENTO          |     4
+ Stretch (Tensor Fasciae Latae)     |    30 | ESTIRAMIENTO          |     2
+ Suspended                          |     9 | SUSPENSION            |    28
+ Suspension                         |    10 | SUSPENSION            |     2
+ Weighted                           |     8 | PESO_ADICIONAL        |    30
+ Weighted  Chest Dip                |    21 | PESO_ADICIONAL        |     1
+(36 rows)
+
+ embeddings_nulos 
+------------------
+                0
+(1 row)
+

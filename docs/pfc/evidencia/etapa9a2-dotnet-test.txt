@@ -1,0 +1,14 @@
+Etapa 9a-2 (ejercicios y equipamiento propios del gimnasio) - evidencia
+Comando: dotnet test GymBro.slnx --no-build
+Commit: b447cd2b0336b66095a7ce4f3d889b3748f3153a (evidencia generada sobre el arbol de trabajo de la rama etapa9a2 antes del commit; el contenido del codigo es identico al de ese commit)
+Fecha: 2026-11-18 22:34:03 -0300
+Codigo de salida: 0
+------------------------------------------------------------
+Serie de pruebas para C:\Users\miguel\source\repos\GymBro\GymBro.Tests\bin\Debug\net10.0\GymBro.Tests.dll (.NETCoreApp,Version=v10.0)
+Serie de pruebas para C:\Users\miguel\source\repos\GymBro\GymBro.Tests.Integration\bin\Debug\net10.0\GymBro.Tests.Integration.dll (.NETCoreApp,Version=v10.0)
+1 archivos de prueba en total coincidieron con el patrón especificado.
+1 archivos de prueba en total coincidieron con el patrón especificado.
+
+Correctas! - Con error:     0, Superado:   170, Omitido:     0, Total:   170, Duración: 134 ms - GymBro.Tests.dll (net10.0)
+
+Correctas! - Con error:     0, Superado:   287, Omitido:     0, Total:   287, Duración: 18 s - GymBro.Tests.Integration.dll (net10.0)

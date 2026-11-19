@@ -1,0 +1,81 @@
+Etapa 9a-2 (ejercicios y equipamiento propios del gimnasio) - evidencia: estado previo de la base local (solo lectura)
+Comando: docker exec gymbro-db psql -U postgres -d gymbro_db -v ON_ERROR_STOP=1 -c "SELECT equipamiento, length(equipamiento) AS largo, count(*) FROM ejercicios GROUP BY 1,2 ORDER BY 1; SELECT zona_objetivo, min(dificultad), max(dificultad), count(*) FROM ejercicios GROUP BY 1 ORDER BY 1; SELECT count(*) AS gimnasios FROM gimnasios; SELECT count(*) AS sin_embedding FROM ejercicios WHERE embedding IS NULL; SELECT origen, count(*) FROM ejercicios GROUP BY 1 ORDER BY 1; SELECT migration_id FROM "__EFMigrationsHistory" ORDER BY 1 DESC LIMIT 1;"
+Commit: 4c7583e51731576d49ac03a1ca2ec5044dee98c6 (rama etapa9a2, sin cambios de codigo)
+Fecha: 2026-11-18 22:07:37 -0300
+Codigo de salida: 0
+Base: gymbro-db (base local de desarrollo; catalogo de datasets publicos y del proyecto, sin datos personales)
+Nota: 'largo' muestra los espacios de ancho cero (U+200B) en algunos valores de equipamiento.
+------------------------------------------------------------
+            equipamiento            | largo | count 
+------------------------------------+-------+-------
+ Assisted                           |     8 |     4
+ Assisted  Chest Dip                |    21 |     1
+ Assisted (machine)                 |    18 |     3
+ Assisted (partner)                 |    18 |     2
+ Band-assisted                      |    13 |     7
+ Barbell                            |     7 |    57
+ Body Weight                        |    11 |    80
+ Cable                              |     5 |   100
+ Cable (pull side)                  |    17 |     1
+ Cable  Standing Fly                |    21 |     1
+ Dumbbell                           |     8 |    62
+ Dynamic Stretch                    |    15 |     2
+ Lever                              |     5 |     3
+ Lever (plate loaded)               |    20 |    73
+ Lever (selectorized)               |    20 |    77
+ Lever (selectorized)​​​​​​​               |    27 |     4
+ Lever (selectorized)  Chest Dip    |    33 |     1
+ Plyometric                         |    10 |     2
+ Self-assisted                      |    13 |     6
+ Self-assisted​​​​​​​                      |    20 |     5
+ Sled                               |     4 |    31
+ Sled (plate loaded)                |    19 |     1
+ Sled (selectorized)                |    19 |     1
+ Smith                              |     5 |    21
+ Smith​​​​​​​                              |    12 |     1
+ Stretch                            |     7 |    70
+ StretchBroomstickDoorway           |    25 |     2
+ Stretch  Fixed Bar Hugging         |    28 |     2
+ Stretch (Gluteus Medius & Minimus) |    34 |     5
+ Stretch (Iliopsoas)                |    19 |     4
+ Stretch (Piriformis)               |    20 |     4
+ Stretch (Tensor Fasciae Latae)     |    30 |     2
+ Suspended                          |     9 |    28
+ Suspension                         |    10 |     2
+ Weighted                           |     8 |    30
+ Weighted  Chest Dip                |    21 |     1
+(36 rows)
+
+ zona_objetivo | min | max | count 
+---------------+-----+-----+-------
+ Arms          |   2 |   4 |    59
+ Back          |   1 |   5 |    97
+ Chest         |   1 |   4 |    72
+ Core          |   1 |   3 |     8
+ Forearms      |   1 |   2 |    23
+ Legs          |   1 |   5 |   282
+ Movilidad     |   1 |   1 |    91
+ Shoulders     |   2 |   5 |    64
+(8 rows)
+
+ gimnasios 
+-----------
+         3
+(1 row)
+
+ sin_embedding 
+---------------
+             0
+(1 row)
+
+  origen  | count 
+----------+-------
+ Dataset  |   688
+ Proyecto |     8
+(2 rows)
+
+             migration_id             
+--------------------------------------
+ 20261118001101_Etapa9a1_CatalogoCore
+(1 row)
+

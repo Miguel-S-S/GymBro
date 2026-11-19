@@ -1,0 +1,19 @@
+Etapa 9a-2 (ejercicios y equipamiento propios del gimnasio) - evidencia
+Comando: npx ng test --watch=false
+Commit: b447cd2b0336b66095a7ce4f3d889b3748f3153a (evidencia generada sobre el arbol de trabajo de la rama etapa9a2 antes del commit; el contenido del codigo es identico al de ese commit)
+Fecha: 2026-11-18 22:34:24 -0300
+Codigo de salida: 0
+------------------------------------------------------------
+❯ Building...
+✔ Building...
+Application bundle generation complete. [3.984 seconds] - 2026-11-19T01:34:17.777Z
+
+
+ RUN  v5.1.0 C:/Users/miguel/source/repos/GymBro/GymBro.Web
+
+
+ Test Files  26 passed (26)
+      Tests  164 passed (164)
+   Start at  22:34:18
+   Duration  6.55s (environment 71%, tests 11%, import 8%, setup 7%, transform 3%)
+

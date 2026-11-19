@@ -33,6 +33,16 @@ namespace GymBro.Domain.Entities
         public Guid? TipoEquipamientoId { get; set; }
         public TipoEquipamiento? TipoEquipamiento { get; set; }
 
+        /// <summary>
+        /// Etapa 9a-2b: los ejercicios no se dan de baja, se desactivan. Uno inactivo no aparece en el catálogo, la búsqueda
+        /// ni el baseline (filtro global), pero se conserva en el historial y se puede reactivar.
+        /// </summary>
+        public bool Activo { get; set; } = true;
+
+        /// <summary>Usuario que creó el ejercicio propio (Etapa 9a-2b). Nulo en los globales y en los anteriores a la etapa.</summary>
+        public Guid? CreadoPorUsuarioId { get; set; }
+        public Usuario? CreadoPor { get; set; }
+
         // Motor IA
         public Vector? Embedding { get; set; }
     }

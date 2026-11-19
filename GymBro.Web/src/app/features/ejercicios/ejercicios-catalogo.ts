@@ -10,13 +10,20 @@ import { MatListModule } from '@angular/material/list';
 import { MatPaginatorIntl, MatPaginatorModule, PageEvent } from '@angular/material/paginator';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { MatSelectModule } from '@angular/material/select';
+import { MatSlideToggleModule } from '@angular/material/slide-toggle';
 import { MatTableModule } from '@angular/material/table';
 import { MatTabsModule } from '@angular/material/tabs';
 import { debounceTime, distinctUntilChanged, merge } from 'rxjs';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { EjerciciosApi } from '../../core/api/ejercicios.api';
 import { AuthService } from '../../core/auth/auth.service';
-import { EjercicioBuscado, EjercicioResumen, ORIGEN_ETIQUETA, OrigenEjercicio } from '../../core/models/ejercicio.models';
+import {
+  ADVERTENCIA_EJERCICIO_PROPIO,
+  EjercicioBuscado,
+  EjercicioResumen,
+  ORIGEN_ETIQUETA,
+  OrigenEjercicio,
+} from '../../core/models/ejercicio.models';
 import { ConfirmarDatos, ConfirmarDialog } from '../../core/ui/confirmar-dialog';
 import { mensajeDeError } from '../../core/util/api-error';
 import { EjercicioDetalleDialog } from './ejercicio-detalle-dialog';
@@ -37,6 +44,7 @@ import { paginadorEnEspaniol } from './paginador-es';
     MatIconModule,
     MatListModule,
     MatProgressBarModule,
+    MatSlideToggleModule,
   ],
   providers: [{ provide: MatPaginatorIntl, useFactory: paginadorEnEspaniol }],
   template: `
@@ -45,10 +53,13 @@ import { paginadorEnEspaniol } from './paginador-es';
         <h1>Ejercicios</h1>
         <p class="subtitulo">Catálogo de musculación y acondicionamiento</p>
       </div>
-      @if (esDueno) {
+      @if (gestiona) {
         <button mat-flat-button class="nuevo" (click)="nuevo()"><mat-icon>add</mat-icon> Nuevo ejercicio</button>
       }
     </div>
+    @if (gestiona) {
+      <p class="aviso advertencia"><mat-icon>warning_amber</mat-icon><span>{{ advertencia }}</span></p>
+    }
 
     <mat-tab-group mat-stretch-tabs="false" animationDuration="0ms">
       <!-- ===== Catálogo ===== -->
@@ -76,6 +87,9 @@ import { paginadorEnEspaniol } from './paginador-es';
                 @for (o of origenes; track o) { <mat-option [value]="o">{{ etiquetaOrigen[o] }}</mat-option> }
               </mat-select>
             </mat-form-field>
+            @if (gestiona) {
+              <mat-slide-toggle class="ver-inactivos" [formControl]="verInactivos">Ver desactivados</mat-slide-toggle>
+            }
           </div>
 
           @if (cargando()) { <mat-progress-bar mode="indeterminate" /> }
@@ -88,7 +102,11 @@ import { paginadorEnEspaniol } from './paginador-es';
               <table mat-table [dataSource]="ejercicios()">
                 <ng-container matColumnDef="nombre">
                   <th mat-header-cell *matHeaderCellDef>Nombre</th>
-                  <td mat-cell *matCellDef="let e">{{ e.nombre }}</td>
+                  <td mat-cell *matCellDef="let e">
+                    {{ e.nombre }}
+                    @if (e.activo === false) { <span class="insignia inactivo">Desactivado</span> }
+                    @if (e.creadoPor) { <span class="autor">Propuesto por: {{ e.creadoPor }}</span> }
+                  </td>
                 </ng-container>
                 <ng-container matColumnDef="origen">
                   <th mat-header-cell *matHeaderCellDef>Origen</th>
@@ -115,9 +133,15 @@ import { paginadorEnEspaniol } from './paginador-es';
                 <ng-container matColumnDef="acciones">
                   <th mat-header-cell *matHeaderCellDef><span class="oculto">Acciones</span></th>
                   <td mat-cell *matCellDef="let e" class="acciones">
-                    @if (esPropio(e)) {
+                    @if (e.puedeEditar) {
                       <button mat-icon-button aria-label="Editar" class="editar" (click)="$event.stopPropagation(); editar(e)"><mat-icon>edit</mat-icon></button>
-                      <button mat-icon-button aria-label="Dar de baja" class="baja" (click)="$event.stopPropagation(); darDeBaja(e)"><mat-icon>delete</mat-icon></button>
+                    }
+                    @if (e.puedeCambiarEstado) {
+                      @if (e.activo === false) {
+                        <button mat-icon-button aria-label="Reactivar" class="reactivar" (click)="$event.stopPropagation(); cambiarEstado(e, true)"><mat-icon>restore</mat-icon></button>
+                      } @else {
+                        <button mat-icon-button aria-label="Desactivar" class="desactivar" (click)="$event.stopPropagation(); cambiarEstado(e, false)"><mat-icon>block</mat-icon></button>
+                      }
                     }
                   </td>
                 </ng-container>
@@ -196,6 +220,10 @@ import { paginadorEnEspaniol } from './paginador-es';
     .origen-Gimnasio { background: var(--mat-sys-primary-container); color: var(--mat-sys-on-primary-container); }
     .origen-Proyecto { background: var(--mat-sys-tertiary-container); color: var(--mat-sys-on-tertiary-container); }
     .acciones { white-space: nowrap; text-align: end; }
+    .inactivo { margin-left: 8px; background: var(--mat-sys-error-container); color: var(--mat-sys-on-error-container); }
+    .autor { display: block; font: var(--mat-sys-body-small); color: var(--mat-sys-on-surface-variant); }
+    .ver-inactivos { align-self: center; }
+    .advertencia { margin: 0 0 8px; }
     .oculto { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
     .rango {
       display: grid; place-items: center; border-radius: 50%;
@@ -210,9 +238,13 @@ export class EjerciciosCatalogo {
   private readonly destroyRef = inject(DestroyRef);
   private readonly snack = inject(MatSnackBar);
 
-  /** Etapa 9a-2: solo el Dueño crea, edita y da de baja ejercicios propios de su gimnasio. */
-  readonly esDueno = inject(AuthService).tieneRol('AdministradorGimnasio');
-  readonly columnas = ['nombre', 'origen', 'zona', 'musculo', 'equipamiento', 'dificultad', ...(this.esDueno ? ['acciones'] : [])];
+  /**
+   * Etapa 9a-2b: gestionan el catálogo el Administrador de la Plataforma (cualquier gimnasio), el Dueño y el Personal
+   * Trainer (D4). Qué puede hacer con cada ejercicio lo informa el servidor (puedeEditar, puedeCambiarEstado).
+   */
+  readonly gestiona = inject(AuthService).tieneRol('SuperAdministrador', 'AdministradorGimnasio', 'Entrenador');
+  readonly advertencia = ADVERTENCIA_EJERCICIO_PROPIO;
+  readonly columnas = ['nombre', 'origen', 'zona', 'musculo', 'equipamiento', 'dificultad', ...(this.gestiona ? ['acciones'] : [])];
   readonly origenes: OrigenEjercicio[] = ['Dataset', 'Proyecto', 'Gimnasio'];
   readonly etiquetaOrigen = ORIGEN_ETIQUETA;
   etiqueta(o: OrigenEjercicio): string {
@@ -223,6 +255,7 @@ export class EjerciciosCatalogo {
   readonly texto = new FormControl('', { nonNullable: true });
   readonly zona = new FormControl<string | null>(null);
   readonly origen = new FormControl<OrigenEjercicio | null>(null);
+  readonly verInactivos = new FormControl(false, { nonNullable: true });
   readonly zonas = signal<string[]>([]);
   readonly ejercicios = signal<EjercicioResumen[]>([]);
   readonly total = signal(0);
@@ -241,7 +274,8 @@ export class EjerciciosCatalogo {
   constructor() {
     this.api.zonas().subscribe({ next: (z) => this.zonas.set(z), error: () => this.zonas.set([]) });
 
-    merge(this.texto.valueChanges.pipe(debounceTime(300), distinctUntilChanged()), this.zona.valueChanges, this.origen.valueChanges)
+    merge(this.texto.valueChanges.pipe(debounceTime(300), distinctUntilChanged()), this.zona.valueChanges, this.origen.valueChanges,
+      this.verInactivos.valueChanges)
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe(() => {
         this.pagina.set(1);
@@ -255,7 +289,10 @@ export class EjerciciosCatalogo {
     this.cargando.set(true);
     this.error.set(null);
     this.api
-      .catalogo({ texto: this.texto.value, zona: this.zona.value, origen: this.origen.value, pagina: this.pagina(), tamanioPagina: this.tamanio() })
+      .catalogo({
+        texto: this.texto.value, zona: this.zona.value, origen: this.origen.value, inactivos: this.verInactivos.value,
+        pagina: this.pagina(), tamanioPagina: this.tamanio(),
+      })
       .subscribe({
         next: (r) => {
           this.ejercicios.set(r.items);
@@ -301,11 +338,6 @@ export class EjerciciosCatalogo {
     });
   }
 
-  /** El Dueño solo ve los ejercicios propios de su gimnasio (el filtro lo aplica la API). */
-  esPropio(e: EjercicioResumen): boolean {
-    return this.esDueno && e.origen === 'Gimnasio';
-  }
-
   nuevo(): void {
     this.abrirFormulario({});
   }
@@ -314,19 +346,28 @@ export class EjerciciosCatalogo {
     this.abrirFormulario({ id: e.id });
   }
 
-  darDeBaja(e: EjercicioResumen): void {
+  /** Etapa 9a-2b: desactivar (con confirmación) o reactivar. Los ejercicios no se dan de baja. */
+  cambiarEstado(e: EjercicioResumen, activo: boolean): void {
+    const aplicar = () =>
+      this.api.cambiarEstado(e.id, activo).subscribe({
+        next: () => {
+          this.snack.open(activo ? 'Ejercicio reactivado' : 'Ejercicio desactivado', 'Cerrar', { duration: 3000 });
+          this.cargar();
+        },
+        error: (err) => this.snack.open(mensajeDeError(err), 'Cerrar', { duration: 6000 }),
+      });
+    if (activo) {
+      aplicar();
+      return;
+    }
     const datos: ConfirmarDatos = {
-      titulo: 'Dar de baja el ejercicio',
-      mensaje: `"${e.nombre}" dejará de aparecer en el catálogo. Las rutinas anteriores conservan su nombre.`,
-      confirmar: 'Dar de baja',
+      titulo: 'Desactivar el ejercicio',
+      mensaje: `"${e.nombre}" dejará de aparecer en el catálogo y en las rutinas nuevas. Se puede reactivar desde "Ver desactivados". Las rutinas anteriores conservan su nombre.`,
+      confirmar: 'Desactivar',
       peligro: true,
     };
     this.dialog.open(ConfirmarDialog, { data: datos }).afterClosed().subscribe((ok) => {
-      if (!ok) return;
-      this.api.darDeBaja(e.id).subscribe({
-        next: () => { this.snack.open('Ejercicio dado de baja', 'Cerrar', { duration: 3000 }); this.cargar(); },
-        error: (err) => this.snack.open(mensajeDeError(err), 'Cerrar', { duration: 6000 }),
-      });
+      if (ok) aplicar();
     });
   }
 

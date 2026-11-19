@@ -7,6 +7,12 @@ namespace GymBro.Application.Services
     public interface IAuditService
     {
         Task RegistrarAsync(string accion, string entidad, string? entidadId = null, string? detalle = null);
+
+        /// <summary>
+        /// Etapa 9a-2b: registra la acción sobre un gimnasio indicado explícitamente (el Administrador de la Plataforma no
+        /// tiene gimnasio en el JWT). Si quien actúa es el Administrador de la Plataforma, el detalle lo indica.
+        /// </summary>
+        Task RegistrarEnGimnasioAsync(string accion, string entidad, string? entidadId, Guid? gimnasioId, string? detalle = null);
         Task<IEnumerable<AuditLogDto>> ConsultarAsync(int cantidad, Guid? gimnasioId, DateTime? desdeUtc = null, DateTime? hastaUtc = null, string? accion = null, string? entidad = null);
     }
 
@@ -32,6 +38,25 @@ namespace GymBro.Application.Services
                 EntidadId = entidadId,
                 Detalle = detalle
             });
+
+        public Task RegistrarEnGimnasioAsync(string accion, string entidad, string? entidadId, Guid? gimnasioId, string? detalle = null)
+        {
+            var plataforma = _actual.Rol == Domain.Enums.RolUsuario.SuperAdministrador;
+            var texto = plataforma
+                ? $"Administrador de la Plataforma sobre {(gimnasioId is null ? "el catálogo global" : $"el gimnasio {gimnasioId}")}"
+                  + (string.IsNullOrEmpty(detalle) ? "" : $". {detalle}")
+                : detalle;
+            return _repo.AddAsync(new AuditLog
+            {
+                UsuarioId = _actual.UsuarioId,
+                Rol = _actual.Rol?.ToString(),
+                GimnasioId = gimnasioId ?? _actual.GimnasioId,
+                Accion = accion,
+                Entidad = entidad,
+                EntidadId = entidadId,
+                Detalle = texto
+            });
+        }
 
         public async Task<IEnumerable<AuditLogDto>> ConsultarAsync(int cantidad, Guid? gimnasioId,
             DateTime? desdeUtc = null, DateTime? hastaUtc = null, string? accion = null, string? entidad = null)

@@ -1,4 +1,4 @@
-using GymBro.Domain.Entities;
+﻿using GymBro.Domain.Entities;
 using GymBro.Domain.Enums;
 using GymBro.Domain.Security;
 using Microsoft.EntityFrameworkCore;
@@ -61,7 +61,9 @@ namespace GymBro.Infrastructure.Persistence
             // Etapa 9a-2: los ejercicios globales los ve cualquiera; los propios de un gimnasio, solo ese gimnasio
             // (personal por el claim gimnasio_id; el Socio por su ficha, porque su cuenta no lleva gimnasio_id).
             // El Administrador de la Plataforma ve los de todos los gimnasios.
-            modelBuilder.Entity<Ejercicio>().HasQueryFilter(e => e.FechaBaja == null && (
+            // Etapa 9a-2b: un ejercicio desactivado (Activo = false) queda oculto para todos los roles y para el baseline;
+            // la gestión (listar y reactivar) lo lee aparte con IgnoreQueryFilters y una regla de visibilidad explícita.
+            modelBuilder.Entity<Ejercicio>().HasQueryFilter(e => e.FechaBaja == null && e.Activo && (
                 e.GimnasioId == null
                 || _actual.EsProcesoDeSistema
                 || _actual.Rol == RolUsuario.SuperAdministrador
@@ -266,6 +268,10 @@ namespace GymBro.Infrastructure.Persistence
                 e.HasIndex(x => x.GimnasioId);
                 e.HasOne(x => x.TipoEquipamiento).WithMany().HasForeignKey(x => x.TipoEquipamientoId).OnDelete(DeleteBehavior.Restrict);
                 e.HasIndex(x => x.TipoEquipamientoId);
+                // Etapa 9a-2b: autor del ejercicio propio. Activo no lleva HasDefaultValue: con un bool, EF omitiría el
+                // false al insertar; el valor por defecto true para las filas existentes lo fija la migración.
+                e.HasOne(x => x.CreadoPor).WithMany().HasForeignKey(x => x.CreadoPorUsuarioId).OnDelete(DeleteBehavior.Restrict);
+                e.HasIndex(x => x.CreadoPorUsuarioId);
                 e.ToTable(t => t.HasCheckConstraint("CK_Ejercicio_OrigenGimnasio",
                     "(origen = 'Gimnasio' AND gimnasio_id IS NOT NULL) OR (origen <> 'Gimnasio' AND gimnasio_id IS NULL)"));
             });
@@ -330,6 +336,9 @@ namespace GymBro.Infrastructure.Persistence
                 e.HasOne(s => s.Gimnasio).WithMany(g => g.Socios)
                     .HasForeignKey(s => s.GimnasioId).OnDelete(DeleteBehavior.Restrict);
                 e.HasIndex(s => s.GimnasioId);
+                // Etapa 9a-2b: estado administrativo informativo, como texto; la migración deja Activo en las filas existentes.
+                e.Property(s => s.Estado).HasConversion<string>().HasMaxLength(20);
+                e.ToTable(t => t.HasCheckConstraint("CK_Socio_Estado", GuardaEnums.CondicionTexto<EstadoSocio>("estado")));
             });
 
             // Usuario (cuenta de acceso)

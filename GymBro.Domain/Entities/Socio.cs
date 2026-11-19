@@ -16,6 +16,9 @@ namespace GymBro.Domain.Entities
         public Guid? GimnasioId { get; set; }
         public Gimnasio? Gimnasio { get; set; }
 
+        /// <summary>Estado administrativo, informativo (Etapa 9a-2b). Por defecto Activo.</summary>
+        public EstadoSocio Estado { get; set; } = EstadoSocio.Activo;
+
         /// <summary>Consentimiento expreso para tratar datos de salud (Ley 25.326, art. 5 y 7).</summary>
         public DateTime? ConsentimientoDatosSaludFecha { get; set; }
 

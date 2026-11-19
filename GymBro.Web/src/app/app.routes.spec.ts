@@ -110,6 +110,13 @@ describe('rutas por rol (Etapa 8c, T2)', () => {
     expect(navegar('gimnasio/equipamiento')).toBe(true);
   });
 
+  // Etapa 9a-2b: el Administrador de la Plataforma abre todas las pantallas que ya tenía; ningún cambio se las quita.
+  it.each(['ejercicios', 'gimnasio/equipamiento', 'plataforma/gimnasios', 'plataforma/auditoria'])(
+    'el Administrador de la Plataforma sigue abriendo /%s (Etapa 9a-2b)', (ruta) => {
+      guardar('SuperAdministrador');
+      expect(navegar(ruta)).toBe(true);
+    });
+
   it('un Socio que abre /gimnasio/equipamiento es redirigido a /mi', () => {
     guardar('Socio');
     expect(navegar('gimnasio/equipamiento')).toBe('/mi');

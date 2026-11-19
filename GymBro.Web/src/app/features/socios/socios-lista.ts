@@ -11,7 +11,7 @@ import { MatTableModule } from '@angular/material/table';
 import { Router } from '@angular/router';
 import { SociosApi } from '../../core/api/socios.api';
 import { AuthService } from '../../core/auth/auth.service';
-import { ESTADO_ACCESO_ETIQUETA, SocioResumen } from '../../core/models/socio.models';
+import { ESTADO_ACCESO_ETIQUETA, EstadoSocio, SocioResumen } from '../../core/models/socio.models';
 import { mensajeDeError } from '../../core/util/api-error';
 import { SocioAltaDialog } from './socio-alta-dialog';
 
@@ -77,6 +77,19 @@ import { SocioAltaDialog } from './socio-alta-dialog';
               </span>
             </td>
           </ng-container>
+          <ng-container matColumnDef="estado">
+            <th mat-header-cell *matHeaderCellDef>Estado</th>
+            <td mat-cell *matCellDef="let s" class="estado-socio">
+              <span class="insignia" [class.inactivo]="estadoDe(s) === 'Inactivo'">{{ estadoDe(s) }}</span>
+              @if (esDueno()) {
+                <button mat-icon-button class="cambiar-estado"
+                  [attr.aria-label]="estadoDe(s) === 'Activo' ? 'Marcar como inactivo' : 'Marcar como activo'"
+                  (click)="$event.stopPropagation(); alternarEstado(s)">
+                  <mat-icon>{{ estadoDe(s) === 'Activo' ? 'toggle_on' : 'toggle_off' }}</mat-icon>
+                </button>
+              }
+            </td>
+          </ng-container>
           <ng-container matColumnDef="alta">
             <th mat-header-cell *matHeaderCellDef>Alta</th>
             <td mat-cell *matCellDef="let s">{{ s.fechaAlta | date: 'dd/MM/yyyy' }}</td>
@@ -100,6 +113,8 @@ import { SocioAltaDialog } from './socio-alta-dialog';
     }
     .insignia.pendiente { background: var(--mat-sys-tertiary-container); color: var(--mat-sys-on-tertiary-container); }
     .insignia.sin-acceso { background: var(--mat-sys-error-container); color: var(--mat-sys-on-error-container); }
+    .insignia.inactivo { background: var(--mat-sys-surface-container-highest); color: var(--mat-sys-on-surface-variant); }
+    .estado-socio { white-space: nowrap; }
   `,
 })
 export class SociosLista {
@@ -111,7 +126,7 @@ export class SociosLista {
 
   readonly esDueno = computed(() => this.auth.rol() === 'AdministradorGimnasio');
 
-  readonly columnas = ['nombre', 'email', 'acceso', 'alta', 'ir'];
+  readonly columnas = ['nombre', 'email', 'acceso', 'estado', 'alta', 'ir'];
   readonly socios = signal<SocioResumen[]>([]);
   readonly cargando = signal(true);
   readonly error = signal<string | null>(null);
@@ -131,6 +146,23 @@ export class SociosLista {
 
   etiqueta(s: SocioResumen): string {
     return ESTADO_ACCESO_ETIQUETA[s.estadoAcceso] ?? s.estadoAcceso;
+  }
+
+  /** Etapa 9a-2b: estado administrativo, informativo (respuestas anteriores sin el campo: Activo). */
+  estadoDe(s: SocioResumen): EstadoSocio {
+    return s.estado ?? 'Activo';
+  }
+
+  /** Etapa 9a-2b: el Dueño marca la ficha como activa o inactiva. No bloquea el acceso ni las rutinas. */
+  alternarEstado(s: SocioResumen): void {
+    const nuevo: EstadoSocio = this.estadoDe(s) === 'Activo' ? 'Inactivo' : 'Activo';
+    this.api.cambiarEstado(s.id, nuevo).subscribe({
+      next: () => {
+        this.socios.update((l) => l.map((x) => (x.id === s.id ? { ...x, estado: nuevo } : x)));
+        this.snack.open(`${s.nombreCompleto}: ${nuevo === 'Activo' ? 'activo' : 'inactivo'}`, 'Cerrar', { duration: 3000 });
+      },
+      error: (e) => this.snack.open(mensajeDeError(e), 'Cerrar', { duration: 6000 }),
+    });
   }
 
   cargar(): void {

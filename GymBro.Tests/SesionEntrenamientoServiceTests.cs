@@ -1,4 +1,4 @@
-using GymBro.Application.DTOs;
+﻿using GymBro.Application.DTOs;
 using GymBro.Application.Services;
 using GymBro.Domain.Entities;
 using GymBro.Domain.Enums;
@@ -244,13 +244,17 @@ namespace GymBro.Tests
             public FakeEjercicioRepository(params Guid[] ids) { _ids = ids.ToHashSet(); }
             public Task<bool> ExistenTodosAsync(IEnumerable<Guid> ids) => Task.FromResult(ids.All(_ids.Contains));
             public Task<(IReadOnlyList<Ejercicio> Items, int Total)> GetPaginadoAsync(string? texto, string? zonaObjetivo, int omitir, int tomar,
-                OrigenEjercicio? origen = null) => throw new NotSupportedException();
-            public Task<Ejercicio?> GetByIdAsync(Guid id) => throw new NotSupportedException();
+                OrigenEjercicio? origen = null, AlcanceInactivos? inactivos = null) => throw new NotSupportedException();
+            public Task<Ejercicio?> GetByIdAsync(Guid id, AlcanceInactivos? inactivos = null) => throw new NotSupportedException();
             public Task<IReadOnlyList<string>> GetZonasObjetivoAsync() => throw new NotSupportedException();
             // Etapa 9a-2: escritura de ejercicios propios (no se usa en estas pruebas).
-            public Task<Ejercicio?> GetParaEdicionAsync(Guid id) => throw new NotSupportedException();
+            public Task<Ejercicio?> GetParaGestionAsync(Guid id) => throw new NotSupportedException();
             public Task<IReadOnlyList<(Guid Id, string Nombre)>> GetNombresVisiblesAsync(Guid gimnasioId) => throw new NotSupportedException();
             public Task<bool> EnUsoPorPrescripcionVigenteAsync(Guid ejercicioId) => throw new NotSupportedException();
+            // Etapa 9a-2b: previsualización de equipamiento y tipos (no se usa en estas pruebas).
+            public Task<IReadOnlyList<string>> GetPropiosActivosPorTiposAsync(Guid gimnasioId, IReadOnlyCollection<Guid> tipos) => throw new NotSupportedException();
+            public Task<int> ContarPorTipoAsync(Guid tipoEquipamientoId) => throw new NotSupportedException();
+            public Task ActualizarTextoEquipamientoAsync(Guid tipoEquipamientoId, string nombre) => throw new NotSupportedException();
             public Task AddAsync(Ejercicio ejercicio) => throw new NotSupportedException();
             public Task SaveChangesAsync() => throw new NotSupportedException();
         }

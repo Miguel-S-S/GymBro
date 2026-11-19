@@ -10,6 +10,9 @@ export const ESTADO_ACCESO_ETIQUETA: Record<EstadoAcceso, string> = {
   SinAcceso: 'Sin acceso',
 };
 
+/** Estado administrativo de la ficha (Etapa 9a-2b). Informativo: no bloquea nada. */
+export type EstadoSocio = 'Activo' | 'Inactivo';
+
 /** GymBro.Application.DTOs.SocioResponseDto */
 export interface SocioResumen {
   id: string;
@@ -18,6 +21,8 @@ export interface SocioResumen {
   fechaAlta: string;
   gimnasioId?: string | null;
   estadoAcceso: EstadoAcceso;
+  /** Etapa 9a-2b. Opcional para tolerar respuestas anteriores (se asume 'Activo'). */
+  estado?: EstadoSocio;
 }
 
 /** GymBro.Application.DTOs.SocioDetalleDto */
@@ -35,6 +40,8 @@ export interface SocioDetalle {
   objetivo: 'PerdidaPeso' | 'GananciaMuscular' | 'Mantenimiento' | null;
   nivel: 'Principiante' | 'Intermedio' | 'Avanzado' | null;
   fechaAlta: string;
+  /** Etapa 9a-2b. */
+  estado?: EstadoSocio;
 }
 
 /** GymBro.Application.DTOs.SocioCreateDto */

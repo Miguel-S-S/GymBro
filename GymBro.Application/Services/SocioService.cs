@@ -126,6 +126,25 @@ namespace GymBro.Application.Services
             return MapearDetalle(socio, estado);
         }
 
+        public async Task<SocioDetalleDto> CambiarEstadoAsync(Guid id, string estado)
+        {
+            if (string.IsNullOrWhiteSpace(estado) || int.TryParse(estado, out _)
+                || !Enum.TryParse<EstadoSocio>(estado.Trim(), true, out var nuevo) || !Enum.IsDefined(nuevo))
+                throw new ReglaNegocioException("El estado debe ser Activo o Inactivo.");
+
+            var socio = await ObtenerDelGimnasioParaModificarAsync(id);
+            if (socio.Estado != nuevo)
+            {
+                socio.Estado = nuevo;
+                socio.FechaModificacion = DateTime.UtcNow;
+                await _repository.SaveChangesAsync();
+                await _audit.RegistrarAsync("CAMBIO_ESTADO_SOCIO", nameof(Socio), id.ToString(), nuevo.ToString());
+            }
+
+            var acceso = (await EstadosDeAccesoAsync(new[] { id })).GetValueOrDefault(id, EstadosAcceso.SinAcceso);
+            return MapearDetalle(socio, acceso);
+        }
+
         public async Task<InvitacionResponseDto> RenovarInvitacionAsync(Guid id)
         {
             var gimnasioId = ExigirDueno();
@@ -240,7 +259,8 @@ namespace GymBro.Application.Services
             Email = s.Email,
             FechaAlta = s.FechaAlta,
             GimnasioId = s.GimnasioId,
-            EstadoAcceso = estadoAcceso
+            EstadoAcceso = estadoAcceso,
+            Estado = s.Estado.ToString()
         };
 
         private SocioDetalleDto MapearDetalle(Socio s, string estadoAcceso)
@@ -260,7 +280,8 @@ namespace GymBro.Application.Services
                 Objetivo = Enum.IsDefined(s.Objetivo) ? s.Objetivo.ToString() : null,
                 Nivel = Enum.IsDefined(s.Nivel) ? s.Nivel.ToString() : null,
                 FechaAlta = s.FechaAlta,
-                EstadoAcceso = estadoAcceso
+                EstadoAcceso = estadoAcceso,
+                Estado = s.Estado.ToString()
             };
         }
     }

@@ -4,7 +4,7 @@ import { MAT_DIALOG_DATA, MatDialogModule } from '@angular/material/dialog';
 import { MatIconModule } from '@angular/material/icon';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { EjerciciosApi } from '../../core/api/ejercicios.api';
-import { EjercicioDetalle } from '../../core/models/ejercicio.models';
+import { ADVERTENCIA_EJERCICIO_PROPIO, EjercicioDetalle } from '../../core/models/ejercicio.models';
 import { mensajeDeError } from '../../core/util/api-error';
 
 @Component({
@@ -14,12 +14,17 @@ import { mensajeDeError } from '../../core/util/api-error';
     @if (ejercicio(); as e) {
       <h2 mat-dialog-title>{{ e.nombre }}</h2>
       <mat-dialog-content>
+        @if (e.origen === 'Gimnasio') {
+          <p class="aviso advertencia"><mat-icon>warning_amber</mat-icon><span>{{ advertencia }}</span></p>
+        }
         <dl class="datos">
           <div><dt>Zona objetivo</dt><dd>{{ e.zonaObjetivo || '—' }}</dd></div>
           <div><dt>Músculo principal</dt><dd>{{ e.musculoPrincipal || '—' }}</dd></div>
           <div><dt>Equipamiento</dt><dd>{{ e.tipoEquipamiento || e.equipamiento || '—' }}</dd></div>
           <div><dt>Origen</dt><dd>{{ e.origen || '—' }}</dd></div>
           <div><dt>Dificultad</dt><dd>{{ e.dificultad || '—' }}</dd></div>
+          @if (e.creadoPor) { <div><dt>Propuesto por</dt><dd>{{ e.creadoPor }}</dd></div> }
+          @if (e.activo === false) { <div><dt>Estado</dt><dd>Desactivado</dd></div> }
           <div class="ancho"><dt>Sinergistas</dt><dd>{{ e.sinergistas || '—' }}</dd></div>
           <div class="ancho"><dt>Estabilizadores</dt><dd>{{ e.estabilizadores || '—' }}</dd></div>
         </dl>
@@ -57,6 +62,7 @@ import { mensajeDeError } from '../../core/util/api-error';
   `,
 })
 export class EjercicioDetalleDialog {
+  readonly advertencia = ADVERTENCIA_EJERCICIO_PROPIO;
   readonly ejercicio = signal<EjercicioDetalle | null>(null);
   readonly error = signal<string | null>(null);
 

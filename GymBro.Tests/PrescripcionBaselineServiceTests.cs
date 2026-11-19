@@ -494,6 +494,7 @@ namespace GymBro.Tests
         private sealed class FakeAudit : IAuditService
         {
             public Task RegistrarAsync(string accion, string entidad, string? entidadId = null, string? detalle = null) => Task.CompletedTask;
+            public Task RegistrarEnGimnasioAsync(string accion, string entidad, string? entidadId, Guid? gimnasioId, string? detalle = null) => Task.CompletedTask;
             public Task<IEnumerable<AuditLogDto>> ConsultarAsync(int cantidad, Guid? gimnasioId, DateTime? desdeUtc = null,
                 DateTime? hastaUtc = null, string? accion = null, string? entidad = null) => throw new NotSupportedException();
         }

@@ -1,7 +1,7 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
 import { Observable } from 'rxjs';
-import { Invitacion, SocioAlta, SocioCreate, SocioDetalle, SocioResumen, SocioUpdate } from '../models/socio.models';
+import { EstadoSocio, Invitacion, SocioAlta, SocioCreate, SocioDetalle, SocioResumen, SocioUpdate } from '../models/socio.models';
 import { API_BASE_URL } from './api.config';
 
 /** Cliente de GymBro.Api/Controllers/SocioController. */
@@ -31,6 +31,11 @@ export class SociosApi {
   /** Emite una invitación nueva; la anterior deja de valer. */
   renovarInvitacion(id: string): Observable<Invitacion> {
     return this.http.post<Invitacion>(`${this.url}/${id}/invitacion`, {});
+  }
+
+  /** Etapa 9a-2b: estado administrativo (Activo o Inactivo), informativo. Solo el Dueño. */
+  cambiarEstado(id: string, estado: EstadoSocio): Observable<SocioDetalle> {
+    return this.http.put<SocioDetalle>(`${this.url}/${id}/estado`, { estado });
   }
 
   /** Ficha sin cuenta: baja lógica. Socio con cuenta: se desvincula del gimnasio. */

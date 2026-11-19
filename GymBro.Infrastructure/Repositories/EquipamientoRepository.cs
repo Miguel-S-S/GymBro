@@ -1,4 +1,4 @@
-using GymBro.Domain.Entities;
+﻿using GymBro.Domain.Entities;
 using GymBro.Domain.Repositories;
 using GymBro.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
@@ -23,6 +23,16 @@ namespace GymBro.Infrastructure.Repositories
 
         public async Task<IReadOnlyList<EquipamientoGimnasio>> GetMarcadosAsync(Guid gimnasioId) =>
             await _context.EquipamientosGimnasio.Where(x => x.GimnasioId == gimnasioId).ToListAsync();
+
+        public Task<TipoEquipamiento?> GetTipoParaGestionAsync(Guid id) =>
+            _context.TiposEquipamiento.FirstOrDefaultAsync(t => t.Id == id);
+
+        public async Task<IReadOnlyList<TipoEquipamiento>> GetTodosLosTiposVigentesAsync() =>
+            await _context.TiposEquipamiento.IgnoreQueryFilters().AsNoTracking().Where(t => t.FechaBaja == null).ToListAsync();
+
+        public async Task<IReadOnlyList<EquipamientoGimnasio>> GetMarcadosDeTipoAsync(Guid tipoEquipamientoId) =>
+            await _context.EquipamientosGimnasio.IgnoreQueryFilters()
+                .Where(x => x.TipoEquipamientoId == tipoEquipamientoId && x.FechaBaja == null).ToListAsync();
 
         public async Task AddTipoAsync(TipoEquipamiento tipo) => await _context.TiposEquipamiento.AddAsync(tipo);
 

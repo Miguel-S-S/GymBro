@@ -225,6 +225,14 @@ namespace GymBro.Infrastructure.Migrations
                         .HasColumnType("uuid")
                         .HasColumnName("id");
 
+                    b.Property<bool>("Activo")
+                        .HasColumnType("boolean")
+                        .HasColumnName("activo");
+
+                    b.Property<Guid?>("CreadoPorUsuarioId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("creado_por_usuario_id");
+
                     b.Property<int>("Dificultad")
                         .HasColumnType("integer")
                         .HasColumnName("dificultad");
@@ -319,6 +327,9 @@ namespace GymBro.Infrastructure.Migrations
 
                     b.HasKey("Id")
                         .HasName("pk_ejercicios");
+
+                    b.HasIndex("CreadoPorUsuarioId")
+                        .HasDatabaseName("ix_ejercicios_creado_por_usuario_id");
 
                     b.HasIndex("GimnasioId")
                         .HasDatabaseName("ix_ejercicios_gimnasio_id");
@@ -1249,6 +1260,12 @@ namespace GymBro.Infrastructure.Migrations
                         .HasColumnType("text")
                         .HasColumnName("email");
 
+                    b.Property<string>("Estado")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)")
+                        .HasColumnName("estado");
+
                     b.Property<DateTime>("FechaAlta")
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("fecha_alta");
@@ -1314,6 +1331,8 @@ namespace GymBro.Infrastructure.Migrations
 
                     b.ToTable("socios", null, t =>
                         {
+                            t.HasCheckConstraint("CK_Socio_Estado", "estado IN ('Activo', 'Inactivo')");
+
                             t.HasCheckConstraint("CK_Socio_Nivel", "nivel IN ('Principiante', 'Intermedio', 'Avanzado')");
 
                             t.HasCheckConstraint("CK_Socio_Objetivo", "objetivo IN ('PerdidaPeso', 'GananciaMuscular', 'Mantenimiento')");
@@ -1588,6 +1607,12 @@ namespace GymBro.Infrastructure.Migrations
 
             modelBuilder.Entity("GymBro.Domain.Entities.Ejercicio", b =>
                 {
+                    b.HasOne("GymBro.Domain.Entities.Usuario", "CreadoPor")
+                        .WithMany()
+                        .HasForeignKey("CreadoPorUsuarioId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .HasConstraintName("fk_ejercicios_usuarios_creado_por_usuario_id");
+
                     b.HasOne("GymBro.Domain.Entities.Gimnasio", null)
                         .WithMany()
                         .HasForeignKey("GimnasioId")
@@ -1599,6 +1624,8 @@ namespace GymBro.Infrastructure.Migrations
                         .HasForeignKey("TipoEquipamientoId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .HasConstraintName("fk_ejercicios_tipos_equipamiento_tipo_equipamiento_id");
+
+                    b.Navigation("CreadoPor");
 
                     b.Navigation("TipoEquipamiento");
                 });

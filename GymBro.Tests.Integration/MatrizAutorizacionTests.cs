@@ -42,9 +42,14 @@ namespace GymBro.Tests.Integration
         private const string AttrBienestarSocio = "BienestarController: [Authorize(Roles = Socio)] en la acción";
         private const string AttrBienestarHistorial = "BienestarController.Historial: [Authorize(AdministradorGimnasio,Entrenador,Socio)]";
         private const string NoVisible ="SocioAccessService: socio no visible -> RecursoNoEncontrado (T7)";
-        private const string AttrEjerciciosDueno = "EjerciciosController: [Authorize(Roles = AdministradorGimnasio)] en la acción (Etapa 9a-2)";
+        private const string AttrEjerciciosGestores = "EjerciciosController: [Authorize(SuperAdministrador,AdministradorGimnasio,Entrenador)] en la acción (Etapa 9a-2b)";
         private const string AttrEquipamientoLectura = "EquipamientoController.Get: [Authorize(SuperAdministrador,AdministradorGimnasio,Entrenador)]";
-        private const string AttrEquipamientoDueno = "EquipamientoController: [Authorize(Roles = AdministradorGimnasio)] en la acción";
+        private const string AttrEquipamientoEscritura = "EquipamientoController: [Authorize(SuperAdministrador,AdministradorGimnasio)] en la acción (Etapa 9a-2b)";
+        private const string AttrSocioEstado = "SocioController.PutEstado: [Authorize(Roles = AdministradorGimnasio)] (Etapa 9a-2b)";
+        private const string SinGimnasio = "GimnasioDestino: el Administrador de la Plataforma debe indicar el gimnasio -> ReglaNegocio (400)";
+        private const string EjercicioNoVisible = "EjercicioGimnasioService: ejercicio no visible -> RecursoNoEncontrado (T7)";
+        private const string TipoNoVisible = "EquipamientoService: tipo no visible -> RecursoNoEncontrado (T7)";
+        private const string CuerpoInvalido = "validación del cuerpo vacío -> ReglaNegocio (400), sin efectos";
 
         public static TheoryData<string, string, string, int, string> Celdas()
         {
@@ -128,16 +133,24 @@ namespace GymBro.Tests.Integration
             Fila("GET", "/api/Ejercicios/zonas", "EjerciciosController: FallbackPolicy (usuario autenticado)",
                 (Anonimo, 401, Fallback), (SuperAdmin, 200, null));
 
-            // ---- Etapa 9a-2: ejercicios propios (escritura solo del Dueño; D2: el Administrador de la Plataforma solo lee) ----
-            Fila("POST", "/api/Ejercicios", AttrEjerciciosDueno,
-                (Anonimo, 401, Fallback), (SuperAdmin, 403, null), (Trainer, 403, null), (Socio, 403, null));
-            Fila("PUT", "/api/Ejercicios/{X}", AttrEjerciciosDueno,
-                (Anonimo, 401, Fallback), (SuperAdmin, 403, null), (Trainer, 403, null), (Socio, 403, null),
-                (Dueno, 404, "EjercicioGimnasioService: ejercicio no visible -> RecursoNoEncontrado (T7)"));
-            Fila("DELETE", "/api/Ejercicios/{X}", AttrEjerciciosDueno,
-                (Anonimo, 401, Fallback), (SuperAdmin, 403, null), (Trainer, 403, null), (Socio, 403, null),
-                (Dueno, 404, "EjercicioGimnasioService: ejercicio no visible -> RecursoNoEncontrado (T7)"));
-            Fila("PUT", "/api/Ejercicios/{CORE}", "EjercicioGimnasioService: ejercicio global visible -> AccesoDenegado (T7)", (Dueno, 403, null));
+            // ---- Etapa 9a-2 y 9a-2b: ejercicios propios (D2: plataforma; D4: el Personal Trainer propone) ----
+            // Solo celdas sin efectos: cuerpo vacío (400) o recurso inexistente (404). Los flujos permitidos los cubren
+            // CatalogoGimnasioTests y AdministracionCatalogoTests.
+            Fila("POST", "/api/Ejercicios", AttrEjerciciosGestores,
+                (Anonimo, 401, Fallback), (Socio, 403, null), (SuperAdmin, 400, SinGimnasio), (Trainer, 400, CuerpoInvalido), (Dueno, 400, CuerpoInvalido));
+            Fila("PUT", "/api/Ejercicios/{X}", AttrEjerciciosGestores,
+                (Anonimo, 401, Fallback), (Socio, 403, null), (SuperAdmin, 404, EjercicioNoVisible), (Trainer, 404, EjercicioNoVisible), (Dueno, 404, EjercicioNoVisible));
+            Fila("PUT", "/api/Ejercicios/{X}/estado", AttrEjerciciosGestores,
+                (Anonimo, 401, Fallback), (Socio, 403, null), (SuperAdmin, 404, EjercicioNoVisible), (Trainer, 404, EjercicioNoVisible), (Dueno, 404, EjercicioNoVisible));
+            // La baja de la 9a-2 ya no existe: los ejercicios se desactivan.
+            Fila("DELETE", "/api/Ejercicios/{X}", "EjerciciosController: sin acción DELETE (Etapa 9a-2b) -> 405",
+                (Dueno, 405, null), (SuperAdmin, 405, null));
+            Fila("PUT", "/api/Ejercicios/{CORE}", "EjercicioGimnasioService: ejercicio global visible -> AccesoDenegado (T7); la plataforma lo modifica por script",
+                (Dueno, 403, null), (Trainer, 403, null), (SuperAdmin, 403, null));
+            Fila("PUT", "/api/Ejercicios/{CORE}/estado", "EjercicioGimnasioService: solo la plataforma desactiva un global -> AccesoDenegado",
+                (Dueno, 403, null), (Trainer, 403, null));
+            Fila("GET", "/api/Ejercicios?inactivos=true", "EjercicioCatalogoService.AlcanceDe: el Socio no gestiona el catálogo -> AccesoDenegado",
+                (Socio, 403, null), (SuperAdmin, 200, null), (Dueno, 200, null), (Trainer, 200, null));
 
             // ---- Etapa 9a-2: equipamiento del gimnasio (sin datos de salud) ----
             Fila("GET", "/api/equipamiento", AttrEquipamientoLectura,
@@ -147,10 +160,24 @@ namespace GymBro.Tests.Integration
                 (SuperAdmin, 200, null), (Dueno, 200, null), (Trainer, 200, null), (Socio, 403, null));
             Fila("GET", "/api/equipamiento?gimnasioId={G2}", "EquipamientoService: otro gimnasio -> RecursoNoEncontrado",
                 (SuperAdmin, 200, AttrEquipamientoLectura), (Dueno, 404, null), (Trainer, 404, null));
-            Fila("PUT", "/api/equipamiento", AttrEquipamientoDueno,
-                (Anonimo, 401, Fallback), (SuperAdmin, 403, null), (Trainer, 403, null), (Socio, 403, null));
-            Fila("POST", "/api/equipamiento/tipos", AttrEquipamientoDueno,
-                (Anonimo, 401, Fallback), (SuperAdmin, 403, null), (Trainer, 403, null), (Socio, 403, null));
+            Fila("PUT", "/api/equipamiento", AttrEquipamientoEscritura,
+                (Anonimo, 401, Fallback), (SuperAdmin, 400, SinGimnasio), (Trainer, 403, null), (Socio, 403, null));
+            Fila("POST", "/api/equipamiento/previsualizacion", AttrEquipamientoEscritura,
+                (Anonimo, 401, Fallback), (SuperAdmin, 400, SinGimnasio), (Dueno, 200, "solo lectura"), (Trainer, 403, null), (Socio, 403, null));
+            Fila("POST", "/api/equipamiento/tipos", AttrEquipamientoEscritura,
+                (Anonimo, 401, Fallback), (SuperAdmin, 400, SinGimnasio), (Trainer, 403, null), (Socio, 403, null));
+            Fila("PUT", "/api/equipamiento/tipos/{X}", AttrEquipamientoEscritura,
+                (Anonimo, 401, Fallback), (SuperAdmin, 404, TipoNoVisible), (Dueno, 404, TipoNoVisible), (Trainer, 403, null), (Socio, 403, null));
+            Fila("DELETE", "/api/equipamiento/tipos/{X}", AttrEquipamientoEscritura,
+                (Anonimo, 401, Fallback), (SuperAdmin, 404, TipoNoVisible), (Dueno, 404, TipoNoVisible), (Trainer, 403, null), (Socio, 403, null));
+            Fila("PUT", "/api/equipamiento/tipos/{TIPOGLOBAL}", "EquipamientoService: tipo global -> solo la plataforma (AccesoDenegado)",
+                (Dueno, 403, null));
+            Fila("DELETE", "/api/equipamiento/tipos/{TIPOGLOBAL}", "EquipamientoService: tipo global -> solo la plataforma (AccesoDenegado)",
+                (Dueno, 403, null));
+
+            // ---- Etapa 9a-2b: estado administrativo del socio (solo el Dueño; la plataforma, por script) ----
+            Fila("PUT", "/api/Socio/{A}/estado", AttrSocioEstado,
+                (Anonimo, 401, Fallback), (SuperAdmin, 403, null), (Trainer, 403, null), (Socio, 403, null), (Dueno, 400, CuerpoInvalido));
 
             // ---- Bienestar diario (Etapa 8b; datos de salud: el Administrador de la Plataforma no accede) ----
             Fila("GET", "/api/bienestar/hoy", AttrBienestarSocio,
@@ -181,6 +208,7 @@ namespace GymBro.Tests.Integration
                 .Replace("{C}", _esc.SocioC.Id.ToString()).Replace("{X}", Guid.NewGuid().ToString())
                 .Replace("{G1}", _esc.SocioA.GimnasioId.ToString()).Replace("{G2}", _esc.SocioC.GimnasioId.ToString())
                 .Replace("{CORE}", "13e90ee5-9fb4-47bf-9abc-1277eae966d1")
+                .Replace("{TIPOGLOBAL}", GymBro.Domain.Rules.CatalogoEquipamiento.IdDe(GymBro.Domain.Rules.CatalogoEquipamiento.Barra).ToString())
                 .Replace("{HOY}", GymBro.Application.Services.DiaLocal.Hoy(TimeProvider.System).ToString("yyyy-MM-dd"));
             var cliente = rol == Anonimo ? _esc.Api.CreateClient() : _esc.Api.ClienteComo(_esc.Usuario(rol));
             var pedido = new HttpRequestMessage(new HttpMethod(metodo), url);

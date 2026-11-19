@@ -19,6 +19,16 @@ namespace GymBro.Application.DTOs
         public Guid? TipoEquipamientoId { get; set; }
         /// <summary>Nombre del tipo de equipamiento normalizado (Etapa 9a-2).</summary>
         public string? TipoEquipamiento { get; set; }
+        /// <summary>false si está desactivado (Etapa 9a-2b; solo lo ven quienes gestionan el catálogo).</summary>
+        public bool Activo { get; set; } = true;
+        /// <summary>Autor del ejercicio propio (Etapa 9a-2b); null en los globales y en los anteriores a la etapa.</summary>
+        public Guid? CreadoPorUsuarioId { get; set; }
+        /// <summary>Nombre del autor, si quien consulta puede verlo ("Propuesto por").</summary>
+        public string? CreadoPor { get; set; }
+        /// <summary>Etapa 9a-2b: quien consulta puede editarlo (misma regla que EjercicioGimnasioService).</summary>
+        public bool PuedeEditar { get; set; }
+        /// <summary>Etapa 9a-2b: quien consulta puede desactivarlo o reactivarlo.</summary>
+        public bool PuedeCambiarEstado { get; set; }
     }
 
     public class EjercicioDetalleDto
@@ -42,5 +52,15 @@ namespace GymBro.Application.DTOs
         public Guid? TipoEquipamientoId { get; set; }
         /// <summary>Nombre del tipo de equipamiento normalizado (Etapa 9a-2).</summary>
         public string? TipoEquipamiento { get; set; }
+        /// <summary>false si está desactivado (Etapa 9a-2b; solo lo ven quienes gestionan el catálogo).</summary>
+        public bool Activo { get; set; } = true;
+        /// <summary>Autor del ejercicio propio (Etapa 9a-2b); null en los globales y en los anteriores a la etapa.</summary>
+        public Guid? CreadoPorUsuarioId { get; set; }
+        /// <summary>Nombre del autor, si quien consulta puede verlo ("Propuesto por").</summary>
+        public string? CreadoPor { get; set; }
+        /// <summary>Etapa 9a-2b: quien consulta puede editarlo (misma regla que EjercicioGimnasioService).</summary>
+        public bool PuedeEditar { get; set; }
+        /// <summary>Etapa 9a-2b: quien consulta puede desactivarlo o reactivarlo.</summary>
+        public bool PuedeCambiarEstado { get; set; }
     }
 }

@@ -1,4 +1,4 @@
-using System.Net;
+﻿using System.Net;
 using System.Net.Http.Json;
 using GymBro.Application.Services;
 using GymBro.Domain.Entities;
@@ -61,7 +61,7 @@ namespace GymBro.Tests.Integration
     public class CatalogoGimnasioTests : IClassFixture<CatalogoGimnasioTests.Escenario>
     {
         public sealed record ItemCatalogo(Guid Id, string Nombre, string ZonaObjetivo, string Equipamiento, string Origen,
-            Guid? GimnasioId, Guid? TipoEquipamientoId, string? TipoEquipamiento);
+            Guid? GimnasioId, Guid? TipoEquipamientoId, string? TipoEquipamiento, bool Activo = true);
         public sealed record Pagina(List<ItemCatalogo> Items, int Total);
         public sealed record Buscado(Guid Id, string Nombre);
         public sealed record ItemEquipamiento(Guid TipoEquipamientoId, string Clave, string Nombre, bool SiempreDisponible, bool Propio, bool Marcado, int? Cantidad);
@@ -112,12 +112,13 @@ namespace GymBro.Tests.Integration
         [Fact]
         public async Task El_Dueno_crea_un_ejercicio_propio_y_el_servidor_fija_origen_gimnasio_y_embedding()
         {
-            // El cuerpo intenta fijar origen y gimnasio: se ignoran.
+            // El cuerpo intenta fijar el origen: se ignora. Etapa 9a-2b: indicar otro gimnasio ya no se ignora, responde 404
+            // (lo cubre AdministracionCatalogoTests); acá se envía el propio.
             var cuerpo = new
             {
                 nombre = "Plancha con toalla", zonaObjetivo = "core", tipoEquipamientoId = TipoPesoCorporal,
                 musculoPrincipal = "Recto abdominal", ejecucion = "Sostener.", tipoMedida = "segundos", dificultad = 2,
-                origen = "Dataset", gimnasioId = _e.G2.Id
+                origen = "Dataset", gimnasioId = _e.G1.Id
             };
             var r = await Como(_e.Dueno1).PostAsJsonAsync("/api/Ejercicios", cuerpo);
             Assert.Equal(HttpStatusCode.Created, r.StatusCode);
@@ -177,13 +178,14 @@ namespace GymBro.Tests.Integration
         public async Task El_Dueno_no_puede_tocar_un_global_403_ni_uno_de_otro_gimnasio_404()
         {
             Assert.Equal(HttpStatusCode.Forbidden, (await Como(_e.Dueno1).PutAsJsonAsync($"/api/Ejercicios/{Plancha}", Pedido("Plancha editada"))).StatusCode);
-            Assert.Equal(HttpStatusCode.Forbidden, (await Como(_e.Dueno1).DeleteAsync($"/api/Ejercicios/{Plancha}")).StatusCode);
+            // Etapa 9a-2b: la baja se reemplazó por desactivar (PUT {id}/estado).
+            Assert.Equal(HttpStatusCode.Forbidden, (await Como(_e.Dueno1).PutAsJsonAsync($"/api/Ejercicios/{Plancha}/estado", new { activo = false })).StatusCode);
             Assert.Equal(HttpStatusCode.NotFound, (await Como(_e.Dueno1).PutAsJsonAsync($"/api/Ejercicios/{_e.PropioG2}", Pedido("Ajeno"))).StatusCode);
-            Assert.Equal(HttpStatusCode.NotFound, (await Como(_e.Dueno1).DeleteAsync($"/api/Ejercicios/{_e.PropioG2}")).StatusCode);
+            Assert.Equal(HttpStatusCode.NotFound, (await Como(_e.Dueno1).PutAsJsonAsync($"/api/Ejercicios/{_e.PropioG2}/estado", new { activo = false })).StatusCode);
         }
 
         [Fact]
-        public async Task El_Dueno_edita_y_da_de_baja_un_ejercicio_propio()
+        public async Task El_Dueno_edita_desactiva_y_reactiva_un_ejercicio_propio()
         {
             var propio = await CrearAsync(_e.Dueno1, "Para editar");
 
@@ -191,9 +193,17 @@ namespace GymBro.Tests.Integration
             Assert.Equal(HttpStatusCode.OK, r.StatusCode);
             Assert.Equal("Para editar (v2)", (await r.Content.ReadFromJsonAsync<ItemCatalogo>())!.Nombre);
 
-            Assert.Equal(HttpStatusCode.NoContent, (await Como(_e.Dueno1).DeleteAsync($"/api/Ejercicios/{propio.Id}")).StatusCode);
-            Assert.Equal(HttpStatusCode.NotFound, (await Como(_e.Dueno1).GetAsync($"/api/Ejercicios/{propio.Id}")).StatusCode);
+            // Etapa 9a-2b: desactivar oculta el ejercicio del catálogo y del socio, pero el Dueño lo sigue viendo para reactivarlo.
+            var off = await Como(_e.Dueno1).PutAsJsonAsync($"/api/Ejercicios/{propio.Id}/estado", new { activo = false });
+            Assert.Equal(HttpStatusCode.OK, off.StatusCode);
+            Assert.False((await off.Content.ReadFromJsonAsync<ItemCatalogo>())!.Activo);
             Assert.DoesNotContain(await ListarAsync(_e.Dueno1), i => i.Id == propio.Id);
+            Assert.Contains(await ListarAsync(_e.Dueno1, "inactivos=true"), i => i.Id == propio.Id);
+            Assert.Equal(HttpStatusCode.NotFound, (await Como(_e.UsuarioSocioA).GetAsync($"/api/Ejercicios/{propio.Id}")).StatusCode);
+
+            var on = await Como(_e.Dueno1).PutAsJsonAsync($"/api/Ejercicios/{propio.Id}/estado", new { activo = true });
+            Assert.True((await on.Content.ReadFromJsonAsync<ItemCatalogo>())!.Activo);
+            Assert.Contains(await ListarAsync(_e.Dueno1), i => i.Id == propio.Id);
         }
 
         // ---- Validaciones ----
@@ -267,22 +277,22 @@ namespace GymBro.Tests.Integration
         // ---- Baja e historial ----
 
         [Fact]
-        public async Task La_baja_de_un_ejercicio_en_una_rutina_vigente_se_rechaza()
+        public async Task Desactivar_un_ejercicio_en_una_rutina_vigente_se_rechaza()
         {
             var propio = await CrearAsync(_e.Dueno1, "En rutina vigente");
             await _e.AgregarRutinaAsync(_e.SocioA.Id, propio.Id, EstadoPrescripcion.Aprobada);
 
-            var r = await Como(_e.Dueno1).DeleteAsync($"/api/Ejercicios/{propio.Id}");
+            var r = await Como(_e.Dueno1).PutAsJsonAsync($"/api/Ejercicios/{propio.Id}/estado", new { activo = false });
             Assert.Equal(HttpStatusCode.BadRequest, r.StatusCode);
             Assert.Contains("rutina vigente", await r.Content.ReadAsStringAsync());
         }
 
         [Fact]
-        public async Task El_historial_conserva_el_nombre_tras_la_baja_y_tras_dejar_el_gimnasio()
+        public async Task El_historial_conserva_el_nombre_tras_desactivar_y_tras_dejar_el_gimnasio()
         {
             var dadoDeBaja = await CrearAsync(_e.Dueno1, "Historial baja");
             await _e.AgregarRutinaAsync(_e.SocioA.Id, dadoDeBaja.Id, EstadoPrescripcion.Rechazada);
-            Assert.Equal(HttpStatusCode.NoContent, (await Como(_e.Dueno1).DeleteAsync($"/api/Ejercicios/{dadoDeBaja.Id}")).StatusCode);
+            Assert.Equal(HttpStatusCode.OK, (await Como(_e.Dueno1).PutAsJsonAsync($"/api/Ejercicios/{dadoDeBaja.Id}/estado", new { activo = false })).StatusCode);
 
             var rutinasA = await Como(_e.UsuarioSocioA).GetFromJsonAsync<List<Rutina>>($"/api/Socio/{_e.SocioA.Id}/prescripciones");
             Assert.Contains(rutinasA!.SelectMany(r => r.Ejercicios), e => e.EjercicioId == dadoDeBaja.Id && e.Ejercicio == "Historial baja");
@@ -343,10 +353,11 @@ namespace GymBro.Tests.Integration
         }
 
         [Fact]
-        public async Task El_Administrador_de_la_Plataforma_lee_el_equipamiento_de_cualquier_gimnasio_sin_editarlo()
+        public async Task El_Administrador_de_la_Plataforma_lee_el_equipamiento_de_cualquier_gimnasio()
         {
+            // Etapa 9a-2b (D2): además lo puede editar (lo cubre AdministracionCatalogoTests).
             var g2 = await Como(_e.SuperAdmin).GetFromJsonAsync<Equipamiento>($"/api/equipamiento?gimnasioId={_e.G2.Id}");
-            Assert.False(g2!.Editable);
+            Assert.True(g2!.Editable);
             Assert.Contains(g2.Items, i => i.TipoEquipamientoId == _e.TipoPropioG2);
             Assert.Equal(HttpStatusCode.BadRequest, (await Como(_e.SuperAdmin).GetAsync("/api/equipamiento")).StatusCode);
             Assert.Equal(HttpStatusCode.NotFound, (await Como(_e.SuperAdmin).GetAsync($"/api/equipamiento?gimnasioId={Guid.NewGuid()}")).StatusCode);

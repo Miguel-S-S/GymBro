@@ -27,6 +27,7 @@ export class EjerciciosApi {
     if (filtro.texto?.trim()) params = params.set('texto', filtro.texto.trim());
     if (filtro.zona) params = params.set('zona', filtro.zona);
     if (filtro.origen) params = params.set('origen', filtro.origen);
+    if (filtro.inactivos) params = params.set('inactivos', true);
     return this.http.get<Paginado<EjercicioResumen>>(this.url, { params });
   }
 
@@ -57,7 +58,7 @@ export class EjerciciosApi {
     ).pipe(map((pares) => Object.fromEntries(pares)));
   }
 
-  // ---- Etapa 9a-2: ejercicios propios del gimnasio (solo el Dueño) ----
+  // ---- Etapa 9a-2 y 9a-2b: ejercicios propios (Administrador de la Plataforma, Dueño y Personal Trainer) ----
 
   crear(dto: EjercicioGimnasioRequest): Observable<EjercicioDetalle> {
     return this.http.post<EjercicioDetalle>(this.url, dto);
@@ -68,9 +69,10 @@ export class EjerciciosApi {
     return this.http.put<EjercicioDetalle>(`${this.url}/${id}`, dto);
   }
 
-  darDeBaja(id: string): Observable<void> {
+  /** Etapa 9a-2b: desactivar (false) o reactivar (true). Los ejercicios no se dan de baja. */
+  cambiarEstado(id: string, activo: boolean): Observable<EjercicioDetalle> {
     this.cacheDetalle.delete(id);
-    return this.http.delete<void>(`${this.url}/${id}`);
+    return this.http.put<EjercicioDetalle>(`${this.url}/${id}/estado`, { activo });
   }
 
   /**

@@ -32,9 +32,10 @@ namespace GymBro.Infrastructure.Repositories
         }
 
         public async Task<(IReadOnlyList<Ejercicio> Items, int Total)> GetPaginadoAsync(
-            string? texto, string? zonaObjetivo, int omitir, int tomar, OrigenEjercicio? origen = null)
+            string? texto, string? zonaObjetivo, int omitir, int tomar, OrigenEjercicio? origen = null,
+            AlcanceInactivos? inactivos = null)
         {
-            var query = _context.Ejercicios.AsNoTracking();
+            var query = inactivos is null ? _context.Ejercicios.AsNoTracking() : Inactivos(inactivos);
 
             if (!string.IsNullOrWhiteSpace(texto))
             {
@@ -63,18 +64,50 @@ namespace GymBro.Infrastructure.Repositories
                 .Take(tomar)
                 .Select(ProyeccionSinEmbedding)
                 .ToListAsync();
+            await CompletarAutoresAsync(items);
 
             return (items, total);
         }
 
-        public async Task<Ejercicio?> GetByIdAsync(Guid id)
+        public async Task<Ejercicio?> GetByIdAsync(Guid id, AlcanceInactivos? inactivos = null)
         {
-            return await _context.Ejercicios
+            var activo = await _context.Ejercicios
                 .AsNoTracking()
                 .Where(e => e.Id == id)
                 .Select(ProyeccionSinEmbedding)
                 .FirstOrDefaultAsync();
+            var ejercicio = activo ?? (inactivos is null ? null
+                : await Inactivos(inactivos).Where(e => e.Id == id).Select(ProyeccionSinEmbedding).FirstOrDefaultAsync());
+            if (ejercicio is not null) await CompletarAutoresAsync(new[] { ejercicio });
+            return ejercicio;
         }
+
+        /// <summary>
+        /// Etapa 9a-2b: autor de los ejercicios propios ("Propuesto por"). Se lee aparte, ignorando el filtro de usuarios,
+        /// solo para los Id que ya referencian ejercicios visibles, y solo nombre y rol (sin email ni otros datos). Así el
+        /// resultado no depende de si el autor es del gimnasio o es el Administrador de la Plataforma. Quién puede ver el
+        /// nombre lo decide el servicio.
+        /// </summary>
+        private async Task CompletarAutoresAsync(IReadOnlyCollection<Ejercicio> items)
+        {
+            var ids = items.Where(e => e.CreadoPorUsuarioId != null).Select(e => e.CreadoPorUsuarioId!.Value).Distinct().ToList();
+            if (ids.Count == 0) return;
+            var autores = await _context.Usuarios.IgnoreQueryFilters().AsNoTracking()
+                .Where(u => ids.Contains(u.Id))
+                .Select(u => new Usuario { Id = u.Id, NombreCompleto = u.NombreCompleto, Rol = u.Rol })
+                .ToDictionaryAsync(u => u.Id);
+            foreach (var e in items)
+                if (e.CreadoPorUsuarioId is { } autor && autores.TryGetValue(autor, out var u)) e.CreadoPor = u;
+        }
+
+        /// <summary>
+        /// Etapa 9a-2b: ejercicios desactivados (no dados de baja) del alcance indicado. Ignora el filtro global, así que
+        /// la regla de visibilidad se aplica acá de forma explícita: todos, o solo los propios de ese gimnasio.
+        /// </summary>
+        private IQueryable<Ejercicio> Inactivos(AlcanceInactivos alcance) =>
+            _context.Ejercicios.IgnoreQueryFilters().AsNoTracking()
+                .Where(e => e.FechaBaja == null && !e.Activo
+                            && (alcance.Todos || (alcance.GimnasioId != null && e.GimnasioId == alcance.GimnasioId)));
 
         public async Task<IReadOnlyList<string>> GetZonasObjetivoAsync()
         {
@@ -87,13 +120,14 @@ namespace GymBro.Infrastructure.Repositories
                 .ToListAsync();
         }
 
-        public Task<Ejercicio?> GetParaEdicionAsync(Guid id) =>
-            _context.Ejercicios.FirstOrDefaultAsync(e => e.Id == id);
+        public Task<Ejercicio?> GetParaGestionAsync(Guid id) =>
+            _context.Ejercicios.IgnoreQueryFilters().FirstOrDefaultAsync(e => e.Id == id && e.FechaBaja == null);
 
         public async Task<IReadOnlyList<(Guid Id, string Nombre)>> GetNombresVisiblesAsync(Guid gimnasioId)
         {
-            var filas = await _context.Ejercicios.AsNoTracking()
-                .Where(e => e.GimnasioId == null || e.GimnasioId == gimnasioId)
+            // Etapa 9a-2b: incluye los desactivados, para que reactivar uno nunca produzca dos con el mismo nombre.
+            var filas = await _context.Ejercicios.IgnoreQueryFilters().AsNoTracking()
+                .Where(e => e.FechaBaja == null && (e.GimnasioId == null || e.GimnasioId == gimnasioId))
                 .Select(e => new { e.Id, e.Nombre })
                 .ToListAsync();
             return filas.Select(f => (f.Id, f.Nombre)).ToList();
@@ -108,6 +142,27 @@ namespace GymBro.Infrastructure.Repositories
                                 && pe.PrescripcionEntrenamiento.FechaBaja == null
                                 && estados.Contains(pe.PrescripcionEntrenamiento.Estado));
         }
+
+        public async Task<IReadOnlyList<string>> GetPropiosActivosPorTiposAsync(Guid gimnasioId, IReadOnlyCollection<Guid> tipos)
+        {
+            if (tipos.Count == 0) return Array.Empty<string>();
+            var ids = tipos.ToList();
+            return await _context.Ejercicios.IgnoreQueryFilters().AsNoTracking()
+                .Where(e => e.FechaBaja == null && e.Activo && e.GimnasioId == gimnasioId
+                            && e.TipoEquipamientoId != null && ids.Contains(e.TipoEquipamientoId.Value))
+                .OrderBy(e => e.Nombre)
+                .Select(e => e.Nombre)
+                .ToListAsync();
+        }
+
+        public Task<int> ContarPorTipoAsync(Guid tipoEquipamientoId) =>
+            _context.Ejercicios.IgnoreQueryFilters()
+                .CountAsync(e => e.FechaBaja == null && e.TipoEquipamientoId == tipoEquipamientoId);
+
+        public Task ActualizarTextoEquipamientoAsync(Guid tipoEquipamientoId, string nombre) =>
+            _context.Ejercicios.IgnoreQueryFilters()
+                .Where(e => e.TipoEquipamientoId == tipoEquipamientoId && e.Origen == OrigenEjercicio.Gimnasio)
+                .ExecuteUpdateAsync(x => x.SetProperty(e => e.Equipamiento, nombre));
 
         public async Task AddAsync(Ejercicio ejercicio) => await _context.Ejercicios.AddAsync(ejercicio);
 
@@ -134,6 +189,8 @@ namespace GymBro.Infrastructure.Repositories
                 TipoEquipamientoId = e.TipoEquipamientoId,
                 TipoEquipamiento = e.TipoEquipamiento == null ? null
                     : new TipoEquipamiento { Id = e.TipoEquipamiento.Id, Nombre = e.TipoEquipamiento.Nombre, Clave = e.TipoEquipamiento.Clave },
+                Activo = e.Activo,
+                CreadoPorUsuarioId = e.CreadoPorUsuarioId,
                 FechaAlta = e.FechaAlta
             };
     }

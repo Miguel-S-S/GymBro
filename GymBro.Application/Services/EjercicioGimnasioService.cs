@@ -1,4 +1,4 @@
-using GymBro.Application.DTOs;
+﻿using GymBro.Application.DTOs;
 using GymBro.Domain.Entities;
 using GymBro.Domain.Enums;
 using GymBro.Domain.Exceptions;
@@ -13,13 +13,22 @@ namespace GymBro.Application.Services
     {
         Task<EjercicioDetalleDto> CrearAsync(EjercicioGimnasioRequest request);
         Task<EjercicioDetalleDto> EditarAsync(Guid id, EjercicioGimnasioRequest request);
-        Task DarDeBajaAsync(Guid id);
+
+        /// <summary>Desactiva (false) o reactiva (true) un ejercicio. Etapa 9a-2b: reemplaza a la baja.</summary>
+        Task<EjercicioDetalleDto> CambiarEstadoAsync(Guid id, bool activo);
     }
 
     /// <summary>
-    /// Ejercicios propios del gimnasio (Etapa 9a-2): alta, edición y baja lógica por el Dueño.
-    /// El gimnasio sale del JWT y el origen lo fija el servidor. Criterio de rechazo (T7 de la 8c): 404 si el ejercicio
-    /// no es visible para quien llama; 403 si es visible pero no se puede modificar (por ejemplo, uno global).
+    /// Ejercicios propios del gimnasio (Etapa 9a-2, ampliada en la 9a-2b). Quién puede hacer qué:
+    ///   - Administrador de la Plataforma: alta en cualquier gimnasio (indicado en el cuerpo y validado), edición y
+    ///     desactivación de los propios de cualquier gimnasio; desactivar y reactivar los globales. Los globales (Dataset y
+    ///     Proyecto) no se editan por la API: se modifican por script (docs/pfc/scripts/admin-ejercicio-global.sql).
+    ///   - Dueño: alta, edición y desactivacion de cualquier ejercicio propio de su gimnasio.
+    ///   - Personal Trainer (D4): alta en su gimnasio; edita y desactiva solo los que él creó.
+    /// El gimnasio del Dueño y del Personal Trainer sale del JWT; si el cuerpo indica otro, 404 (no sirve para saltarse el
+    /// aislamiento). El origen y el autor los fija el servidor. Criterio de rechazo (T7 de la 8c): 404 si el ejercicio no
+    /// es visible para quien llama; 403 si es visible pero no lo puede modificar; 400 por regla de negocio.
+    /// Etapa 9a-2b: los ejercicios no se dan de baja; se desactivan y se pueden reactivar.
     ///
     /// ADVERTENCIA: estos ejercicios no pasan por ninguna validación profesional ni de seguridad y el baseline los puede
     /// prescribir. Queda como insumo de las reglas de seguridad de la 10a.
@@ -32,25 +41,29 @@ namespace GymBro.Application.Services
 
         private readonly IEjercicioRepository _ejercicios;
         private readonly IEquipamientoRepository _equipamiento;
+        private readonly IGimnasioRepository _gimnasios;
         private readonly IIaService _ia;
         private readonly IUsuarioActual _actual;
         private readonly IAuditService _audit;
         private readonly EmbeddingConfig _config;
 
-        public EjercicioGimnasioService(IEjercicioRepository ejercicios, IEquipamientoRepository equipamiento, IIaService ia,
-            IUsuarioActual actual, IAuditService audit, EmbeddingConfig config)
+        public EjercicioGimnasioService(IEjercicioRepository ejercicios, IEquipamientoRepository equipamiento,
+            IGimnasioRepository gimnasios, IIaService ia, IUsuarioActual actual, IAuditService audit, EmbeddingConfig config)
         {
             _ejercicios = ejercicios;
             _equipamiento = equipamiento;
+            _gimnasios = gimnasios;
             _ia = ia;
             _actual = actual;
             _audit = audit;
             _config = config;
         }
 
+        private bool EsPlataforma => _actual.Rol == RolUsuario.SuperAdministrador;
+
         public async Task<EjercicioDetalleDto> CrearAsync(EjercicioGimnasioRequest request)
         {
-            var gimnasioId = _actual.GimnasioId ?? throw new AccesoDenegadoException();
+            var gimnasioId = await GimnasioDestino.ResolverAsync(_actual, _gimnasios, request.GimnasioId);
             var datos = await ValidarAsync(request, gimnasioId, ejercicioId: null, tipoActual: null);
 
             var ejercicio = new Ejercicio
@@ -58,20 +71,23 @@ namespace GymBro.Application.Services
                 Id = Guid.NewGuid(),
                 Origen = OrigenEjercicio.Gimnasio,
                 GimnasioId = gimnasioId,
+                // Sale del JWT; el cuerpo no lo puede fijar.
+                CreadoPorUsuarioId = _actual.UsuarioId,
             };
             Aplicar(ejercicio, datos);
             ejercicio.Embedding = await GenerarEmbeddingAsync(ejercicio);
 
             await _ejercicios.AddAsync(ejercicio);
             await _ejercicios.SaveChangesAsync();
-            await _audit.RegistrarAsync("ALTA_EJERCICIO", nameof(Ejercicio), ejercicio.Id.ToString(),
+            await _audit.RegistrarEnGimnasioAsync("ALTA_EJERCICIO", nameof(Ejercicio), ejercicio.Id.ToString(), gimnasioId,
                 ejercicio.Embedding is null ? "Embedding pendiente" : null);
-            return Mapear(ejercicio, datos.Tipo.Nombre);
+            return await DetalleAsync(ejercicio.Id);
         }
 
         public async Task<EjercicioDetalleDto> EditarAsync(Guid id, EjercicioGimnasioRequest request)
         {
-            var (ejercicio, gimnasioId) = await ObtenerPropioAsync(id);
+            var ejercicio = await ObtenerParaGestionAsync(id, operacionSobreGlobal: false);
+            var gimnasioId = ejercicio.GimnasioId!.Value;
             var datos = await ValidarAsync(request, gimnasioId, id, ejercicio.TipoEquipamientoId);
 
             var cambiaTexto = ejercicio.Nombre != datos.Nombre || ejercicio.ZonaObjetivo != datos.Zona
@@ -82,32 +98,69 @@ namespace GymBro.Application.Services
             if (cambiaTexto) ejercicio.Embedding = await GenerarEmbeddingAsync(ejercicio);
 
             await _ejercicios.SaveChangesAsync();
-            await _audit.RegistrarAsync("EDICION_EJERCICIO", nameof(Ejercicio), ejercicio.Id.ToString(),
+            await _audit.RegistrarEnGimnasioAsync("EDICION_EJERCICIO", nameof(Ejercicio), ejercicio.Id.ToString(), gimnasioId,
                 cambiaTexto && ejercicio.Embedding is null ? "Embedding pendiente" : null);
-            return Mapear(ejercicio, datos.Tipo.Nombre);
+            return await DetalleAsync(ejercicio.Id);
         }
 
-        public async Task DarDeBajaAsync(Guid id)
+        public async Task<EjercicioDetalleDto> CambiarEstadoAsync(Guid id, bool activo)
         {
-            var (ejercicio, _) = await ObtenerPropioAsync(id);
-            if (await _ejercicios.EnUsoPorPrescripcionVigenteAsync(id))
-                throw new ReglaNegocioException(
-                    "El ejercicio está en una rutina vigente o pendiente de revisión: no se puede dar de baja.");
+            var ejercicio = await ObtenerParaGestionAsync(id, operacionSobreGlobal: true);
+            if (ejercicio.Activo != activo)
+            {
+                // Integridad: no se desactiva un ejercicio de una rutina vigente o pendiente, tampoco el Administrador.
+                if (!activo && await _ejercicios.EnUsoPorPrescripcionVigenteAsync(id))
+                    throw new ReglaNegocioException(
+                        "El ejercicio está en una rutina vigente o pendiente de revisión: no se puede desactivar.");
 
-            ejercicio.FechaBaja = DateTime.UtcNow;
-            await _ejercicios.SaveChangesAsync();
-            await _audit.RegistrarAsync("BAJA_EJERCICIO", nameof(Ejercicio), ejercicio.Id.ToString());
+                ejercicio.Activo = activo;
+                ejercicio.FechaModificacion = DateTime.UtcNow;
+                await _ejercicios.SaveChangesAsync();
+                await _audit.RegistrarEnGimnasioAsync(activo ? "REACTIVAR_EJERCICIO" : "DESACTIVAR_EJERCICIO", nameof(Ejercicio),
+                    ejercicio.Id.ToString(), ejercicio.GimnasioId);
+            }
+            return await DetalleAsync(ejercicio.Id);
         }
 
-        /// <summary>404 si no es visible; 403 si es visible pero no es un ejercicio propio de este gimnasio.</summary>
-        private async Task<(Ejercicio Ejercicio, Guid GimnasioId)> ObtenerPropioAsync(Guid id)
+        /// <summary>
+        /// Ejercicio para gestionar (incluidos los desactivados). 404 si no es visible para quien llama; 403 si es visible
+        /// pero no lo puede modificar. Los globales solo los desactiva o reactiva el Administrador de la Plataforma.
+        /// </summary>
+        private async Task<Ejercicio> ObtenerParaGestionAsync(Guid id, bool operacionSobreGlobal)
         {
-            var gimnasioId = _actual.GimnasioId ?? throw new AccesoDenegadoException();
-            var ejercicio = await _ejercicios.GetParaEdicionAsync(id)
-                ?? throw new RecursoNoEncontradoException("Ejercicio no encontrado.");
-            if (ejercicio.Origen != OrigenEjercicio.Gimnasio || ejercicio.GimnasioId != gimnasioId)
-                throw new AccesoDenegadoException("Solo se pueden modificar los ejercicios propios del gimnasio.");
-            return (ejercicio, gimnasioId);
+            var ejercicio = await _ejercicios.GetParaGestionAsync(id);
+            if (ejercicio is null || !EsVisible(ejercicio))
+                throw new RecursoNoEncontradoException("Ejercicio no encontrado.");
+
+            if (ejercicio.GimnasioId is null)
+            {
+                if (EsPlataforma && operacionSobreGlobal) return ejercicio;
+                throw new AccesoDenegadoException(EsPlataforma
+                    ? "Los ejercicios globales no se editan desde la aplicación: se modifican por script."
+                    : "Solo se pueden modificar los ejercicios propios del gimnasio.");
+            }
+
+            if (_actual.Rol == RolUsuario.Entrenador && ejercicio.CreadoPorUsuarioId != _actual.UsuarioId)
+                throw new AccesoDenegadoException("El Personal Trainer solo modifica los ejercicios que él creó.");
+            return ejercicio;
+        }
+
+        /// <summary>
+        /// Misma regla que el filtro global, pero alcanzando también a los desactivados: el Administrador de la Plataforma
+        /// ve todos; el personal del gimnasio, los globales activos y los propios de su gimnasio.
+        /// </summary>
+        private bool EsVisible(Ejercicio e)
+        {
+            if (EsPlataforma) return true;
+            if (_actual.GimnasioId is null) return false;
+            return e.GimnasioId is null ? e.Activo : e.GimnasioId == _actual.GimnasioId;
+        }
+
+        private async Task<EjercicioDetalleDto> DetalleAsync(Guid id)
+        {
+            var e = await _ejercicios.GetByIdAsync(id, EjercicioCatalogoService.AlcanceDe(_actual))
+                    ?? throw new RecursoNoEncontradoException("Ejercicio no encontrado.");
+            return Mapear(e);
         }
 
         private sealed record Datos(string Nombre, string Zona, TipoEquipamiento Tipo, string Musculo, string Sinergistas,
@@ -188,7 +241,7 @@ namespace GymBro.Application.Services
             }
         }
 
-        private static EjercicioDetalleDto Mapear(Ejercicio e, string tipoNombre) => new()
+        private EjercicioDetalleDto Mapear(Ejercicio e) => new()
         {
             Id = e.Id,
             Nombre = e.Nombre,
@@ -204,7 +257,14 @@ namespace GymBro.Application.Services
             Origen = e.Origen.ToString(),
             GimnasioId = e.GimnasioId,
             TipoEquipamientoId = e.TipoEquipamientoId,
-            TipoEquipamiento = tipoNombre,
+            TipoEquipamiento = e.TipoEquipamiento?.Nombre,
+            Activo = e.Activo,
+            CreadoPorUsuarioId = e.CreadoPorUsuarioId,
+            CreadoPor = e.CreadoPor is null ? null
+                : e.CreadoPor.Rol == RolUsuario.SuperAdministrador && !EsPlataforma ? "Administrador de la Plataforma"
+                : e.CreadoPor.NombreCompleto,
+            PuedeEditar = EjercicioCatalogoService.Permisos(_actual, e).Editar,
+            PuedeCambiarEstado = EjercicioCatalogoService.Permisos(_actual, e).CambiarEstado,
         };
     }
 }

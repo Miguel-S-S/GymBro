@@ -63,6 +63,12 @@ namespace GymBro.Api.Controllers
             Ok(await _socioService.ActualizarSocioAsync(id, dto));
 
         /// <summary>Emite una invitación nueva; la anterior deja de valer.</summary>
+        /// <summary>Etapa 9a-2b: estado administrativo de la ficha (Activo o Inactivo), informativo. Solo el Dueño.</summary>
+        [HttpPut("{id:guid}/estado")]
+        [Authorize(Roles = Roles.AdministradorGimnasio)]
+        public async Task<IActionResult> PutEstado(Guid id, [FromBody] EstadoSocioRequest request) =>
+            Ok(await _socioService.CambiarEstadoAsync(id, request.Estado));
+
         [HttpPost("{id:guid}/invitacion")]
         [Authorize(Roles = Roles.AdministradorGimnasio)]
         public async Task<IActionResult> RenovarInvitacion(Guid id) =>

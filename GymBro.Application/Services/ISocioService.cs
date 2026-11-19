@@ -1,4 +1,4 @@
-using GymBro.Application.DTOs;
+﻿using GymBro.Application.DTOs;
 
 namespace GymBro.Application.Services
 {
@@ -18,5 +18,11 @@ namespace GymBro.Application.Services
 
         /// <summary>Ficha sin cuenta: baja lógica. Socio con cuenta: se desvincula del gimnasio y sigue como independiente.</summary>
         Task BajaSocioAsync(Guid id);
+
+        /// <summary>
+        /// Etapa 9a-2b: cambia el estado administrativo (Activo o Inactivo) de la ficha. Solo el Dueño, sobre su gimnasio.
+        /// Es informativo: no bloquea el acceso, las sesiones ni las rutinas.
+        /// </summary>
+        Task<SocioDetalleDto> CambiarEstadoAsync(Guid id, string estado);
     }
 }

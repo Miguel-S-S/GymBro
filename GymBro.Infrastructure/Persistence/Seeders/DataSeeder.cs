@@ -21,7 +21,9 @@ namespace GymBro.Infrastructure.Persistence.Seeders
             // 1. Cargar Dosificaciones (series.csv)
             // Etapa 9a-1: las filas propias del proyecto (CatalogoProyectoSeeder) no cuentan; se reconocen por su Id fijo.
             var idsProyecto = CatalogoProyectoSeeder.IdsDosificacionesProyecto;
-            if (!await context.Dosificaciones.AnyAsync(d => !idsProyecto.Contains(d.Id)))
+            // Etapa 9a-2b: IgnoreQueryFilters para que las filas dadas de baja (por ejemplo, por script) cuenten como cargadas
+            // y no se vuelva a importar el archivo.
+            if (!await context.Dosificaciones.IgnoreQueryFilters().AnyAsync(d => !idsProyecto.Contains(d.Id)))
             {
                 try
                 {
@@ -33,7 +35,7 @@ namespace GymBro.Infrastructure.Persistence.Seeders
             }
 
             // 2. Cargar Matriz Clínica (gym_recommendation.xlsx)
-            if (!await context.MatricesRecomendacion.AnyAsync())
+            if (!await context.MatricesRecomendacion.IgnoreQueryFilters().AnyAsync()) // Etapa 9a-2b: idem
             {
                 try
                 {
@@ -58,7 +60,8 @@ namespace GymBro.Infrastructure.Persistence.Seeders
 
             // 4. Cargar Catálogos de Ejercicios
             // Etapa 9a-1: solo cuentan los ejercicios del dataset; los del proyecto (Core) no bloquean la carga.
-            if (!await context.Ejercicios.AnyAsync(e => e.Origen == OrigenEjercicio.Dataset))
+            // Etapa 9a-2b: se cuentan también los desactivados y los dados de baja; si no, desactivar todo el dataset lo recargaría.
+            if (!await context.Ejercicios.IgnoreQueryFilters().AnyAsync(e => e.Origen == OrigenEjercicio.Dataset))
             {
                 try
                 {

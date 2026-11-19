@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 
 namespace GymBro.Application.DTOs
 {
@@ -27,5 +27,14 @@ namespace GymBro.Application.DTOs
         public string? Nivel { get; set; }
 
         public DateTime FechaAlta { get; set; }
+
+        /// <summary>Estado administrativo de la ficha (Etapa 9a-2b): Activo o Inactivo. Informativo.</summary>
+        public string Estado { get; set; } = "Activo";
+    }
+
+    /// <summary>Cambio del estado administrativo del socio (Etapa 9a-2b): "Activo" o "Inactivo".</summary>
+    public class EstadoSocioRequest
+    {
+        public string Estado { get; set; } = string.Empty;
     }
 }

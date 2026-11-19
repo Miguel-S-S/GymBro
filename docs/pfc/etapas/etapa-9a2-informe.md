@@ -1,6 +1,6 @@
 # Etapa 9a-2 — Ejercicios y equipamiento propios del gimnasio: texto para el informe y registro de decisiones
 
-**Fecha:** 18/11/2026. **Rama:** `etapa9a2`, creada desde `4c7583e` (`main`, que tiene un commit de evidencias de las etapas 6 y 8 posterior a `8953054`, sin cambios de código). **Estado del merge:** código en el commit `b447cd2` de la rama `etapa9a2`, y evidencia con este informe en el commit siguiente. Sin merge y sin push a `main`: esperan la revisión de Claude Web y la autorización del autor. La evidencia se generó sobre el árbol de trabajo antes del commit `b447cd2`, con contenido de código idéntico.
+**Fecha:** 18/11/2026. **Rama:** `etapa9a2`, creada desde `4c7583e` (`main`, que tiene un commit de evidencias de las etapas 6 y 8 posterior a `8953054`, sin cambios de código). **Estado del merge:** código en el commit `b447cd2` de la rama `etapa9a2`, y evidencia con este informe en `d5fbfe4`. Integrado a `main` por fast-forward el 18/11/2026, por decisión del autor, antes de la revisión de Claude Web; esa revisión queda pendiente. La evidencia se generó sobre el árbol de trabajo antes del commit `b447cd2`, con contenido de código idéntico.
 **Evidencia:** `docs/pfc/evidencia/etapa9a2-*.txt`:
 - `etapa9a2-estado-previo.txt`: estado previo de la base local (solo lectura);
 - `etapa9a2-migracion.sql.txt`: SQL de la migración (Up aplicado y Down) y salida de psql;

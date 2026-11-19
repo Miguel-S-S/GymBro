@@ -1,6 +1,7 @@
-using GymBro.Application.DTOs;
+﻿using GymBro.Application.DTOs;
 using GymBro.Domain.Repositories;
 using GymBro.Application.Services;
+using GymBro.Domain.Enums;
 
 namespace GymBro.Application.Services
 {
@@ -16,15 +17,23 @@ namespace GymBro.Application.Services
         }
 
         public async Task<PaginadoDto<EjercicioResumenDto>> GetCatalogoAsync(
-            string? texto, string? zonaObjetivo, int pagina, int tamanioPagina)
+            string? texto, string? zonaObjetivo, int pagina, int tamanioPagina, string? origen = null)
         {
             if (pagina < 1)
                 throw new ArgumentException("La página debe ser mayor o igual a 1.");
             if (tamanioPagina < 1 || tamanioPagina > TamanioPaginaMaximo)
                 throw new ArgumentException($"El tamaño de página debe estar entre 1 y {TamanioPaginaMaximo}.");
 
+            OrigenEjercicio? filtroOrigen = null;
+            if (!string.IsNullOrWhiteSpace(origen))
+            {
+                if (!Enum.TryParse<OrigenEjercicio>(origen.Trim(), true, out var o) || !Enum.IsDefined(o) || int.TryParse(origen, out _))
+                    throw new ArgumentException("El origen debe ser Dataset, Proyecto o Gimnasio.");
+                filtroOrigen = o;
+            }
+
             var (items, total) = await _repository.GetPaginadoAsync(
-                texto, zonaObjetivo, (pagina - 1) * tamanioPagina, tamanioPagina);
+                texto, zonaObjetivo, (pagina - 1) * tamanioPagina, tamanioPagina, filtroOrigen);
 
             return new PaginadoDto<EjercicioResumenDto>
             {
@@ -37,7 +46,10 @@ namespace GymBro.Application.Services
                     Equipamiento = e.Equipamiento,
                     Dificultad = e.Dificultad,
                     TipoMedida = e.TipoMedida.ToString(),
-                    Origen = e.Origen.ToString()
+                    Origen = e.Origen.ToString(),
+                    GimnasioId = e.GimnasioId,
+                    TipoEquipamientoId = e.TipoEquipamientoId,
+                    TipoEquipamiento = e.TipoEquipamiento?.Nombre
                 }).ToList(),
                 Total = total,
                 Pagina = pagina,
@@ -63,7 +75,10 @@ namespace GymBro.Application.Services
                 Ejecucion = e.Ejecucion,
                 Dificultad = e.Dificultad,
                 TipoMedida = e.TipoMedida.ToString(),
-                Origen = e.Origen.ToString()
+                Origen = e.Origen.ToString(),
+                GimnasioId = e.GimnasioId,
+                TipoEquipamientoId = e.TipoEquipamientoId,
+                TipoEquipamiento = e.TipoEquipamiento?.Nombre
             };
         }
 

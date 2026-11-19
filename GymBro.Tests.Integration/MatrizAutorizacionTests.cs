@@ -1,4 +1,4 @@
-using System.Net;
+﻿using System.Net;
 using System.Text;
 using GymBro.Domain.Entities;
 using GymBro.Domain.Enums;
@@ -42,6 +42,9 @@ namespace GymBro.Tests.Integration
         private const string AttrBienestarSocio = "BienestarController: [Authorize(Roles = Socio)] en la acción";
         private const string AttrBienestarHistorial = "BienestarController.Historial: [Authorize(AdministradorGimnasio,Entrenador,Socio)]";
         private const string NoVisible ="SocioAccessService: socio no visible -> RecursoNoEncontrado (T7)";
+        private const string AttrEjerciciosDueno = "EjerciciosController: [Authorize(Roles = AdministradorGimnasio)] en la acción (Etapa 9a-2)";
+        private const string AttrEquipamientoLectura = "EquipamientoController.Get: [Authorize(SuperAdministrador,AdministradorGimnasio,Entrenador)]";
+        private const string AttrEquipamientoDueno = "EquipamientoController: [Authorize(Roles = AdministradorGimnasio)] en la acción";
 
         public static TheoryData<string, string, string, int, string> Celdas()
         {
@@ -125,6 +128,30 @@ namespace GymBro.Tests.Integration
             Fila("GET", "/api/Ejercicios/zonas", "EjerciciosController: FallbackPolicy (usuario autenticado)",
                 (Anonimo, 401, Fallback), (SuperAdmin, 200, null));
 
+            // ---- Etapa 9a-2: ejercicios propios (escritura solo del Dueño; D2: el Administrador de la Plataforma solo lee) ----
+            Fila("POST", "/api/Ejercicios", AttrEjerciciosDueno,
+                (Anonimo, 401, Fallback), (SuperAdmin, 403, null), (Trainer, 403, null), (Socio, 403, null));
+            Fila("PUT", "/api/Ejercicios/{X}", AttrEjerciciosDueno,
+                (Anonimo, 401, Fallback), (SuperAdmin, 403, null), (Trainer, 403, null), (Socio, 403, null),
+                (Dueno, 404, "EjercicioGimnasioService: ejercicio no visible -> RecursoNoEncontrado (T7)"));
+            Fila("DELETE", "/api/Ejercicios/{X}", AttrEjerciciosDueno,
+                (Anonimo, 401, Fallback), (SuperAdmin, 403, null), (Trainer, 403, null), (Socio, 403, null),
+                (Dueno, 404, "EjercicioGimnasioService: ejercicio no visible -> RecursoNoEncontrado (T7)"));
+            Fila("PUT", "/api/Ejercicios/{CORE}", "EjercicioGimnasioService: ejercicio global visible -> AccesoDenegado (T7)", (Dueno, 403, null));
+
+            // ---- Etapa 9a-2: equipamiento del gimnasio (sin datos de salud) ----
+            Fila("GET", "/api/equipamiento", AttrEquipamientoLectura,
+                (Anonimo, 401, Fallback), (Dueno, 200, null), (Trainer, 200, null), (Socio, 403, null),
+                (SuperAdmin, 400, "EquipamientoService: el Administrador de la Plataforma debe indicar gimnasioId"));
+            Fila("GET", "/api/equipamiento?gimnasioId={G1}", AttrEquipamientoLectura,
+                (SuperAdmin, 200, null), (Dueno, 200, null), (Trainer, 200, null), (Socio, 403, null));
+            Fila("GET", "/api/equipamiento?gimnasioId={G2}", "EquipamientoService: otro gimnasio -> RecursoNoEncontrado",
+                (SuperAdmin, 200, AttrEquipamientoLectura), (Dueno, 404, null), (Trainer, 404, null));
+            Fila("PUT", "/api/equipamiento", AttrEquipamientoDueno,
+                (Anonimo, 401, Fallback), (SuperAdmin, 403, null), (Trainer, 403, null), (Socio, 403, null));
+            Fila("POST", "/api/equipamiento/tipos", AttrEquipamientoDueno,
+                (Anonimo, 401, Fallback), (SuperAdmin, 403, null), (Trainer, 403, null), (Socio, 403, null));
+
             // ---- Bienestar diario (Etapa 8b; datos de salud: el Administrador de la Plataforma no accede) ----
             Fila("GET", "/api/bienestar/hoy", AttrBienestarSocio,
                 (Anonimo, 401, Fallback), (SuperAdmin, 403, null), (Dueno, 403, null), (Trainer, 403, null), (Socio, 200, null));
@@ -152,6 +179,8 @@ namespace GymBro.Tests.Integration
         {
             var url = ruta.Replace("{A}", _esc.SocioA.Id.ToString()).Replace("{B}", _esc.SocioB.Id.ToString())
                 .Replace("{C}", _esc.SocioC.Id.ToString()).Replace("{X}", Guid.NewGuid().ToString())
+                .Replace("{G1}", _esc.SocioA.GimnasioId.ToString()).Replace("{G2}", _esc.SocioC.GimnasioId.ToString())
+                .Replace("{CORE}", "13e90ee5-9fb4-47bf-9abc-1277eae966d1")
                 .Replace("{HOY}", GymBro.Application.Services.DiaLocal.Hoy(TimeProvider.System).ToString("yyyy-MM-dd"));
             var cliente = rol == Anonimo ? _esc.Api.CreateClient() : _esc.Api.ClienteComo(_esc.Usuario(rol));
             var pedido = new HttpRequestMessage(new HttpMethod(metodo), url);

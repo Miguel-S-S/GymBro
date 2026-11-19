@@ -13,10 +13,14 @@ import { MatSelectModule } from '@angular/material/select';
 import { MatTableModule } from '@angular/material/table';
 import { MatTabsModule } from '@angular/material/tabs';
 import { debounceTime, distinctUntilChanged, merge } from 'rxjs';
+import { MatSnackBar } from '@angular/material/snack-bar';
 import { EjerciciosApi } from '../../core/api/ejercicios.api';
-import { EjercicioBuscado, EjercicioResumen } from '../../core/models/ejercicio.models';
+import { AuthService } from '../../core/auth/auth.service';
+import { EjercicioBuscado, EjercicioResumen, ORIGEN_ETIQUETA, OrigenEjercicio } from '../../core/models/ejercicio.models';
+import { ConfirmarDatos, ConfirmarDialog } from '../../core/ui/confirmar-dialog';
 import { mensajeDeError } from '../../core/util/api-error';
 import { EjercicioDetalleDialog } from './ejercicio-detalle-dialog';
+import { EjercicioFormDatos, EjercicioFormDialog } from './ejercicio-form-dialog';
 import { paginadorEnEspaniol } from './paginador-es';
 
 @Component({
@@ -41,6 +45,9 @@ import { paginadorEnEspaniol } from './paginador-es';
         <h1>Ejercicios</h1>
         <p class="subtitulo">Catálogo de musculación y acondicionamiento</p>
       </div>
+      @if (esDueno) {
+        <button mat-flat-button class="nuevo" (click)="nuevo()"><mat-icon>add</mat-icon> Nuevo ejercicio</button>
+      }
     </div>
 
     <mat-tab-group mat-stretch-tabs="false" animationDuration="0ms">
@@ -62,6 +69,13 @@ import { paginadorEnEspaniol } from './paginador-es';
                 }
               </mat-select>
             </mat-form-field>
+            <mat-form-field>
+              <mat-label>Origen</mat-label>
+              <mat-select [formControl]="origen">
+                <mat-option [value]="null">Todos</mat-option>
+                @for (o of origenes; track o) { <mat-option [value]="o">{{ etiquetaOrigen[o] }}</mat-option> }
+              </mat-select>
+            </mat-form-field>
           </div>
 
           @if (cargando()) { <mat-progress-bar mode="indeterminate" /> }
@@ -75,6 +89,12 @@ import { paginadorEnEspaniol } from './paginador-es';
                 <ng-container matColumnDef="nombre">
                   <th mat-header-cell *matHeaderCellDef>Nombre</th>
                   <td mat-cell *matCellDef="let e">{{ e.nombre }}</td>
+                </ng-container>
+                <ng-container matColumnDef="origen">
+                  <th mat-header-cell *matHeaderCellDef>Origen</th>
+                  <td mat-cell *matCellDef="let e">
+                    @if (e.origen) { <span [class]="'insignia origen-' + e.origen">{{ etiqueta(e.origen) }}</span> }
+                  </td>
                 </ng-container>
                 <ng-container matColumnDef="zona">
                   <th mat-header-cell *matHeaderCellDef>Zona</th>
@@ -91,6 +111,15 @@ import { paginadorEnEspaniol } from './paginador-es';
                 <ng-container matColumnDef="dificultad">
                   <th mat-header-cell *matHeaderCellDef class="numero">Dificultad</th>
                   <td mat-cell *matCellDef="let e" class="numero">{{ e.dificultad || '—' }}</td>
+                </ng-container>
+                <ng-container matColumnDef="acciones">
+                  <th mat-header-cell *matHeaderCellDef><span class="oculto">Acciones</span></th>
+                  <td mat-cell *matCellDef="let e" class="acciones">
+                    @if (esPropio(e)) {
+                      <button mat-icon-button aria-label="Editar" class="editar" (click)="$event.stopPropagation(); editar(e)"><mat-icon>edit</mat-icon></button>
+                      <button mat-icon-button aria-label="Dar de baja" class="baja" (click)="$event.stopPropagation(); darDeBaja(e)"><mat-icon>delete</mat-icon></button>
+                    }
+                  </td>
                 </ng-container>
                 <tr mat-header-row *matHeaderRowDef="columnas"></tr>
                 <tr mat-row *matRowDef="let e; columns: columnas" class="fila-clickeable" (click)="verDetalle(e.id)"></tr>
@@ -161,6 +190,13 @@ import { paginadorEnEspaniol } from './paginador-es';
     .consulta { flex: 4 1 320px !important; }
     .cantidad { flex: 0 1 150px !important; }
     .boton { align-self: center; }
+    .nuevo { align-self: center; }
+    .insignia { padding: 2px 8px; border-radius: 8px; font: var(--mat-sys-label-small); white-space: nowrap;
+      background: var(--mat-sys-surface-container-high); color: var(--mat-sys-on-surface-variant); }
+    .origen-Gimnasio { background: var(--mat-sys-primary-container); color: var(--mat-sys-on-primary-container); }
+    .origen-Proyecto { background: var(--mat-sys-tertiary-container); color: var(--mat-sys-on-tertiary-container); }
+    .acciones { white-space: nowrap; text-align: end; }
+    .oculto { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
     .rango {
       display: grid; place-items: center; border-radius: 50%;
       background: var(--mat-sys-primary-container); color: var(--mat-sys-on-primary-container);
@@ -172,12 +208,21 @@ export class EjerciciosCatalogo {
   private readonly api = inject(EjerciciosApi);
   private readonly dialog = inject(MatDialog);
   private readonly destroyRef = inject(DestroyRef);
+  private readonly snack = inject(MatSnackBar);
 
-  readonly columnas = ['nombre', 'zona', 'musculo', 'equipamiento', 'dificultad'];
+  /** Etapa 9a-2: solo el Dueño crea, edita y da de baja ejercicios propios de su gimnasio. */
+  readonly esDueno = inject(AuthService).tieneRol('AdministradorGimnasio');
+  readonly columnas = ['nombre', 'origen', 'zona', 'musculo', 'equipamiento', 'dificultad', ...(this.esDueno ? ['acciones'] : [])];
+  readonly origenes: OrigenEjercicio[] = ['Dataset', 'Proyecto', 'Gimnasio'];
+  readonly etiquetaOrigen = ORIGEN_ETIQUETA;
+  etiqueta(o: OrigenEjercicio): string {
+    return ORIGEN_ETIQUETA[o] ?? o;
+  }
 
   // Catálogo
   readonly texto = new FormControl('', { nonNullable: true });
   readonly zona = new FormControl<string | null>(null);
+  readonly origen = new FormControl<OrigenEjercicio | null>(null);
   readonly zonas = signal<string[]>([]);
   readonly ejercicios = signal<EjercicioResumen[]>([]);
   readonly total = signal(0);
@@ -196,7 +241,7 @@ export class EjerciciosCatalogo {
   constructor() {
     this.api.zonas().subscribe({ next: (z) => this.zonas.set(z), error: () => this.zonas.set([]) });
 
-    merge(this.texto.valueChanges.pipe(debounceTime(300), distinctUntilChanged()), this.zona.valueChanges)
+    merge(this.texto.valueChanges.pipe(debounceTime(300), distinctUntilChanged()), this.zona.valueChanges, this.origen.valueChanges)
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe(() => {
         this.pagina.set(1);
@@ -210,7 +255,7 @@ export class EjerciciosCatalogo {
     this.cargando.set(true);
     this.error.set(null);
     this.api
-      .catalogo({ texto: this.texto.value, zona: this.zona.value, pagina: this.pagina(), tamanioPagina: this.tamanio() })
+      .catalogo({ texto: this.texto.value, zona: this.zona.value, origen: this.origen.value, pagina: this.pagina(), tamanioPagina: this.tamanio() })
       .subscribe({
         next: (r) => {
           this.ejercicios.set(r.items);
@@ -253,6 +298,43 @@ export class EjerciciosCatalogo {
             : mensajeDeError(e, 'No se pudo realizar la búsqueda.'),
         );
       },
+    });
+  }
+
+  /** El Dueño solo ve los ejercicios propios de su gimnasio (el filtro lo aplica la API). */
+  esPropio(e: EjercicioResumen): boolean {
+    return this.esDueno && e.origen === 'Gimnasio';
+  }
+
+  nuevo(): void {
+    this.abrirFormulario({});
+  }
+
+  editar(e: EjercicioResumen): void {
+    this.abrirFormulario({ id: e.id });
+  }
+
+  darDeBaja(e: EjercicioResumen): void {
+    const datos: ConfirmarDatos = {
+      titulo: 'Dar de baja el ejercicio',
+      mensaje: `"${e.nombre}" dejará de aparecer en el catálogo. Las rutinas anteriores conservan su nombre.`,
+      confirmar: 'Dar de baja',
+      peligro: true,
+    };
+    this.dialog.open(ConfirmarDialog, { data: datos }).afterClosed().subscribe((ok) => {
+      if (!ok) return;
+      this.api.darDeBaja(e.id).subscribe({
+        next: () => { this.snack.open('Ejercicio dado de baja', 'Cerrar', { duration: 3000 }); this.cargar(); },
+        error: (err) => this.snack.open(mensajeDeError(err), 'Cerrar', { duration: 6000 }),
+      });
+    });
+  }
+
+  private abrirFormulario(datos: EjercicioFormDatos): void {
+    this.dialog.open(EjercicioFormDialog, { data: datos, width: '640px', maxWidth: '95vw' }).afterClosed().subscribe((r) => {
+      if (!r) return;
+      this.snack.open(datos.id ? 'Ejercicio actualizado' : 'Ejercicio creado', 'Cerrar', { duration: 3000 });
+      this.cargar();
     });
   }
 

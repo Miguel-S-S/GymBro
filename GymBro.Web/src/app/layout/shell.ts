@@ -52,6 +52,13 @@ import { map } from 'rxjs';
               <span matListItemTitle>Ejercicios</span>
             </a>
           }
+          <!-- Etapa 9a-2: equipamiento (edita el Dueño; el resto lo ve en solo lectura). -->
+          @if (auth.tieneRol('AdministradorGimnasio', 'Entrenador', 'SuperAdministrador')) {
+            <a mat-list-item routerLink="/gimnasio/equipamiento" routerLinkActive="activo" (click)="esMovil() && nav.close()">
+              <mat-icon matListItemIcon>handyman</mat-icon>
+              <span matListItemTitle>Equipamiento</span>
+            </a>
+          }
           @if (auth.tieneRol('AdministradorGimnasio', 'Entrenador')) {
             <a mat-list-item routerLink="/revisiones" routerLinkActive="activo" (click)="esMovil() && nav.close()">
               <mat-icon matListItemIcon>assignment_turned_in</mat-icon>

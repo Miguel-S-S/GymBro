@@ -4,6 +4,7 @@ import { Observable, catchError, forkJoin, map, of, shareReplay } from 'rxjs';
 import {
   EjercicioBuscado,
   EjercicioDetalle,
+  EjercicioGimnasioRequest,
   EjercicioResumen,
   FiltroCatalogo,
   Paginado,
@@ -25,6 +26,7 @@ export class EjerciciosApi {
       .set('tamanioPagina', filtro.tamanioPagina);
     if (filtro.texto?.trim()) params = params.set('texto', filtro.texto.trim());
     if (filtro.zona) params = params.set('zona', filtro.zona);
+    if (filtro.origen) params = params.set('origen', filtro.origen);
     return this.http.get<Paginado<EjercicioResumen>>(this.url, { params });
   }
 
@@ -53,6 +55,22 @@ export class EjerciciosApi {
         ),
       ),
     ).pipe(map((pares) => Object.fromEntries(pares)));
+  }
+
+  // ---- Etapa 9a-2: ejercicios propios del gimnasio (solo el Dueño) ----
+
+  crear(dto: EjercicioGimnasioRequest): Observable<EjercicioDetalle> {
+    return this.http.post<EjercicioDetalle>(this.url, dto);
+  }
+
+  editar(id: string, dto: EjercicioGimnasioRequest): Observable<EjercicioDetalle> {
+    this.cacheDetalle.delete(id);
+    return this.http.put<EjercicioDetalle>(`${this.url}/${id}`, dto);
+  }
+
+  darDeBaja(id: string): Observable<void> {
+    this.cacheDetalle.delete(id);
+    return this.http.delete<void>(`${this.url}/${id}`);
   }
 
   /**

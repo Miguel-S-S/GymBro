@@ -1,4 +1,4 @@
-using GymBro.Application.DTOs.Acceso;
+﻿using GymBro.Application.DTOs.Acceso;
 using GymBro.Domain.Entities;
 using GymBro.Domain.Enums;
 using GymBro.Domain.Exceptions;
@@ -127,12 +127,25 @@ namespace GymBro.Application.Services
                 OrigenGeneracion = Origen,
             };
             var omitidas = new List<string>();
+            var omitidasPorEquipamiento = new List<string>();
             var orden = 0;
+
+            // Etapa 9a-2: se usa el gimnasio del socio (no el de quien llama). Si el gimnasio declaró equipamiento, solo
+            // son factibles los ejercicios cuyo tipo está marcado o es siempre disponible; si no declaró nada, o el socio
+            // es independiente, no se filtra por equipamiento.
+            var factibles = socio.GimnasioId is Guid gimnasioSocio
+                ? await _repo.GetTiposEquipamientoFactiblesAsync(gimnasioSocio)
+                : null;
 
             foreach (var zona in _config.ZonasEfectivas())
             {
-                var candidatos = await _repo.GetEjerciciosDeZonaAsync(zona.Alias);
-                if (candidatos.Count == 0) { omitidas.Add(zona.Nombre); continue; }
+                var deLaZona = await _repo.GetEjerciciosDeZonaAsync(zona.Alias, socio.GimnasioId);
+                if (deLaZona.Count == 0) { omitidas.Add(zona.Nombre); continue; }
+
+                var candidatos = factibles is null
+                    ? deLaZona
+                    : deLaZona.Where(c => c.TipoEquipamientoId is Guid t && factibles.Contains(t)).ToList();
+                if (candidatos.Count == 0) { omitidasPorEquipamiento.Add(zona.Nombre); continue; }
 
                 var elegido = candidatos.FirstOrDefault(c => preferencias.Any(p =>
                                   c.Equipamiento.Contains(p, StringComparison.OrdinalIgnoreCase)))
@@ -162,11 +175,15 @@ namespace GymBro.Application.Services
                 });
             }
 
+            if (prescripcion.EjerciciosPrescritos.Count == 0 && omitidasPorEquipamiento.Count > 0)
+                throw new ReglaNegocioException(
+                    "Con el equipamiento declarado por el gimnasio no hay ejercicios factibles para ninguna zona del baseline.");
             if (prescripcion.EjerciciosPrescritos.Count == 0)
                 throw new CatalogosIncompletosException("El catálogo no tiene ejercicios para ninguna de las zonas del baseline.");
 
             prescripcion.Observaciones = ArmarObservaciones(edad, genero, categoriaImc, medicion.TieneHipertension,
-                medicion.TieneDiabetes, socio.Objetivo.ToString(), matriz, omitidas, prescripcion.EjerciciosPrescritos.Count);
+                medicion.TieneDiabetes, socio.Objetivo.ToString(), matriz, omitidas, omitidasPorEquipamiento,
+                factibles is not null, prescripcion.EjerciciosPrescritos.Count);
 
             // 5) Estado inicial según la política de revisión del gimnasio (independiente: aprobada).
             await _revision.AplicarPoliticaAsync(prescripcion);
@@ -208,7 +225,8 @@ namespace GymBro.Application.Services
         }
 
         private static string ArmarObservaciones(int edad, string genero, GymBro.Domain.Enums.CategoriaIMC imc,
-            bool hta, bool dm, string objetivo, MatrizRecomendacion? matriz, List<string> omitidas, int cantidad)
+            bool hta, bool dm, string objetivo, MatrizRecomendacion? matriz, List<string> omitidas,
+            List<string> omitidasPorEquipamiento, bool filtroEquipamiento, int cantidad)
         {
             var partes = new List<string>
             {
@@ -217,6 +235,11 @@ namespace GymBro.Application.Services
             };
             if (omitidas.Count > 0)
                 partes.Add($"Zonas sin ejercicios en el catálogo, omitidas: {string.Join(", ", omitidas)} (la rutina quedó con {cantidad}).");
+            // Etapa 9a-2: se distingue la zona omitida por falta de ejercicios de la omitida por el equipamiento declarado.
+            if (omitidasPorEquipamiento.Count > 0)
+                partes.Add($"Zonas omitidas por equipamiento (el gimnasio no declaró el necesario): {string.Join(", ", omitidasPorEquipamiento)} (la rutina quedó con {cantidad}).");
+            else if (filtroEquipamiento)
+                partes.Add("Se usó el equipamiento declarado por el gimnasio.");
             if (matriz is null)
                 partes.Add("La matriz de recomendaciones no tiene filas: sin sugerencias adicionales.");
             else

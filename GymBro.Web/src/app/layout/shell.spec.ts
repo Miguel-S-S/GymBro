@@ -36,6 +36,14 @@ describe('menú lateral por rol (Etapa 8c, T8)', () => {
     expect(enlaces).not.toContain('/revisiones');
   });
 
+  it('Etapa 9a-2: el Administrador de la Plataforma, el Dueño y el Personal Trainer ven Equipamiento', () => {
+    expect(enlacesDelMenu('SuperAdministrador')).toContain('/gimnasio/equipamiento');
+    TestBed.resetTestingModule();
+    expect(enlacesDelMenu('AdministradorGimnasio')).toContain('/gimnasio/equipamiento');
+    TestBed.resetTestingModule();
+    expect(enlacesDelMenu('Entrenador')).toContain('/gimnasio/equipamiento');
+  });
+
   it('el Personal Trainer conserva Socios y Ejercicios', () => {
     const enlaces = enlacesDelMenu('Entrenador');
     expect(enlaces).toEqual(expect.arrayContaining(['/socios', '/ejercicios', '/revisiones']));

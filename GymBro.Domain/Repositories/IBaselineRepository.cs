@@ -1,4 +1,4 @@
-using GymBro.Domain.Entities;
+﻿using GymBro.Domain.Entities;
 using GymBro.Domain.Enums;
 
 namespace GymBro.Domain.Repositories
@@ -6,7 +6,7 @@ namespace GymBro.Domain.Repositories
     /// <summary>Ejercicio del catálogo sin el vector de embedding (no se necesita para el baseline).</summary>
     public record EjercicioCandidato(
         Guid Id, string Nombre, string Equipamiento, string ZonaObjetivo, string MusculoPrincipal, int Dificultad,
-        TipoMedida TipoMedida = TipoMedida.Repeticiones);
+        TipoMedida TipoMedida = TipoMedida.Repeticiones, Guid? TipoEquipamientoId = null);
 
     /// <summary>
     /// Accesos de lectura al catálogo y escritura de la prescripción para la generación determinista
@@ -36,8 +36,17 @@ namespace GymBro.Domain.Repositories
         /// </summary>
         Task<DosificacionVolumetrica?> BuscarDosificacionAsync(IReadOnlyCollection<string> aliasZona, TipoMedida tipoMedida);
 
-        /// <summary>Ejercicios de la zona en orden fijo: dificultad, nombre, id.</summary>
-        Task<IReadOnlyList<EjercicioCandidato>> GetEjerciciosDeZonaAsync(IReadOnlyCollection<string> aliasZona);
+        /// <summary>
+        /// Ejercicios de la zona en orden fijo: dificultad, nombre, id. Incluye los globales y, si se indica, los propios de
+        /// ese gimnasio (nunca los de otro). Etapa 9a-2: el gimnasio es el del socio, no el de quien llama.
+        /// </summary>
+        Task<IReadOnlyList<EjercicioCandidato>> GetEjerciciosDeZonaAsync(IReadOnlyCollection<string> aliasZona, Guid? gimnasioId);
+
+        /// <summary>
+        /// Tipos de equipamiento factibles en el gimnasio (Etapa 9a-2): los marcados más los siempre disponibles (globales y
+        /// propios). Devuelve null si el gimnasio no declaró ningún tipo: en ese caso no se filtra por equipamiento.
+        /// </summary>
+        Task<IReadOnlySet<Guid>?> GetTiposEquipamientoFactiblesAsync(Guid gimnasioId);
 
         Task<bool> TienePendienteDeRevisionAsync(Guid socioId);
 

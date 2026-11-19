@@ -34,6 +34,8 @@ namespace GymBro.Infrastructure.Persistence
         public DbSet<PrescripcionEjercicio> PrescripcionesEjercicios { get; set; }
         public DbSet<SerieRealizada> SeriesRealizadas { get; set; }
         public DbSet<RegistroBienestarDiario> RegistrosBienestarDiario { get; set; }
+        public DbSet<TipoEquipamiento> TiposEquipamiento { get; set; }
+        public DbSet<EquipamientoGimnasio> EquipamientosGimnasio { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -56,7 +58,15 @@ namespace GymBro.Infrastructure.Persistence
                 || (_actual.GimnasioId != null && m.Socio.GimnasioId == _actual.GimnasioId)
                 || (_actual.SocioId != null && m.SocioId == _actual.SocioId)));
 
-            modelBuilder.Entity<Ejercicio>().HasQueryFilter(e => e.FechaBaja == null);
+            // Etapa 9a-2: los ejercicios globales los ve cualquiera; los propios de un gimnasio, solo ese gimnasio
+            // (personal por el claim gimnasio_id; el Socio por su ficha, porque su cuenta no lleva gimnasio_id).
+            // El Administrador de la Plataforma ve los de todos los gimnasios.
+            modelBuilder.Entity<Ejercicio>().HasQueryFilter(e => e.FechaBaja == null && (
+                e.GimnasioId == null
+                || _actual.EsProcesoDeSistema
+                || _actual.Rol == RolUsuario.SuperAdministrador
+                || (_actual.GimnasioId != null && e.GimnasioId == _actual.GimnasioId)
+                || (_actual.SocioId != null && Socios.Any(s => s.Id == _actual.SocioId && s.GimnasioId == e.GimnasioId))));
             modelBuilder.Entity<Ejercicio>().Property(e => e.Embedding).HasColumnType("vector(768)");
 
             modelBuilder.Entity<SesionEntrenamiento>().HasQueryFilter(se => se.FechaBaja == null && (
@@ -163,6 +173,7 @@ namespace GymBro.Infrastructure.Persistence
 
             ConfigurarAccesoYTenants(modelBuilder);
             ConfigurarBienestarDiario(modelBuilder);
+            ConfigurarCatalogoGimnasio(modelBuilder);
 
             // 5. Conversión de Enums a texto puro en la base de datos
             modelBuilder.Entity<Socio>().Property(s => s.Objetivo).HasConversion<string>();
@@ -209,6 +220,55 @@ namespace GymBro.Infrastructure.Persistence
         {
             GuardaEnums.Validar(ChangeTracker);
             return base.SaveChangesAsync(acceptAllChangesOnSuccess, cancellationToken);
+        }
+
+        /// <summary>Equipamiento normalizado y ejercicios propios del gimnasio (Etapa 9a-2).</summary>
+        private void ConfigurarCatalogoGimnasio(ModelBuilder modelBuilder)
+        {
+            modelBuilder.Entity<TipoEquipamiento>(e =>
+            {
+                // Globales + los del propio gimnasio; el Administrador de la Plataforma ve todos.
+                e.HasQueryFilter(t => t.FechaBaja == null && (
+                    t.GimnasioId == null
+                    || _actual.EsProcesoDeSistema
+                    || _actual.Rol == RolUsuario.SuperAdministrador
+                    || (_actual.GimnasioId != null && t.GimnasioId == _actual.GimnasioId)
+                    || (_actual.SocioId != null && Socios.Any(s => s.Id == _actual.SocioId && s.GimnasioId == t.GimnasioId))));
+                e.Property(t => t.Clave).HasMaxLength(60).IsRequired();
+                e.Property(t => t.Nombre).HasMaxLength(80).IsRequired();
+                e.HasOne<Gimnasio>().WithMany().HasForeignKey(t => t.GimnasioId).OnDelete(DeleteBehavior.Restrict);
+                // Clave única entre los globales y, para los propios, dentro de cada gimnasio.
+                e.HasIndex(t => t.Clave).IsUnique().HasFilter("gimnasio_id IS NULL")
+                    .HasDatabaseName("ix_tipos_equipamiento_clave_global");
+                e.HasIndex(t => new { t.GimnasioId, t.Clave }).IsUnique().HasFilter("gimnasio_id IS NOT NULL")
+                    .HasDatabaseName("ix_tipos_equipamiento_gimnasio_id_clave");
+            });
+
+            modelBuilder.Entity<EquipamientoGimnasio>(e =>
+            {
+                // El propio gimnasio (el Socio, el de su ficha: lo usa el baseline que él mismo dispara);
+                // el Administrador de la Plataforma ve todos.
+                e.HasQueryFilter(x => x.FechaBaja == null && (
+                    _actual.EsProcesoDeSistema
+                    || _actual.Rol == RolUsuario.SuperAdministrador
+                    || (_actual.GimnasioId != null && x.GimnasioId == _actual.GimnasioId)
+                    || (_actual.SocioId != null && Socios.Any(s => s.Id == _actual.SocioId && s.GimnasioId == x.GimnasioId))));
+                e.HasOne<Gimnasio>().WithMany().HasForeignKey(x => x.GimnasioId).OnDelete(DeleteBehavior.Restrict);
+                e.HasOne(x => x.TipoEquipamiento).WithMany().HasForeignKey(x => x.TipoEquipamientoId).OnDelete(DeleteBehavior.Restrict);
+                // Un registro vigente por gimnasio y tipo (convive con la baja lógica).
+                e.HasIndex(x => new { x.GimnasioId, x.TipoEquipamientoId }).IsUnique().HasFilter("fecha_baja IS NULL");
+                e.ToTable(t => t.HasCheckConstraint("CK_EquipamientoGimnasio_Cantidad", "cantidad IS NULL OR cantidad >= 1"));
+            });
+
+            modelBuilder.Entity<Ejercicio>(e =>
+            {
+                e.HasOne<Gimnasio>().WithMany().HasForeignKey(x => x.GimnasioId).OnDelete(DeleteBehavior.Restrict);
+                e.HasIndex(x => x.GimnasioId);
+                e.HasOne(x => x.TipoEquipamiento).WithMany().HasForeignKey(x => x.TipoEquipamientoId).OnDelete(DeleteBehavior.Restrict);
+                e.HasIndex(x => x.TipoEquipamientoId);
+                e.ToTable(t => t.HasCheckConstraint("CK_Ejercicio_OrigenGimnasio",
+                    "(origen = 'Gimnasio' AND gimnasio_id IS NOT NULL) OR (origen <> 'Gimnasio' AND gimnasio_id IS NULL)"));
+            });
         }
 
         /// <summary>Registro diario de bienestar del socio (Etapa 8b).</summary>

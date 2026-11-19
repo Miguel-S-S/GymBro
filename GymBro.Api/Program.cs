@@ -1,4 +1,4 @@
-using System.Text;
+﻿using System.Text;
 using System.Threading.RateLimiting;
 using GymBro.Api.Infrastructure;
 using GymBro.Api.Security;
@@ -68,6 +68,12 @@ builder.Services.AddScoped<IPrescripcionBaselineService, PrescripcionBaselineSer
 builder.Services.AddSingleton(TimeProvider.System);
 builder.Services.AddScoped<IRegistroBienestarRepository, RegistroBienestarRepository>();
 builder.Services.AddScoped<IBienestarService, BienestarService>();
+
+// Etapa 9a-2: equipamiento y ejercicios propios del gimnasio.
+builder.Services.AddSingleton(builder.Configuration.GetSection("Embeddings").Get<EmbeddingConfig>() ?? new EmbeddingConfig());
+builder.Services.AddScoped<IEquipamientoRepository, EquipamientoRepository>();
+builder.Services.AddScoped<IEquipamientoService, EquipamientoService>();
+builder.Services.AddScoped<IEjercicioGimnasioService, EjercicioGimnasioService>();
 
 builder.Services.Configure<JwtOptions>(builder.Configuration.GetSection(JwtOptions.Seccion));
 var jwt = builder.Configuration.GetSection(JwtOptions.Seccion).Get<JwtOptions>() ?? new JwtOptions();
@@ -147,6 +153,9 @@ using (var scope = app.Services.CreateScope())
 
     // Catálogo propio del proyecto (Etapa 9a-1, Core): en todos los entornos, después de DataSeeder (decisión A).
     await CatalogoProyectoSeeder.SeedAsync(context);
+
+    // Etapa 9a-2: tipos globales de equipamiento y su asignación a los ejercicios globales (todos los entornos).
+    await EquipamientoSeeder.SeedAsync(context);
 
     await AccesoSeeder.SeedSuperAdministradorAsync(context, services.GetRequiredService<IHasheadorContrasena>(),
         app.Configuration["SuperAdmin:Email"], app.Configuration["SuperAdmin:Password"]);

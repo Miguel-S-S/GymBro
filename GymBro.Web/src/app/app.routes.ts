@@ -109,6 +109,15 @@ export const routes: Routes = [
         loadComponent: () => import('./features/gimnasio/mi-gimnasio').then((m) => m.MiGimnasio),
       },
 
+      // Etapa 9a-2: equipamiento del gimnasio. Edita el Dueño; el Personal Trainer y el Administrador de la Plataforma
+      // lo ven en solo lectura (regla del autor: el Administrador puede abrir todas las pantallas nuevas).
+      {
+        path: 'gimnasio/equipamiento',
+        title: 'Equipamiento · GymBro',
+        canActivate: [rolGuard('AdministradorGimnasio', 'Entrenador', 'SuperAdministrador')],
+        loadComponent: () => import('./features/gimnasio/equipamiento').then((m) => m.Equipamiento),
+      },
+
       // Dueño y Personal Trainer
       {
         path: 'revisiones',

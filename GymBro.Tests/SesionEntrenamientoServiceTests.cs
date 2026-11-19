@@ -243,10 +243,16 @@ namespace GymBro.Tests
             private readonly HashSet<Guid> _ids;
             public FakeEjercicioRepository(params Guid[] ids) { _ids = ids.ToHashSet(); }
             public Task<bool> ExistenTodosAsync(IEnumerable<Guid> ids) => Task.FromResult(ids.All(_ids.Contains));
-            public Task<(IReadOnlyList<Ejercicio> Items, int Total)> GetPaginadoAsync(string? texto, string? zonaObjetivo, int omitir, int tomar) =>
-                throw new NotSupportedException();
+            public Task<(IReadOnlyList<Ejercicio> Items, int Total)> GetPaginadoAsync(string? texto, string? zonaObjetivo, int omitir, int tomar,
+                OrigenEjercicio? origen = null) => throw new NotSupportedException();
             public Task<Ejercicio?> GetByIdAsync(Guid id) => throw new NotSupportedException();
             public Task<IReadOnlyList<string>> GetZonasObjetivoAsync() => throw new NotSupportedException();
+            // Etapa 9a-2: escritura de ejercicios propios (no se usa en estas pruebas).
+            public Task<Ejercicio?> GetParaEdicionAsync(Guid id) => throw new NotSupportedException();
+            public Task<IReadOnlyList<(Guid Id, string Nombre)>> GetNombresVisiblesAsync(Guid gimnasioId) => throw new NotSupportedException();
+            public Task<bool> EnUsoPorPrescripcionVigenteAsync(Guid ejercicioId) => throw new NotSupportedException();
+            public Task AddAsync(Ejercicio ejercicio) => throw new NotSupportedException();
+            public Task SaveChangesAsync() => throw new NotSupportedException();
         }
     }
 }

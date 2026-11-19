@@ -17,7 +17,8 @@ import { mensajeDeError } from '../../core/util/api-error';
         <dl class="datos">
           <div><dt>Zona objetivo</dt><dd>{{ e.zonaObjetivo || '—' }}</dd></div>
           <div><dt>Músculo principal</dt><dd>{{ e.musculoPrincipal || '—' }}</dd></div>
-          <div><dt>Equipamiento</dt><dd>{{ e.equipamiento || '—' }}</dd></div>
+          <div><dt>Equipamiento</dt><dd>{{ e.tipoEquipamiento || e.equipamiento || '—' }}</dd></div>
+          <div><dt>Origen</dt><dd>{{ e.origen || '—' }}</dd></div>
           <div><dt>Dificultad</dt><dd>{{ e.dificultad || '—' }}</dd></div>
           <div class="ancho"><dt>Sinergistas</dt><dd>{{ e.sinergistas || '—' }}</dd></div>
           <div class="ancho"><dt>Estabilizadores</dt><dd>{{ e.estabilizadores || '—' }}</dd></div>

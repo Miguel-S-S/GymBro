@@ -23,8 +23,15 @@ namespace GymBro.Domain.Entities
         /// <summary>Repeticiones o Segundos (Etapa 9a-1). Las filas del dataset quedan en Repeticiones.</summary>
         public TipoMedida TipoMedida { get; set; } = TipoMedida.Repeticiones;
 
-        /// <summary>Dataset (Kaggle), Proyecto (CatalogoProyectoSeeder) o Gimnasio (reservado para la 9a-2).</summary>
+        /// <summary>Dataset (Kaggle), Proyecto (CatalogoProyectoSeeder) o Gimnasio (ejercicio propio, Etapa 9a-2).</summary>
         public OrigenEjercicio Origen { get; set; } = OrigenEjercicio.Dataset;
+
+        /// <summary>Nulo: ejercicio global. Con valor: ejercicio propio de ese gimnasio (Origen = Gimnasio). Etapa 9a-2.</summary>
+        public Guid? GimnasioId { get; set; }
+
+        /// <summary>Tipo normalizado de equipamiento (Etapa 9a-2). El texto Equipamiento se conserva sin cambios.</summary>
+        public Guid? TipoEquipamientoId { get; set; }
+        public TipoEquipamiento? TipoEquipamiento { get; set; }
 
         // Motor IA
         public Vector? Embedding { get; set; }

@@ -104,6 +104,17 @@ describe('rutas por rol (Etapa 8c, T2)', () => {
     expect(navegar('mi/entrenar')).toBe('/socios');
   });
 
+  // Etapa 9a-2: pantalla de equipamiento. El Administrador de la Plataforma la abre (solo lectura); el Socio no.
+  it.each<Rol>(['AdministradorGimnasio', 'Entrenador', 'SuperAdministrador'])('%s abre /gimnasio/equipamiento', (rol) => {
+    guardar(rol);
+    expect(navegar('gimnasio/equipamiento')).toBe(true);
+  });
+
+  it('un Socio que abre /gimnasio/equipamiento es redirigido a /mi', () => {
+    guardar('Socio');
+    expect(navegar('gimnasio/equipamiento')).toBe('/mi');
+  });
+
   it('sin sesión, las pantallas del personal llevan a /login', () => {
     expect(navegar('socios')).toBe('/login');
   });

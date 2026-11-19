@@ -1,4 +1,4 @@
-using GymBro.Application.DTOs.Acceso;
+﻿using GymBro.Application.DTOs.Acceso;
 using GymBro.Application.Services;
 using GymBro.Domain.Entities;
 using GymBro.Domain.Enums;
@@ -312,6 +312,96 @@ namespace GymBro.Tests
             Assert.True(rutina.Observaciones!.Length <= 500);
         }
 
+        // ---- Etapa 9a-2: equipamiento del gimnasio ----
+
+        private static readonly Guid GimnasioSocio = Guid.Parse("22222222-2222-2222-2222-222222222222");
+        private static readonly Guid TipoMancuerna = CatalogoEquipamiento.IdDe(CatalogoEquipamiento.Mancuerna);
+        private static readonly Guid TipoBarra = CatalogoEquipamiento.IdDe(CatalogoEquipamiento.Barra);
+        private static readonly Guid TipoPesoCorporal = CatalogoEquipamiento.IdDe(CatalogoEquipamiento.PesoCorporal);
+
+        /// <summary>Por zona: "A" con barra (dificultad 1, va primero) y "B" con mancuerna (dificultad 2). Core: solo peso corporal.</summary>
+        private static FakeBaselineRepository RepoConEquipamiento()
+        {
+            var repo = new FakeBaselineRepository { SocioActual = NuevoSocio(), Medicion = NuevaMedicion() };
+            repo.SocioActual.GimnasioId = GimnasioSocio;
+            foreach (var z in new[] { "Chest", "Back", "Legs", "Arms" })
+            {
+                repo.Ejercicios.Add(new EjercicioCandidato(Guid.NewGuid(), $"{z} A barra", "Barbell", z, z, 1, TipoMedida.Repeticiones, TipoBarra));
+                repo.Ejercicios.Add(new EjercicioCandidato(Guid.NewGuid(), $"{z} B mancuerna", "Dumbbell", z, z, 2, TipoMedida.Repeticiones, TipoMancuerna));
+            }
+            repo.Ejercicios.Add(new EjercicioCandidato(Guid.NewGuid(), "Core peso corporal", "Body Weight", "Core", "Core", 1, TipoMedida.Repeticiones, TipoPesoCorporal));
+            repo.Dosificaciones.Add(new DosificacionVolumetrica { Id = Guid.NewGuid(), ZonaObjetivo = "Chest", SeriesMinimas = 3, RepeticionesMinimas = 8, RepeticionesMaximas = 12 });
+            return repo;
+        }
+
+        [Fact]
+        public async Task SinEquipamientoDeclarado_NoSeFiltra_YElResultadoEsElDeLa9a1()
+        {
+            var repo = RepoConEquipamiento();
+            repo.Factibles = null;
+
+            var rutina = await Servicio(repo).GenerarAsync(SocioId);
+
+            Assert.Equal(new[] { "Chest A barra", "Back A barra", "Legs A barra", "Arms A barra", "Core peso corporal" },
+                rutina.Ejercicios.Select(e => e.Ejercicio));
+            Assert.DoesNotContain("equipamiento", rutina.Observaciones);
+        }
+
+        [Fact]
+        public async Task ConEquipamientoDeclarado_SoloEligeEjerciciosFactibles_YElPesoCorporalSiempre()
+        {
+            var repo = RepoConEquipamiento();
+            // Lo que devuelve el repositorio: lo marcado (mancuerna) más los siempre disponibles (peso corporal).
+            repo.Factibles = new HashSet<Guid> { TipoMancuerna, TipoPesoCorporal };
+
+            var rutina = await Servicio(repo).GenerarAsync(SocioId);
+
+            Assert.Equal(new[] { "Chest B mancuerna", "Back B mancuerna", "Legs B mancuerna", "Arms B mancuerna", "Core peso corporal" },
+                rutina.Ejercicios.Select(e => e.Ejercicio));
+            Assert.Contains("Se usó el equipamiento declarado por el gimnasio.", rutina.Observaciones);
+        }
+
+        [Fact]
+        public async Task ZonaSinEjerciciosFactibles_SeOmite_YLaObservacionLoDistingueDeLaZonaSinEjercicios()
+        {
+            var repo = RepoConEquipamiento();
+            repo.Ejercicios.RemoveAll(e => e.ZonaObjetivo == "Arms"); // sin ejercicios en el catálogo
+            repo.Factibles = new HashSet<Guid> { TipoPesoCorporal };  // declaró equipamiento, pero no barra ni mancuerna
+
+            var rutina = await Servicio(repo).GenerarAsync(SocioId);
+
+            Assert.Equal(new[] { "Core peso corporal" }, rutina.Ejercicios.Select(e => e.Ejercicio));
+            Assert.Contains("Zonas sin ejercicios en el catálogo, omitidas: Brazos", rutina.Observaciones);
+            Assert.Contains("Zonas omitidas por equipamiento (el gimnasio no declaró el necesario): Pecho, Espalda, Piernas", rutina.Observaciones);
+            Assert.True(rutina.Observaciones!.Length <= 500);
+        }
+
+        [Fact]
+        public async Task SiNingunaZonaEsFactible_PorEquipamiento_LanzaReglaDeNegocio()
+        {
+            var repo = RepoConEquipamiento();
+            repo.Ejercicios.RemoveAll(e => e.ZonaObjetivo == "Core");
+            repo.Factibles = new HashSet<Guid> { TipoPesoCorporal };
+
+            await Assert.ThrowsAsync<ReglaNegocioException>(() => Servicio(repo).GenerarAsync(SocioId));
+        }
+
+        [Fact]
+        public async Task SeConsultaElGimnasioDelSocio_YElSocioIndependienteNoSeFiltra()
+        {
+            var repo = RepoConEquipamiento();
+            repo.Factibles = new HashSet<Guid> { TipoPesoCorporal };
+            await Servicio(repo).GenerarAsync(SocioId);
+            Assert.Equal(GimnasioSocio, repo.GimnasioConsultado);
+
+            var independiente = RepoConEquipamiento();
+            independiente.SocioActual!.GimnasioId = null;
+            independiente.Factibles = new HashSet<Guid> { TipoPesoCorporal }; // no se consulta: el socio no tiene gimnasio
+            var rutina = await Servicio(independiente).GenerarAsync(SocioId);
+            Assert.Null(independiente.GimnasioConsultado);
+            Assert.Equal(5, rutina.Ejercicios.Count);
+        }
+
         // ---- Dobles de prueba ----
         private sealed class FakeBaselineRepository : IBaselineRepository
         {
@@ -343,8 +433,18 @@ namespace GymBro.Tests
                     aliasZona.Contains(d.ZonaObjetivo, StringComparer.OrdinalIgnoreCase) && d.TipoMedida == tipoMedida));
             }
 
-            public Task<IReadOnlyList<EjercicioCandidato>> GetEjerciciosDeZonaAsync(IReadOnlyCollection<string> aliasZona)
+            /// <summary>Gimnasio pedido en la última consulta de ejercicios (Etapa 9a-2).</summary>
+            public Guid? GimnasioConsultado { get; private set; }
+
+            /// <summary>Tipos factibles que devuelve el repositorio; null = el gimnasio no declaró equipamiento.</summary>
+            public HashSet<Guid>? Factibles { get; set; }
+
+            public Task<IReadOnlySet<Guid>?> GetTiposEquipamientoFactiblesAsync(Guid gimnasioId) =>
+                Task.FromResult<IReadOnlySet<Guid>?>(Factibles);
+
+            public Task<IReadOnlyList<EjercicioCandidato>> GetEjerciciosDeZonaAsync(IReadOnlyCollection<string> aliasZona, Guid? gimnasioId)
             {
+                GimnasioConsultado = gimnasioId;
                 IReadOnlyList<EjercicioCandidato> lista = Ejercicios
                     .Where(e => aliasZona.Contains(e.ZonaObjetivo, StringComparer.OrdinalIgnoreCase))
                     .OrderBy(e => e.Dificultad).ThenBy(e => e.Nombre, StringComparer.Ordinal).ThenBy(e => e.Id)

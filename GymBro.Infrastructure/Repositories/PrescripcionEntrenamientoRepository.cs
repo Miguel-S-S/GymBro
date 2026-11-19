@@ -25,20 +25,24 @@ namespace GymBro.Infrastructure.Repositories
 
         public async Task<IEnumerable<PrescripcionEntrenamiento>> GetPendientesDeRevisionAsync()
         {
-            return await _context.PrescripcionesEntrenamiento.AsNoTracking()
+            var lista = await _context.PrescripcionesEntrenamiento.AsNoTracking()
                 .Include(p => p.Socio)
-                .Include(p => p.EjerciciosPrescritos).ThenInclude(pe => pe.Ejercicio)
+                .Include(p => p.EjerciciosPrescritos)
                 .Where(p => p.Estado == EstadoPrescripcion.PendienteRevision)
                 .OrderBy(p => p.FechaAlta)
                 .ToListAsync();
+            await EjerciciosDeHistorial.CompletarAsync(_context, lista.SelectMany(p => p.EjerciciosPrescritos));
+            return lista;
         }
 
         public async Task<PrescripcionEntrenamiento?> GetForRevisionAsync(Guid id)
         {
-            return await _context.PrescripcionesEntrenamiento
+            var rutina = await _context.PrescripcionesEntrenamiento
                 .Include(p => p.Socio)
-                .Include(p => p.EjerciciosPrescritos).ThenInclude(pe => pe.Ejercicio)
+                .Include(p => p.EjerciciosPrescritos)
                 .FirstOrDefaultAsync(p => p.Id == id);
+            if (rutina != null) await EjerciciosDeHistorial.CompletarAsync(_context, rutina.EjerciciosPrescritos);
+            return rutina;
         }
 
         public async Task AddRevisionAsync(RevisionPrescripcion revision)
@@ -50,10 +54,11 @@ namespace GymBro.Infrastructure.Repositories
 
         public async Task<PrescripcionEntrenamiento?> GetByIdAsync(Guid id)
         {
-            return await _context.PrescripcionesEntrenamiento
+            var rutina = await _context.PrescripcionesEntrenamiento
                 .Include(p => p.EjerciciosPrescritos)
-                    .ThenInclude(pe => pe.Ejercicio)
                 .FirstOrDefaultAsync(p => p.Id == id);
+            if (rutina != null) await EjerciciosDeHistorial.CompletarAsync(_context, rutina.EjerciciosPrescritos);
+            return rutina;
         }
     }
 }

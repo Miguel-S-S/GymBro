@@ -1,4 +1,4 @@
-using GymBro.Domain.Entities;
+﻿using GymBro.Domain.Entities;
 using GymBro.Domain.Enums;
 using GymBro.Domain.Repositories;
 using GymBro.Infrastructure.Persistence;
@@ -66,15 +66,33 @@ namespace GymBro.Infrastructure.Repositories
                 .FirstOrDefaultAsync();
         }
 
-        public async Task<IReadOnlyList<EjercicioCandidato>> GetEjerciciosDeZonaAsync(IReadOnlyCollection<string> aliasZona)
+        public async Task<IReadOnlyList<EjercicioCandidato>> GetEjerciciosDeZonaAsync(IReadOnlyCollection<string> aliasZona, Guid? gimnasioId)
         {
             var alias = aliasZona.Select(a => a.ToLower()).ToArray();
             // Se proyecta sin el embedding (vector de 768 dimensiones).
+            // Etapa 9a-2: además del filtro de EF, se limita explícitamente a los globales y a los del gimnasio del socio.
             return await _context.Ejercicios.AsNoTracking()
                 .Where(e => alias.Contains(e.ZonaObjetivo.ToLower()))
+                .Where(e => e.GimnasioId == null || (gimnasioId != null && e.GimnasioId == gimnasioId))
                 .OrderBy(e => e.Dificultad).ThenBy(e => e.Nombre).ThenBy(e => e.Id)
-                .Select(e => new EjercicioCandidato(e.Id, e.Nombre, e.Equipamiento, e.ZonaObjetivo, e.MusculoPrincipal, e.Dificultad, e.TipoMedida))
+                .Select(e => new EjercicioCandidato(e.Id, e.Nombre, e.Equipamiento, e.ZonaObjetivo, e.MusculoPrincipal, e.Dificultad,
+                    e.TipoMedida, e.TipoEquipamientoId))
                 .ToListAsync();
+        }
+
+        public async Task<IReadOnlySet<Guid>?> GetTiposEquipamientoFactiblesAsync(Guid gimnasioId)
+        {
+            var marcados = await _context.EquipamientosGimnasio.AsNoTracking()
+                .Where(x => x.GimnasioId == gimnasioId)
+                .Select(x => x.TipoEquipamientoId)
+                .ToListAsync();
+            if (marcados.Count == 0) return null;
+
+            var siempre = await _context.TiposEquipamiento.AsNoTracking()
+                .Where(t => t.SiempreDisponible && (t.GimnasioId == null || t.GimnasioId == gimnasioId))
+                .Select(t => t.Id)
+                .ToListAsync();
+            return marcados.Concat(siempre).ToHashSet();
         }
 
         public Task<bool> TienePendienteDeRevisionAsync(Guid socioId) =>
@@ -84,13 +102,18 @@ namespace GymBro.Infrastructure.Repositories
         public async Task AddPrescripcionAsync(PrescripcionEntrenamiento prescripcion) =>
             await _context.PrescripcionesEntrenamiento.AddAsync(prescripcion);
 
-        public async Task<IReadOnlyList<PrescripcionEntrenamiento>> GetPrescripcionesDeSocioAsync(Guid socioId) =>
-            await _context.PrescripcionesEntrenamiento.AsNoTracking()
+        public async Task<IReadOnlyList<PrescripcionEntrenamiento>> GetPrescripcionesDeSocioAsync(Guid socioId)
+        {
+            var lista = await _context.PrescripcionesEntrenamiento.AsNoTracking()
                 .Include(p => p.Socio)
-                .Include(p => p.EjerciciosPrescritos).ThenInclude(pe => pe.Ejercicio)
+                .Include(p => p.EjerciciosPrescritos)
                 .Where(p => p.SocioId == socioId)
                 .OrderByDescending(p => p.FechaAlta)
                 .ToListAsync();
+            // Etapa 9a-2: el nombre del ejercicio no se pierde aunque el filtro por gimnasio lo oculte.
+            await EjerciciosDeHistorial.CompletarAsync(_context, lista.SelectMany(p => p.EjerciciosPrescritos));
+            return lista;
+        }
 
         public Task SaveChangesAsync() => _context.SaveChangesAsync();
     }

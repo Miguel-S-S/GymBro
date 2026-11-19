@@ -8,7 +8,7 @@ namespace GymBro.Application.Services
     /// </summary>
     public interface IEjercicioCatalogoService
     {
-        Task<PaginadoDto<EjercicioResumenDto>> GetCatalogoAsync(string? texto, string? zonaObjetivo, int pagina, int tamanioPagina);
+        Task<PaginadoDto<EjercicioResumenDto>> GetCatalogoAsync(string? texto, string? zonaObjetivo, int pagina, int tamanioPagina, string? origen = null);
         Task<EjercicioDetalleDto?> GetByIdAsync(Guid id);
         Task<IReadOnlyList<string>> GetZonasObjetivoAsync();
     }

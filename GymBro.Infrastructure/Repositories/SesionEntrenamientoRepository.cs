@@ -27,12 +27,12 @@ namespace GymBro.Infrastructure.Repositories
 
         public async Task<SesionEntrenamiento?> GetByIdAsync(Guid id)
         {
-            return await _context.Sesiones
-                .Include(s => s.EjerciciosEjecutados)
-                    .ThenInclude(e => e.Ejercicio)
+            var sesion = await _context.Sesiones
                 .Include(s => s.EjerciciosEjecutados)
                     .ThenInclude(e => e.SeriesRealizadas)
                 .FirstOrDefaultAsync(s => s.Id == id);
+            if (sesion != null) await EjerciciosDeHistorial.CompletarAsync(_context, sesion.EjerciciosEjecutados);
+            return sesion;
         }
 
         public async Task<IEnumerable<SesionEntrenamiento>> GetAllBySocioIdAsync(Guid socioId)

@@ -260,6 +260,10 @@ namespace GymBro.Infrastructure.Migrations
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("fecha_modificacion");
 
+                    b.Property<Guid?>("GimnasioId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("gimnasio_id");
+
                     b.Property<string>("MusculoPrincipal")
                         .IsRequired()
                         .HasColumnType("text")
@@ -285,6 +289,10 @@ namespace GymBro.Infrastructure.Migrations
                         .IsRequired()
                         .HasColumnType("text")
                         .HasColumnName("sinergistas");
+
+                    b.Property<Guid?>("TipoEquipamientoId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("tipo_equipamiento_id");
 
                     b.Property<string>("TipoMedida")
                         .IsRequired()
@@ -312,11 +320,79 @@ namespace GymBro.Infrastructure.Migrations
                     b.HasKey("Id")
                         .HasName("pk_ejercicios");
 
+                    b.HasIndex("GimnasioId")
+                        .HasDatabaseName("ix_ejercicios_gimnasio_id");
+
+                    b.HasIndex("TipoEquipamientoId")
+                        .HasDatabaseName("ix_ejercicios_tipo_equipamiento_id");
+
                     b.ToTable("ejercicios", null, t =>
                         {
                             t.HasCheckConstraint("CK_Ejercicio_Origen", "origen IN ('Dataset', 'Proyecto', 'Gimnasio')");
 
+                            t.HasCheckConstraint("CK_Ejercicio_OrigenGimnasio", "(origen = 'Gimnasio' AND gimnasio_id IS NOT NULL) OR (origen <> 'Gimnasio' AND gimnasio_id IS NULL)");
+
                             t.HasCheckConstraint("CK_Ejercicio_TipoMedida", "tipo_medida IN ('Repeticiones', 'Segundos')");
+                        });
+                });
+
+            modelBuilder.Entity("GymBro.Domain.Entities.EquipamientoGimnasio", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<int?>("Cantidad")
+                        .HasColumnType("integer")
+                        .HasColumnName("cantidad");
+
+                    b.Property<DateTime>("FechaAlta")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("fecha_alta");
+
+                    b.Property<DateTime?>("FechaBaja")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("fecha_baja");
+
+                    b.Property<DateTime?>("FechaModificacion")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("fecha_modificacion");
+
+                    b.Property<Guid>("GimnasioId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("gimnasio_id");
+
+                    b.Property<Guid>("TipoEquipamientoId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("tipo_equipamiento_id");
+
+                    b.Property<int>("UsuarioAlta")
+                        .HasColumnType("integer")
+                        .HasColumnName("usuario_alta");
+
+                    b.Property<int?>("UsuarioBaja")
+                        .HasColumnType("integer")
+                        .HasColumnName("usuario_baja");
+
+                    b.Property<int?>("UsuarioModificacion")
+                        .HasColumnType("integer")
+                        .HasColumnName("usuario_modificacion");
+
+                    b.HasKey("Id")
+                        .HasName("pk_equipamientos_gimnasio");
+
+                    b.HasIndex("TipoEquipamientoId")
+                        .HasDatabaseName("ix_equipamientos_gimnasio_tipo_equipamiento_id");
+
+                    b.HasIndex("GimnasioId", "TipoEquipamientoId")
+                        .IsUnique()
+                        .HasDatabaseName("ix_equipamientos_gimnasio_gimnasio_id_tipo_equipamiento_id")
+                        .HasFilter("fecha_baja IS NULL");
+
+                    b.ToTable("equipamientos_gimnasio", null, t =>
+                        {
+                            t.HasCheckConstraint("CK_EquipamientoGimnasio_Cantidad", "cantidad IS NULL OR cantidad >= 1");
                         });
                 });
 
@@ -1328,6 +1404,73 @@ namespace GymBro.Infrastructure.Migrations
                     b.ToTable("solicitudes_vinculacion", (string)null);
                 });
 
+            modelBuilder.Entity("GymBro.Domain.Entities.TipoEquipamiento", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<string>("Clave")
+                        .IsRequired()
+                        .HasMaxLength(60)
+                        .HasColumnType("character varying(60)")
+                        .HasColumnName("clave");
+
+                    b.Property<DateTime>("FechaAlta")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("fecha_alta");
+
+                    b.Property<DateTime?>("FechaBaja")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("fecha_baja");
+
+                    b.Property<DateTime?>("FechaModificacion")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("fecha_modificacion");
+
+                    b.Property<Guid?>("GimnasioId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("gimnasio_id");
+
+                    b.Property<string>("Nombre")
+                        .IsRequired()
+                        .HasMaxLength(80)
+                        .HasColumnType("character varying(80)")
+                        .HasColumnName("nombre");
+
+                    b.Property<bool>("SiempreDisponible")
+                        .HasColumnType("boolean")
+                        .HasColumnName("siempre_disponible");
+
+                    b.Property<int>("UsuarioAlta")
+                        .HasColumnType("integer")
+                        .HasColumnName("usuario_alta");
+
+                    b.Property<int?>("UsuarioBaja")
+                        .HasColumnType("integer")
+                        .HasColumnName("usuario_baja");
+
+                    b.Property<int?>("UsuarioModificacion")
+                        .HasColumnType("integer")
+                        .HasColumnName("usuario_modificacion");
+
+                    b.HasKey("Id")
+                        .HasName("pk_tipos_equipamiento");
+
+                    b.HasIndex("Clave")
+                        .IsUnique()
+                        .HasDatabaseName("ix_tipos_equipamiento_clave_global")
+                        .HasFilter("gimnasio_id IS NULL");
+
+                    b.HasIndex("GimnasioId", "Clave")
+                        .IsUnique()
+                        .HasDatabaseName("ix_tipos_equipamiento_gimnasio_id_clave")
+                        .HasFilter("gimnasio_id IS NOT NULL");
+
+                    b.ToTable("tipos_equipamiento", (string)null);
+                });
+
             modelBuilder.Entity("GymBro.Domain.Entities.Usuario", b =>
                 {
                     b.Property<Guid>("Id")
@@ -1441,6 +1584,42 @@ namespace GymBro.Infrastructure.Migrations
                     b.Navigation("EntrenadorUsuario");
 
                     b.Navigation("Socio");
+                });
+
+            modelBuilder.Entity("GymBro.Domain.Entities.Ejercicio", b =>
+                {
+                    b.HasOne("GymBro.Domain.Entities.Gimnasio", null)
+                        .WithMany()
+                        .HasForeignKey("GimnasioId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .HasConstraintName("fk_ejercicios_gimnasios_gimnasio_id");
+
+                    b.HasOne("GymBro.Domain.Entities.TipoEquipamiento", "TipoEquipamiento")
+                        .WithMany()
+                        .HasForeignKey("TipoEquipamientoId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .HasConstraintName("fk_ejercicios_tipos_equipamiento_tipo_equipamiento_id");
+
+                    b.Navigation("TipoEquipamiento");
+                });
+
+            modelBuilder.Entity("GymBro.Domain.Entities.EquipamientoGimnasio", b =>
+                {
+                    b.HasOne("GymBro.Domain.Entities.Gimnasio", null)
+                        .WithMany()
+                        .HasForeignKey("GimnasioId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired()
+                        .HasConstraintName("fk_equipamientos_gimnasio_gimnasios_gimnasio_id");
+
+                    b.HasOne("GymBro.Domain.Entities.TipoEquipamiento", "TipoEquipamiento")
+                        .WithMany()
+                        .HasForeignKey("TipoEquipamientoId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired()
+                        .HasConstraintName("fk_equipamientos_gimnasio_tipos_equipamiento_tipo_equipamiento");
+
+                    b.Navigation("TipoEquipamiento");
                 });
 
             modelBuilder.Entity("GymBro.Domain.Entities.InvitacionSocio", b =>
@@ -1616,6 +1795,15 @@ namespace GymBro.Infrastructure.Migrations
                     b.Navigation("Gimnasio");
 
                     b.Navigation("Socio");
+                });
+
+            modelBuilder.Entity("GymBro.Domain.Entities.TipoEquipamiento", b =>
+                {
+                    b.HasOne("GymBro.Domain.Entities.Gimnasio", null)
+                        .WithMany()
+                        .HasForeignKey("GimnasioId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .HasConstraintName("fk_tipos_equipamiento_gimnasios_gimnasio_id");
                 });
 
             modelBuilder.Entity("GymBro.Domain.Entities.Usuario", b =>

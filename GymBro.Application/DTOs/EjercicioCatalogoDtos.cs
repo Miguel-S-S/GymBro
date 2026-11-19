@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 
 namespace GymBro.Application.DTOs
 {
@@ -14,6 +14,11 @@ namespace GymBro.Application.DTOs
         public string TipoMedida { get; set; } = "Repeticiones";
         /// <summary>"Dataset", "Proyecto" o "Gimnasio" (Etapa 9a-1).</summary>
         public string Origen { get; set; } = "Dataset";
+        /// <summary>Gimnasio dueño del ejercicio; null para los globales (Etapa 9a-2).</summary>
+        public Guid? GimnasioId { get; set; }
+        public Guid? TipoEquipamientoId { get; set; }
+        /// <summary>Nombre del tipo de equipamiento normalizado (Etapa 9a-2).</summary>
+        public string? TipoEquipamiento { get; set; }
     }
 
     public class EjercicioDetalleDto
@@ -32,5 +37,10 @@ namespace GymBro.Application.DTOs
         public string TipoMedida { get; set; } = "Repeticiones";
         /// <summary>"Dataset", "Proyecto" o "Gimnasio" (Etapa 9a-1).</summary>
         public string Origen { get; set; } = "Dataset";
+        /// <summary>Gimnasio dueño del ejercicio; null para los globales (Etapa 9a-2).</summary>
+        public Guid? GimnasioId { get; set; }
+        public Guid? TipoEquipamientoId { get; set; }
+        /// <summary>Nombre del tipo de equipamiento normalizado (Etapa 9a-2).</summary>
+        public string? TipoEquipamiento { get; set; }
     }
 }

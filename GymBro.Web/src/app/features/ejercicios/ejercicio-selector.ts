@@ -24,7 +24,7 @@ import { EjercicioResumen } from '../../core/models/ejercicio.models';
         @for (e of opciones(); track e.id) {
           <mat-option [value]="e">
             <span>{{ e.nombre }}</span>
-            <small class="meta">{{ e.zonaObjetivo }} · {{ e.equipamiento }}</small>
+            <small class="meta">{{ e.zonaObjetivo }} · {{ e.equipamiento }}@if (e.origen) { · {{ e.origen }} }</small>
           </mat-option>
         }
       </mat-autocomplete>

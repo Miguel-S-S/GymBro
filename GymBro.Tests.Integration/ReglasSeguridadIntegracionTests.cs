@@ -103,7 +103,7 @@ namespace GymBro.Tests.Integration
             var sesion = await RegistrarAsync(_e.UsuarioSocioA, _e.SocioA.Id, _e.RutinaA,
                 Serie(1, 41, 12, 3), Serie(2, 41, 12, 3), Serie(3, 41, 12, 4));
 
-            var sugerencia = Assert.Single((await FilasAsync(_e.SocioA.Id)).Where(a => a.SesionId == sesion));
+            var sugerencia = Assert.Single(await FilasAsync(_e.SocioA.Id), a => a.SesionId == sesion);
             Assert.Equal((CodigosRegla.Progresion, TipoAlerta.Sugerencia, SeveridadAlerta.Informativa), (sugerencia.ReglaCodigo, sugerencia.Tipo, sugerencia.Severidad));
 
             var delSocio = await ListarAsync(_e.UsuarioSocioA, "?estado=Pendiente");
@@ -116,20 +116,20 @@ namespace GymBro.Tests.Integration
         public async Task Reevaluar_no_duplica_corregir_el_dato_retira_y_una_alerta_vista_sigue_vista()
         {
             var sesion = await RegistrarAsync(_e.UsuarioSocioA, _e.SocioA.Id, _e.RutinaA, Serie(1, 40, 10, 0), Serie(2, 40, 10, 1));
-            var alerta = Assert.Single((await FilasAsync(_e.SocioA.Id)).Where(a => a.SesionId == sesion));
+            var alerta = Assert.Single(await FilasAsync(_e.SocioA.Id), a => a.SesionId == sesion);
 
             // Vista por el Personal Trainer asignado; reevaluar con el mismo resultado no la vuelve a pendiente ni duplica.
             Assert.Equal(HttpStatusCode.OK, (await Como(_e.Trainer).PutAsync($"/api/alertas/{alerta.Id}/vista", null)).StatusCode);
             await ReevaluarSesionAsync(sesion);
             await ReevaluarSesionAsync(sesion);
-            var tras = Assert.Single((await FilasAsync(_e.SocioA.Id, incluirBajas: true)).Where(a => a.SesionId == sesion));
+            var tras = Assert.Single(await FilasAsync(_e.SocioA.Id, incluirBajas: true), a => a.SesionId == sesion);
             Assert.Equal((alerta.Id, EstadoAlerta.Vista, _e.Trainer.Id), (tras.Id, tras.Estado, tras.VistaPorUsuarioId));
 
             // Se corrige el RIR registrado: la condición deja de cumplirse y la alerta se retira (baja lógica).
             await _e.Api.ConDbAsync(async db => await db.SeriesRealizadas.IgnoreQueryFilters()
                 .Where(s => s.SesionEjercicio.SesionId == sesion).ExecuteUpdateAsync(x => x.SetProperty(s => s.RIR, 3)));
             await ReevaluarSesionAsync(sesion);
-            var retirada = Assert.Single((await FilasAsync(_e.SocioA.Id, incluirBajas: true)).Where(a => a.SesionId == sesion));
+            var retirada = Assert.Single(await FilasAsync(_e.SocioA.Id, incluirBajas: true), a => a.SesionId == sesion);
             Assert.NotNull(retirada.FechaBaja);
             Assert.DoesNotContain(await ListarAsync(_e.UsuarioSocioA), x => x.Id == alerta.Id);
         }

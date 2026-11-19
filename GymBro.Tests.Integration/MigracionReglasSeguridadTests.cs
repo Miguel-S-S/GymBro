@@ -34,8 +34,9 @@ namespace GymBro.Tests.Integration
         [InlineData("estado", "'2'", "CK_AlertaSeguridad_Estado")]
         public async Task Los_CHECK_rechazan_valores_fuera_de_los_enums(string columna, string valor, string restriccion)
         {
-            var ex = await Record.ExceptionAsync(() => _e.Api.ConDbAsync(async db => await db.Database.ExecuteSqlRawAsync(
-                $"UPDATE alertas_seguridad SET {columna} = {valor} WHERE id = '{_e.AlertaId}'")));
+            // La columna y el valor son literales fijos de la prueba (InlineData); el id va como parámetro.
+            var sql = "UPDATE alertas_seguridad SET " + columna + " = " + valor + " WHERE id = {0}";
+            var ex = await Record.ExceptionAsync(() => _e.Api.ConDbAsync(async db => await db.Database.ExecuteSqlRawAsync(sql, _e.AlertaId)));
             Assert.NotNull(ex);
             Assert.Contains(restriccion, ex!.ToString());
         }

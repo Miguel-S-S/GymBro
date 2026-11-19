@@ -4,7 +4,7 @@
 **Commits:** código, pruebas, scripts e inventario en `3dd1683`; evidencia y este informe en el commit siguiente.
 **Evidencia:** `docs/pfc/evidencia/etapa9a2b-*.txt`:
 - `etapa9a2b-base-*.txt`: línea base sobre `main` (`2216fe1`), antes de cualquier cambio (observación O2);
-- `etapa9a2b-migracion.sql.txt`: SQL de la migración (Up y Down), generado sin conexión a ninguna base. **No se aplicó a la base local `gymbro-db`**: se aplica al levantar la API;
+- `etapa9a2b-migracion.sql.txt`: SQL de la migración (Up y Down), generado sin conexión a ninguna base, y estado de la base local `gymbro-db` (la migración figura aplicada; ver la sección de diferencias);
 - `etapa9a2b-dotnet-build.txt`, `etapa9a2b-dotnet-test.txt`, `etapa9a2b-ng-build.txt`, `etapa9a2b-ng-test.txt`: build y pruebas sobre el commit de código, con fecha.
 
 **Documentos de la etapa:** inventario del paso 1 en `etapa-9a2b-inventario-admin.md`; scripts de respaldo en `docs/pfc/scripts/admin-*.sql`.
@@ -20,7 +20,7 @@
 
 ## Texto propuesto para 4.5 (implementación)
 
-**Estado: Implementado y verificado con pruebas automáticas (API real contra PostgreSQL descartable, y specs del cliente). Pendientes: la prueba manual en pantalla y la aplicación de la migración a la base local.**
+**Estado: Implementado y verificado con pruebas automáticas (API real contra PostgreSQL descartable, y specs del cliente). Pendiente: la prueba manual en pantalla.**
 
 La Etapa 9a-2 dejó el catálogo y el equipamiento propios del gimnasio en manos del Dueño; el Administrador de la Plataforma solo podía leerlos. Para que la plataforma pueda mantener la integridad de los datos sin acceder a datos de salud, esta etapa agregó:
 
@@ -53,13 +53,13 @@ La Etapa 9a-2 dejó el catálogo y el equipamiento propios del gimnasio en manos
 | La previsualización informa los afectados y no modifica datos (ni el marcado ni la auditoría) | `La_previsualizacion_informa_los_ejercicios_afectados_sin_modificar_datos` | Verificado |
 | No se puede crear un ejercicio con el nombre de uno desactivado | `No_se_puede_crear_un_ejercicio_con_el_nombre_de_uno_desactivado` | Verificado |
 | Estado del socio: lo cambia el Dueño, es informativo, valida el valor y aísla por gimnasio | `El_Dueno_cambia_el_estado_del_socio_de_forma_informativa`, matriz | Verificado |
-| Migración reversible: el Down quita las columnas, el Up las agrega y las filas existentes quedan activas, sin autor y en estado `Activo`; `CHECK` del estado | `MigracionAdminCatalogoTests` (4 pruebas, PostgreSQL descartable) | Verificado (no aplicada a la base local) |
+| Migración reversible: el Down quita las columnas, el Up las agrega y las filas existentes quedan activas, sin autor y en estado `Activo`; `CHECK` del estado | `MigracionAdminCatalogoTests` (4 pruebas, PostgreSQL descartable) | Verificado; en `gymbro-db` figura aplicada |
 | Cada operación de la plataforma queda auditada con el gimnasio | Asserts de auditoría en `AdministracionCatalogoTests` | Verificado |
 | Los scripts: sin parámetros se rechazan; con `ROLLBACK` no dejan cambios; con `COMMIT` hacen lo que dicen y auditan | `ScriptsAdministracionTests` (17 pruebas, los 8 scripts ejecutados tal cual) | Verificado |
 | La plataforma abre todas las pantallas que tenía y ve los botones de gestión; el Personal Trainer, los suyos; el Socio, ninguno | `ejercicios-catalogo.spec.ts`, `ejercicio-form-dialog.spec.ts`, `equipamiento.spec.ts`, `socios-lista.spec.ts`, `app.routes.spec.ts` | Verificado |
 | Build y pruebas sin errores nuevos (piso: 170 / 287 / 164) | Evidencia `etapa9a2b-*` | **170 / 353 / 183**, 0 errores (ver la advertencia CS2008 en las diferencias) |
 
-**Sin verificar:** la prueba manual en pantalla (escritorio y celular) y la migración sobre los datos de la base local. Las pruebas de embedding usan un `IIaService` simulado.
+**Sin verificar:** la prueba manual en pantalla (escritorio y celular). Las pruebas de embedding usan un `IIaService` simulado.
 
 ## Registro de decisiones de la etapa
 
@@ -104,5 +104,5 @@ La Etapa 9a-2 dejó el catálogo y el equipamiento propios del gimnasio en manos
 - **Pantallas no abiertas al Administrador:** `gimnasio/vinculaciones` y `gimnasio/configuracion` no tienen datos de salud, pero siguen siendo solo del Dueño; las cubren los scripts. No se le quitó ninguna pantalla que ya tenía (`app.routes.spec.ts`). Si el autor quiere abrirlas en la aplicación, corresponde una etapa propia.
 - **Comparación de nombres en el script de ejercicios globales:** la aplicación ignora acentos al comparar nombres; el script solo ignora mayúsculas (no depende de la extensión `unaccent`). Está indicado en su encabezado.
 - **Autor dado de baja:** "Propuesto por" se lee ignorando el filtro de usuarios (decisión P1), así que el nombre se sigue mostrando aunque el autor se haya dado de baja por script. Es intencional: el autor es parte de la trazabilidad del ejercicio.
-- **Migración en la base local:** no se aplicó a `gymbro-db` (sin autorización del autor). Se aplica al levantar `GymBro.Api` (`MigrateAsync` en `Program.cs`). Es compatible con el código de `main`: las columnas nuevas tienen valor por defecto o aceptan nulos.
+- **Migración en la base local:** al pedir el autor que se aplicara (19/11/2026), `dotnet ef database update` contra `gymbro_db` (localhost:5433) respondió que no había migraciones pendientes: `Etapa9a2b_AdminCatalogo` ya figuraba en `__EFMigrationsHistory`. Claude Code no la aplicó y no se sabe cuándo se aplicó; lo más probable es que haya sido al levantar `GymBro.Api`, que ejecuta `MigrateAsync` al iniciar. Es compatible con el código de `main`: las columnas nuevas tienen valor por defecto o aceptan nulos.
 - **Sin verificar:** la prueba manual en pantalla y un embedding real con Ollama encendido para un ejercicio creado por la plataforma o el Personal Trainer.

@@ -43,3 +43,15 @@ WHERE migration_id = '20261119122415_Etapa9a2b_AdminCatalogo';
 
 COMMIT;
 
+
+============================== BASE LOCAL gymbro-db (agregado el 2026-11-19 14:27:28 -0300) ==============================
+Destino (dotnet ef dbcontext info): Npgsql, Database name gymbro_db, Data source tcp://localhost:5433
+Comando: dotnet ef database update --project GymBro.Infrastructure --startup-project GymBro.Api --no-build (autorizado por el autor)
+Resultado: codigo de salida 0. "No migrations were applied. The database is already up to date."
+La migracion ya estaba registrada en __EFMigrationsHistory antes de este comando; no se sabe cuando se aplico
+(lo mas probable: al levantar GymBro.Api, que ejecuta MigrateAsync al iniciar). Claude Code no la aplico.
+dotnet ef migrations list (ninguna marcada como Pending):
+20261117230626_Fix_EnumsNoDefinidos
+20261118001101_Etapa9a1_CatalogoCore
+20261119011431_Etapa9a2_CatalogoGimnasio
+20261119122415_Etapa9a2b_AdminCatalogo

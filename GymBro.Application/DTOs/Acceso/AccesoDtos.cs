@@ -118,6 +118,10 @@
         public DateTime FechaAlta { get; set; }
         public List<RutinaEjercicioDto> Ejercicios { get; set; } = new();
 
+        /// <summary>Etapa 7d (aditivo): versión del protocolo y número de generación; null en las rutinas sin protocolo.</summary>
+        public string? ProtocoloVersion { get; set; }
+        public int? NumeroGeneracion { get; set; }
+
         /// <summary>
         /// Etapa 10a (R-LIM): violaciones de los límites duros, para el revisor. Advierten; no bloquean (decisión D3).
         /// Vacía si la rutina cumple los límites.
@@ -141,6 +145,15 @@
         public int? RIRObjetivo { get; set; }
         public int DescansoObjetivoSegundos { get; set; }
         public string? Observaciones { get; set; }
+
+        // Etapa 7d (aditivo, opcional): datos de la línea generada por el protocolo de piernas; null en las demás rutinas.
+        /// <summary>"Referencia" o "Variable".</summary>
+        public string? Rol { get; set; }
+        /// <summary>"Cuadriceps", "Isquiotibiales" o "Pantorrillas".</summary>
+        public string? Grupo { get; set; }
+        public int? TempoExcentricoSeg { get; set; }
+        /// <summary>Carga sugerida a partir del historial: solo informativa.</summary>
+        public decimal? CargaSugeridaKg { get; set; }
     }
 
     public class AjusteEjercicioDto

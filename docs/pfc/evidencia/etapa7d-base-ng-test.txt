@@ -1,0 +1,19 @@
+﻿Etapa 7d - linea base sobre main
+Comando: npx ng test --watch=false
+Commit: c29890f425b3420ab115486bdd98d753e0542c84 (main, arbol sin cambios en archivos versionados; rama etapa7d recien creada)
+Fecha: 2026-11-24 10:27:03 -03:00
+Codigo de salida: 0
+------------------------------------------------------------
+> Building...
+√ Building...
+Application bundle generation complete. [4.109 seconds] - 2026-11-24T13:27:09.823Z
+
+
+ RUN  v5.1.0 C:/Users/miguel/source/repos/GymBro/GymBro.Web
+
+
+ Test Files  32 passed (32)
+      Tests  204 passed (204)
+   Start at  10:27:10
+   Duration  8.71s (environment 80%, tests 9%, import 5%, setup 4%, transform 2%)
+

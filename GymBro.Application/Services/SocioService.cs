@@ -85,7 +85,8 @@ namespace GymBro.Application.Services
                 GimnasioId = gimnasioId,
                 // Género, fecha de nacimiento y consentimiento los completa el socio al activar su cuenta.
                 Objetivo = ObjetivoEntrenamiento.Mantenimiento,
-                Nivel = NivelExperiencia.Principiante
+                Nivel = NivelExperiencia.Principiante,
+                OrigenDatos = OrigenDatos.Real   // Etapa 7d (P1): alta por el flujo normal de la aplicación
             };
 
             var nuevoSocio = await _repository.AddAsync(socio);

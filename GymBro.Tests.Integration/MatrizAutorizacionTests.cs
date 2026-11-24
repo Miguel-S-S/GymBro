@@ -51,7 +51,9 @@ namespace GymBro.Tests.Integration
         private const string EjercicioNoVisible = "EjercicioGimnasioService: ejercicio no visible -> RecursoNoEncontrado (T7)";
         private const string TipoNoVisible = "EquipamientoService: tipo no visible -> RecursoNoEncontrado (T7)";
         private const string CuerpoInvalido = "validación del cuerpo vacío -> ReglaNegocio (400), sin efectos";
-        private const string AttrAlertas = "AlertasController: [Authorize(AdministradorGimnasio,Entrenador,Socio)] (Etapa 10a; datos de salud)";
+        private const string AttrLimitaciones = "LimitacionesArticularesController: [Authorize(AdministradorGimnasio,Entrenador,Socio)] (Etapa 7d; datos de salud)";
+        private const string AttrKpis = "KpisProgresionController: [Authorize(AdministradorGimnasio,Entrenador,Socio)] (Etapa 7d; datos de salud)";
+        private const string AttrAlertas ="AlertasController: [Authorize(AdministradorGimnasio,Entrenador,Socio)] (Etapa 10a; datos de salud)";
 
         public static TheoryData<string, string, string, int, string> Celdas()
         {
@@ -207,6 +209,23 @@ namespace GymBro.Tests.Integration
             Fila("GET", "/api/alertas?socioId={C}", NoVisible, (Dueno, 404, Tenant + " + " + NoVisible));
             Fila("PUT", "/api/alertas/{X}/vista", AttrAlertas,
                 (Anonimo, 401, Fallback), (SuperAdmin, 403, null), (Dueno, 404, "AlertasService: alerta no visible"), (Trainer, 404, "AlertasService: alerta no visible"), (Socio, 404, "AlertasService: alerta no visible"));
+
+            // ---- Etapa 7d: protocolo de piernas, limitaciones articulares y KPIs (datos de salud) ----
+            Fila("GET", "/api/Socio/{A}/limitaciones-articulares", AttrLimitaciones,
+                (Anonimo, 401, Fallback), (SuperAdmin, 403, null), (Dueno, 200, AccesoSocio), (Trainer, 200, AccesoSocio + " (asignado)"), (Socio, 200, AccesoSocio + " (propio)"));
+            Fila("GET", "/api/Socio/{B}/limitaciones-articulares", NoVisible, (Trainer, 404, NoVisible + " (no asignado)"), (Socio, 404, NoVisible + " (ajeno)"));
+            Fila("GET", "/api/Socio/{C}/limitaciones-articulares", NoVisible, (Dueno, 404, Tenant + " + " + NoVisible));
+            Fila("PUT", "/api/Socio/{A}/limitaciones-articulares", AttrLimitaciones, (Anonimo, 401, Fallback), (SuperAdmin, 403, null));
+            Fila("PUT", "/api/Socio/{B}/limitaciones-articulares", NoVisible, (Trainer, 404, NoVisible + " (no asignado)"), (Socio, 404, NoVisible + " (ajeno)"));
+            Fila("PUT", "/api/Socio/{C}/limitaciones-articulares", NoVisible, (Dueno, 404, Tenant + " + " + NoVisible));
+            Fila("POST", "/api/Socio/{A}/prescripciones/piernas", AttrPrescripciones, (Anonimo, 401, Fallback), (SuperAdmin, 403, null));
+            Fila("POST", "/api/Socio/{B}/prescripciones/piernas", NoVisible,
+                (Trainer, 404, NoVisible + " (no asignado)"), (Socio, 404, NoVisible + " (ajeno)"));
+            Fila("POST", "/api/Socio/{C}/prescripciones/piernas", NoVisible, (Dueno, 404, Tenant + " + " + NoVisible));
+            Fila("GET", "/api/Socio/{A}/kpis-progresion", AttrKpis,
+                (Anonimo, 401, Fallback), (SuperAdmin, 403, null), (Dueno, 200, AccesoSocio), (Trainer, 200, AccesoSocio + " (asignado)"), (Socio, 200, AccesoSocio + " (propio)"));
+            Fila("GET", "/api/Socio/{B}/kpis-progresion", NoVisible, (Trainer, 404, NoVisible + " (no asignado)"), (Socio, 404, NoVisible + " (ajeno)"));
+            Fila("GET", "/api/Socio/{C}/kpis-progresion", NoVisible, (Dueno, 404, Tenant + " + " + NoVisible));
 
             // ---- Auditoría ----
             Fila("GET", "/api/auditoria", AttrAuditoria,

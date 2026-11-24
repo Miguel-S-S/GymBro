@@ -1,0 +1,52 @@
+﻿Etapa 7d - verificacion de la migracion Etapa7d_ProtocoloPiernas en gymbro_db (aplicada por el autor; consultas de solo lectura de Claude Code)
+Fecha: 2026-11-24 10:59:59 -03:00
+------------------------------------------------------------
+select migration_id from "__EFMigrationsHistory" order by migration_id desc limit 1;
+select p.grupo, p.rol, p.orden_rotacion as ord, p.clase, coalesce(p.rodilla_excluir_desde,'-') rodilla, coalesce(p.lumbar_excluir_desde,'-') lumbar, e.nombre, e.activo, e.origen, (e.gimnasio_id is null) global
+from ejercicios_protocolo p join ejercicios e on e.id = p.ejercicio_id
+where p.fecha_baja is null and p.protocolo_codigo = 'PIERNAS' and p.protocolo_version = 'piernas-1.0'
+order by p.grupo, p.rol, p.orden_rotacion;
+select count(*) filas, count(distinct ejercicio_id) ejercicios from ejercicios_protocolo where fecha_baja is null;
+select 'socios' tabla, origen_datos, limitacion_rodilla, limitacion_lumbar, count(*) from socios group by 2,3,4;
+select 'prescripciones' tabla, origen_datos, excluida_estudio, es_modificada, count(*) from prescripciones_entrenamiento group by 2,3,4;
+select count(*) sesiones_ejercicios_con_vinculo from sesiones_ejercicios where prescripcion_ejercicio_id is not null;
+------------------------------------------------------------
+              migration_id               
+-----------------------------------------
+ 20261124133430_Etapa7d_ProtocoloPiernas
+(1 row)
+
+     grupo      |    rol     | ord |     clase      | rodilla  |  lumbar  |               nombre               | activo |  origen  | global 
+----------------+------------+-----+----------------+----------+----------+------------------------------------+--------+----------+--------
+ Cuadriceps     | Referencia |   1 | Multiarticular | Alta     | Alta     | Prensa de piernas 45 grados        | t      | Proyecto | t
+ Cuadriceps     | Referencia |   2 | Multiarticular | Alta     | -        | Sentadilla Hack en máquina         | t      | Proyecto | t
+ Cuadriceps     | Variable   |   1 | Multiarticular | Alta     | Moderada | Sentadilla trasera con barra libre | t      | Proyecto | t
+ Cuadriceps     | Variable   |   2 | Multiarticular | Alta     | Alta     | Sentadilla frontal con barra       | t      | Proyecto | t
+ Cuadriceps     | Variable   |   3 | Aislamiento    | Moderada | -        | Extensión de cuádriceps en camilla | t      | Proyecto | t
+ Isquiotibiales | Referencia |   1 | Aislamiento    | -        | -        | Curl femoral sentado en máquina    | t      | Proyecto | t
+ Isquiotibiales | Variable   |   1 | Aislamiento    | -        | -        | Curl femoral acostado en camilla   | t      | Proyecto | t
+ Isquiotibiales | Variable   |   2 | Multiarticular | -        | Moderada | Peso muerto rumano con barra       | t      | Proyecto | t
+ Pantorrillas   | Variable   |   1 | Aislamiento    | -        | -        | Elevación de talones de pie        | t      | Proyecto | t
+ Pantorrillas   | Variable   |   2 | Aislamiento    | -        | -        | Elevación de talones sentado       | t      | Proyecto | t
+(10 rows)
+
+ filas | ejercicios 
+-------+------------
+    10 |         10
+(1 row)
+
+ tabla  |  origen_datos  | limitacion_rodilla | limitacion_lumbar | count 
+--------+----------------+--------------------+-------------------+-------
+ socios | DatasetExterno | SinLimitacion      | SinLimitacion     |   748
+(1 row)
+
+     tabla      |  origen_datos  | excluida_estudio | es_modificada | count 
+----------------+----------------+------------------+---------------+-------
+ prescripciones | DatasetExterno | f                | f             |    12
+(1 row)
+
+ sesiones_ejercicios_con_vinculo 
+---------------------------------
+                               0
+(1 row)
+

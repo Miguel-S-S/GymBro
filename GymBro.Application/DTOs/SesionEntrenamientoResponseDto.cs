@@ -20,6 +20,8 @@ namespace GymBro.Application.DTOs
         public Guid EjercicioId { get; set; }
         public int Orden { get; set; }
         public string? Observaciones { get; set; }
+        /// <summary>Etapa 7d (aditivo): línea de la prescripción vinculada; null si no hay.</summary>
+        public Guid? PrescripcionEjercicioId { get; set; }
         public List<SerieRealizadaResponseDto> SeriesRealizadas { get; set; } = new List<SerieRealizadaResponseDto>();
     }
 

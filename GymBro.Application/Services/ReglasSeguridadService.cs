@@ -85,9 +85,10 @@ namespace GymBro.Application.Services
                 var lineas = sesion.PrescripcionEntrenamiento?.EjerciciosPrescritos.Where(l => l.FechaBaja == null).ToList();
                 foreach (var se in sesion.EjerciciosEjecutados.Where(e => e.FechaBaja == null))
                 {
-                    // Sin vínculo directo entre la sesión y la línea de la rutina: se relacionan por ejercicio
-                    // (R-LIM no admite ejercicios repetidos en una rutina).
-                    var linea = lineas?.FirstOrDefault(l => l.EjercicioId == se.EjercicioId);
+                    // Etapa 7d (6.3): se prefiere el vínculo directo con la línea de la rutina. Sin vínculo (sesiones
+                    // anteriores) se relacionan por ejercicio, como antes (R-LIM no admite ejercicios repetidos en una rutina).
+                    var linea = (se.PrescripcionEjercicioId is Guid lineaId ? lineas?.FirstOrDefault(l => l.Id == lineaId) : null)
+                                ?? lineas?.FirstOrDefault(l => l.EjercicioId == se.EjercicioId);
                     var series = se.SeriesRealizadas.Where(s => s.FechaBaja == null)
                         .Select(s => new SerieEvaluada(s.PesoLevantadoKg, s.Repeticiones, s.RIR, s.EsCalentamiento)).ToList();
                     var nombre = se.Ejercicio?.Nombre ?? "Ejercicio";

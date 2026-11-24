@@ -1,4 +1,5 @@
 using System;
+using GymBro.Domain.Enums;
 
 namespace GymBro.Domain.Entities
 {
@@ -25,5 +26,19 @@ namespace GymBro.Domain.Entities
         public int DescansoObjetivoSegundos { get; set; }
 
         public string? Observaciones { get; set; }
+
+        // ---- Etapa 7d: trazabilidad de la línea generada por un protocolo (null en las demás rutinas) ----
+
+        public RolEjercicioProtocolo? Rol { get; set; }
+        public GrupoMuscularPiernas? Grupo { get; set; }
+
+        /// <summary>Duración de la fase excéntrica en segundos (valor provisional, sin validación clínica).</summary>
+        public short? TempoExcentricoSeg { get; set; }
+
+        /// <summary>Carga sugerida a partir del historial. Solo informativa: no obliga ni se valida.</summary>
+        public decimal? CargaSugeridaKg { get; set; }
+
+        /// <summary>JSON (jsonb) con el motivo de la selección: posición, candidatos, rotación, exclusiones y reglas.</summary>
+        public string? MotivoSeleccion { get; set; }
     }
 }

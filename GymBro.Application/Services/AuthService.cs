@@ -97,7 +97,8 @@ namespace GymBro.Application.Services
                 FechaNacimiento = DateTime.SpecifyKind(r.FechaNacimiento.Date, DateTimeKind.Utc),
                 Objetivo = ObjetivoEntrenamiento.Mantenimiento,
                 Nivel = NivelExperiencia.Principiante,
-                ConsentimientoDatosSaludFecha = DateTime.UtcNow
+                ConsentimientoDatosSaludFecha = DateTime.UtcNow,
+                OrigenDatos = OrigenDatos.Real   // Etapa 7d (P1): registro por el flujo normal de la aplicación
             };
             var usuario = new Usuario
             {

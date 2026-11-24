@@ -70,6 +70,72 @@ namespace GymBro.Tests.Integration
             });
         }
 
+        /// <summary>Etapa 7d: limitaciones articulares y origen de datos del socio.</summary>
+        [Theory]
+        [InlineData(0, 1, 4)]
+        [InlineData(1, 9, 4)]
+        [InlineData(1, 1, 0)]
+        [InlineData(1, 1, 5)]
+        public async Task Un_socio_con_limitacion_u_origen_no_definido_no_se_guarda(int rodilla, int lumbar, int origen)
+        {
+            var socio = Escenario.NuevoSocio($"guarda7d{rodilla}-{lumbar}-{origen}");
+            socio.LimitacionRodilla = (NivelLimitacion)rodilla;
+            socio.LimitacionLumbar = (NivelLimitacion)lumbar;
+            socio.OrigenDatos = (OrigenDatos)origen;
+
+            var ex = await Assert.ThrowsAsync<ReglaNegocioException>(() =>
+                _e.Api.ConDbAsync(db => { db.Socios.Add(socio); return Task.CompletedTask; }));
+            Assert.StartsWith("Valor no válido para Socio.", ex.Message);
+        }
+
+        /// <summary>Etapa 7d: enums de la prescripción, de sus líneas y del catálogo del protocolo.</summary>
+        [Fact]
+        public async Task Una_prescripcion_o_una_fila_del_protocolo_con_enums_no_definidos_no_se_guarda()
+        {
+            var ex = await Assert.ThrowsAsync<ReglaNegocioException>(() => _e.Api.ConDbAsync(db =>
+            {
+                db.PrescripcionesEntrenamiento.Add(new PrescripcionEntrenamiento { SocioId = _e.Socio.Id, OrigenGeneracion = "PRUEBA", OrigenDatos = default });
+                return Task.CompletedTask;
+            }));
+            Assert.Equal("Valor no válido para PrescripcionEntrenamiento.OrigenDatos.", ex.Message);
+
+            ex = await Assert.ThrowsAsync<ReglaNegocioException>(() => _e.Api.ConDbAsync(db =>
+            {
+                db.EjerciciosProtocolo.Add(new EjercicioProtocolo
+                {
+                    ProtocoloCodigo = "PIERNAS", ProtocoloVersion = "prueba", EjercicioId = Guid.NewGuid(),
+                    Grupo = GrupoMuscularPiernas.Cuadriceps, Rol = RolEjercicioProtocolo.Variable, Clase = default,
+                });
+                return Task.CompletedTask;
+            }));
+            Assert.Equal("Valor no válido para EjercicioProtocolo.Clase.", ex.Message);
+        }
+
+        [Theory]
+        [InlineData("UPDATE socios SET limitacion_rodilla = '0' WHERE id = {0}", "CK_Socio_LimitacionRodilla")]
+        [InlineData("UPDATE socios SET limitacion_lumbar = 'Severa' WHERE id = {0}", "CK_Socio_LimitacionLumbar")]
+        [InlineData("UPDATE socios SET origen_datos = '0' WHERE id = {0}", "CK_Socio_OrigenDatos")]
+        public async Task La_base_rechaza_limitaciones_u_origen_no_definidos(string sql, string restriccion)
+        {
+            var ex = await Assert.ThrowsAsync<PostgresException>(() =>
+                _e.Api.ConDbAsync(db => db.Database.ExecuteSqlRawAsync(sql, _e.Socio.Id)));
+            Assert.Equal(PostgresErrorCodes.CheckViolation, ex.SqlState);
+            Assert.Equal(restriccion, ex.ConstraintName);
+        }
+
+        [Fact]
+        public async Task El_alta_presencial_guarda_origen_Real_y_sin_limitaciones()
+        {
+            var r = await _e.Api.ClienteComo(_e.Dueno).PostAsJsonAsync("/api/Socio",
+                new { nombre = "Origen", apellido = "Sintetica", email = "origen@enums.test", dni = "30111333" });
+            Assert.Equal(HttpStatusCode.Created, r.StatusCode);
+            var texto = "";
+            await _e.Api.ConDbAsync(async db => texto = await db.Database
+                .SqlQueryRaw<string>("SELECT origen_datos || '/' || limitacion_rodilla || '/' || limitacion_lumbar AS \"Value\" FROM socios WHERE email = 'origen@enums.test'")
+                .SingleAsync());
+            Assert.Equal("Real/SinLimitacion/SinLimitacion", texto);
+        }
+
         // ---- Restricciones CHECK de la base (aunque se saltee la aplicación) ----
 
         [Theory]

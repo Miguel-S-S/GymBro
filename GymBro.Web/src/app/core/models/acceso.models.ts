@@ -61,6 +61,20 @@ export interface RutinaEjercicio {
   rirObjetivo: number | null;
   descansoObjetivoSegundos: number;
   observaciones: string | null;
+  /** Etapa 7d (opcionales): datos de la línea generada por el protocolo de piernas; null en las demás rutinas. */
+  rol?: 'Referencia' | 'Variable' | null;
+  grupo?: 'Cuadriceps' | 'Isquiotibiales' | 'Pantorrillas' | null;
+  tempoExcentricoSeg?: number | null;
+  /** Solo informativa: sale del historial del socio. */
+  cargaSugeridaKg?: number | null;
+}
+
+/** Etapa 7d: limitación articular declarada (dato de salud). */
+export type NivelLimitacion = 'SinLimitacion' | 'Moderada' | 'Alta';
+
+export interface LimitacionesArticulares {
+  rodilla: NivelLimitacion;
+  lumbar: NivelLimitacion;
 }
 
 export interface RutinaPendiente {
@@ -74,6 +88,9 @@ export interface RutinaPendiente {
   ejercicios: RutinaEjercicio[];
   /** Etapa 10a (R-LIM): violaciones de los límites duros; vacía si cumple. Opcional para respuestas anteriores. */
   advertenciasLimites?: ViolacionLimite[];
+  /** Etapa 7d (opcionales): versión del protocolo y número de generación; null en las rutinas sin protocolo. */
+  protocoloVersion?: string | null;
+  numeroGeneracion?: number | null;
 }
 
 export type DecisionRevision = 'Aprobada' | 'Editada' | 'Rechazada';

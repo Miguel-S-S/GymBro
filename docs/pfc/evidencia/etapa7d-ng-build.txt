@@ -1,0 +1,37 @@
+﻿Etapa 7d - build y pruebas con los cambios de la etapa
+Comando: npx ng build
+Commit: c29890f425b3420ab115486bdd98d753e0542c84 (rama etapa7d sobre c29890f; cambios de la etapa sin commit (no autorizado todavia))
+Fecha: 2026-11-24 10:53:20 -03:00
+Codigo de salida: 0
+------------------------------------------------------------
+> Building...
+√ Building...
+Initial chunk files | Names               |  Raw size | Estimated transfer size
+main-NSUBHQBB.js    | main                | 362.00 kB |                70.27 kB
+chunk-ZGu5PGwd.js   | -                   | 338.02 kB |                86.73 kB
+styles-56MVVM6I.css | styles              |  25.10 kB |                 3.46 kB
+
+                    | Initial total       | 725.12 kB |               160.46 kB
+
+Lazy chunk files    | Names               |  Raw size | Estimated transfer size
+chunk-DECin4Hm.js   | -                   |  44.71 kB |                 9.57 kB
+chunk-DNjbuLlz.js   | ejercicios-catalogo |  42.39 kB |                10.54 kB
+chunk-Cz5DZCRp.js   | -                   |  40.99 kB |                 8.69 kB
+chunk-CqjmcDQF.js   | -                   |  35.89 kB |                 8.81 kB
+chunk-Cc7lau0U.js   | socio-detalle       |  35.16 kB |                 8.67 kB
+chunk-7401UPKS.js   | sesion-registro     |  34.44 kB |                 9.94 kB
+chunk-CO5DCRsA.js   | -                   |  30.07 kB |                 7.12 kB
+chunk-BnNSopGq.js   | -                   |  29.39 kB |                 4.93 kB
+chunk-CT4fbtvL.js   | mi-layout           |  29.20 kB |                 8.02 kB
+chunk-DgQSnZ2v.js   | -                   |  26.53 kB |                 4.50 kB
+chunk-D4CjoeMF.js   | -                   |  15.21 kB |                 4.18 kB
+chunk-BWFi74Nj.js   | mi-bienestar        |  14.16 kB |                 4.52 kB
+chunk-qD1qiIPS.js   | socios-lista        |  12.91 kB |                 4.01 kB
+chunk-CUbvyjnA.js   | -                   |  12.05 kB |                 2.56 kB
+chunk-mHmSScyM.js   | equipamiento        |  11.39 kB |                 3.58 kB
+...and 33 more lazy chunks files. Use "--verbose" to show all the files.
+
+Application bundle generation complete. [4.301 seconds] - 2026-11-24T13:53:27.162Z
+
+Output location: C:\Users\miguel\source\repos\GymBro\GymBro.Web\dist\gymbro-web
+

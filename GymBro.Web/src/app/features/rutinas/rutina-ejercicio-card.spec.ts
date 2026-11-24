@@ -37,6 +37,35 @@ describe('RutinaEjercicioCard', () => {
   });
 });
 
+// Etapa 7d: líneas generadas por el protocolo de piernas.
+describe('RutinaEjercicioCard: protocolo de piernas', () => {
+  async function texto(e: RutinaEjercicio) {
+    const fixture = TestBed.createComponent(RutinaEjercicioCard);
+    fixture.componentRef.setInput('ejercicio', e);
+    await fixture.whenStable();
+    return (fixture.nativeElement as HTMLElement).textContent ?? '';
+  }
+
+  it('muestra rol, tempo excéntrico y la carga sugerida con la leyenda informativa', async () => {
+    const t = await texto({ ...ejercicio(), rol: 'Referencia', grupo: 'Cuadriceps', tempoExcentricoSeg: 4, cargaSugeridaKg: 102.5 });
+    expect(t).toContain('Referencia · tempo excéntrico 4 s');
+    expect(t).toContain('Carga sugerida: 102,5 kg');
+    expect(t).toContain('sugerencia informativa');
+  });
+
+  it('sin carga sugerida no muestra la línea de carga', async () => {
+    const t = await texto({ ...ejercicio(), rol: 'Variable', tempoExcentricoSeg: 3, cargaSugeridaKg: null });
+    expect(t).toContain('Variable · tempo excéntrico 3 s');
+    expect(t).not.toContain('Carga sugerida');
+  });
+
+  it('una línea de otra rutina no muestra datos del protocolo', async () => {
+    const t = await texto(ejercicio());
+    expect(t).not.toContain('tempo excéntrico');
+    expect(t).not.toContain('Carga sugerida');
+  });
+});
+
 // Etapa 9a-1: pantallas de revisión y edición de rutina (usan esta tarjeta).
 describe('RutinaEjercicioCard: tipo de medida', () => {
   async function crear(e: RutinaEjercicio, editable: boolean) {

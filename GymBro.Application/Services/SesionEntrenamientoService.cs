@@ -46,11 +46,12 @@ namespace GymBro.Application.Services
             if (!await _socioRepo.ExistsAsync(request.SocioId))
                 throw new ArgumentException("El SocioId especificado no existe.");
 
+            PrescripcionEntrenamiento? prescripcion = null;
             if (request.PrescripcionEntrenamientoId.HasValue)
             {
                 // El filtro de tenant limita la búsqueda al gimnasio del usuario; acá se exige además que la
                 // prescripción sea del mismo socio y que esté vigente (Aprobada o Editada).
-                var prescripcion = await _prescripcionRepo.GetByIdAsync(request.PrescripcionEntrenamientoId.Value)
+                prescripcion = await _prescripcionRepo.GetByIdAsync(request.PrescripcionEntrenamientoId.Value)
                     ?? throw new ArgumentException("La PrescripcionEntrenamientoId especificada no existe.");
                 if (prescripcion.SocioId != request.SocioId)
                     throw new ReglaNegocioException("La prescripción indicada no pertenece al socio de la sesión.");
@@ -58,6 +59,13 @@ namespace GymBro.Application.Services
                     throw new ReglaNegocioException(
                         $"La prescripción no está vigente (estado {prescripcion.Estado}): solo se registran sesiones de rutinas Aprobadas o Editadas.");
             }
+            else if (request.Ejercicios.Any(e => e.PrescripcionEjercicioId.HasValue))
+            {
+                throw new ReglaNegocioException("Una línea de prescripción solo se puede indicar en una sesión con prescripción.");
+            }
+
+            // Etapa 7d (6.3): línea de la prescripción de cada ejercicio (se valida antes de guardar nada).
+            var lineasPorEjercicio = request.Ejercicios.Select(ej => ResolverLinea(prescripcion, ej)).ToList();
 
             var ejercicioIds = request.Ejercicios.Select(e => e.EjercicioId).Distinct().ToList();
             if (ejercicioIds.Any())
@@ -88,12 +96,13 @@ namespace GymBro.Application.Services
                 CaloriasQuemadas = request.CaloriasQuemadas ?? 0,
                 FrecuenciaCardiacaMaxima = request.FrecuenciaCardiacaMaxima ?? 0,
                 FrecuenciaCardiacaPromedio = request.FrecuenciaCardiacaPromedio ?? 0,
-                EjerciciosEjecutados = request.Ejercicios.Select(ej => new SesionEjercicio
+                EjerciciosEjecutados = request.Ejercicios.Select((ej, i) => new SesionEjercicio
                 {
                     Id = Guid.NewGuid(),
                     EjercicioId = ej.EjercicioId,
                     Orden = ej.Orden,
                     Observaciones = ej.Observaciones,
+                    PrescripcionEjercicioId = lineasPorEjercicio[i],
                     SeriesRealizadas = ej.SeriesRealizadas.Select(s => new SerieRealizada
                     {
                         Id = Guid.NewGuid(),
@@ -121,6 +130,27 @@ namespace GymBro.Application.Services
             }
 
             return await GetByIdAsync(nuevaSesion.Id) ?? throw new InvalidOperationException("Error al recuperar la sesión tras ser creada.");
+        }
+
+        /// <summary>
+        /// Etapa 7d (6.3): línea de la prescripción que corresponde a un ejercicio de la sesión. Con id explícito, debe
+        /// pertenecer a la prescripción y ser del mismo ejercicio; sin id, la única línea de ese ejercicio o, si hay más de
+        /// una, la del mismo orden. Null si la sesión no tiene prescripción o no hay línea que corresponda.
+        /// </summary>
+        public static Guid? ResolverLinea(PrescripcionEntrenamiento? prescripcion, SesionEjercicioRequestDto ej)
+        {
+            if (prescripcion is null) return null;
+            var lineas = prescripcion.EjerciciosPrescritos.Where(l => l.FechaBaja == null).ToList();
+            if (ej.PrescripcionEjercicioId is Guid id)
+            {
+                var linea = lineas.FirstOrDefault(l => l.Id == id)
+                    ?? throw new ReglaNegocioException("La línea de prescripción indicada no pertenece a la prescripción de la sesión.");
+                if (linea.EjercicioId != ej.EjercicioId)
+                    throw new ReglaNegocioException("La línea de prescripción indicada corresponde a otro ejercicio.");
+                return linea.Id;
+            }
+            var mismas = lineas.Where(l => l.EjercicioId == ej.EjercicioId).ToList();
+            return mismas.Count == 1 ? mismas[0].Id : mismas.FirstOrDefault(l => l.Orden == ej.Orden)?.Id;
         }
 
         public async Task<SesionEntrenamientoResponseDto?> GetByIdAsync(Guid id)
@@ -161,15 +191,29 @@ namespace GymBro.Application.Services
             var ejerciciosPrescritos = prescripcion?.EjerciciosPrescritos.ToList() ?? new List<PrescripcionEjercicio>();
             var ejerciciosEjecutados = sesion.EjerciciosEjecutados.ToList();
 
-            var allKeys = ejerciciosPrescritos.Select(p => new { p.EjercicioId, p.Orden })
-                .Union(ejerciciosEjecutados.Select(e => new { e.EjercicioId, e.Orden }))
+            // Etapa 7d (6.3): primero se emparejan los ejercicios con vínculo directo a una línea de la prescripción; el
+            // resto (sesiones anteriores, sin vínculo) mantiene el criterio anterior, por ejercicio y orden.
+            var pares = new List<(PrescripcionEjercicio? Pres, SesionEjercicio? Ejec, Guid EjercicioId, int Orden)>();
+            var vinculados = ejerciciosEjecutados
+                .Where(e => e.PrescripcionEjercicioId is Guid id && ejerciciosPrescritos.Any(p => p.Id == id))
+                .ToList();
+            foreach (var e in vinculados)
+                pares.Add((ejerciciosPrescritos.First(p => p.Id == e.PrescripcionEjercicioId), e, e.EjercicioId, e.Orden));
+
+            var prescritosRestantes = ejerciciosPrescritos.Where(p => vinculados.All(v => v.PrescripcionEjercicioId != p.Id)).ToList();
+            var ejecutadosRestantes = ejerciciosEjecutados.Except(vinculados).ToList();
+            var allKeys = prescritosRestantes.Select(p => new { p.EjercicioId, p.Orden })
+                .Union(ejecutadosRestantes.Select(e => new { e.EjercicioId, e.Orden }))
                 .Distinct()
                 .ToList();
-
             foreach (var key in allKeys)
+                pares.Add((prescritosRestantes.FirstOrDefault(p => p.EjercicioId == key.EjercicioId && p.Orden == key.Orden),
+                    ejecutadosRestantes.FirstOrDefault(e => e.EjercicioId == key.EjercicioId && e.Orden == key.Orden),
+                    key.EjercicioId, key.Orden));
+
+            foreach (var (pres, ejec, ejercicioId, orden) in pares)
             {
-                var pres = ejerciciosPrescritos.FirstOrDefault(p => p.EjercicioId == key.EjercicioId && p.Orden == key.Orden);
-                var ejec = ejerciciosEjecutados.FirstOrDefault(e => e.EjercicioId == key.EjercicioId && e.Orden == key.Orden);
+                var key = new { EjercicioId = ejercicioId, Orden = orden };
 
                 // Etapa 9a-1: la unidad sale del ejercicio. Con Segundos no se multiplica kg por segundos (volumen 0).
                 var tipoMedida = (ejec?.Ejercicio ?? pres?.Ejercicio)?.TipoMedida ?? TipoMedida.Repeticiones;
@@ -181,6 +225,7 @@ namespace GymBro.Application.Services
                     EjercicioId = key.EjercicioId,
                     Orden = key.Orden,
                     TipoMedida = tipoMedida.ToString(),
+                    PrescripcionEjercicioId = pres?.Id,
                     Comparacion = new ComparacionGeneralDto()
                 };
 
@@ -290,6 +335,7 @@ namespace GymBro.Application.Services
                     EjercicioId = e.EjercicioId,
                     Orden = e.Orden,
                     Observaciones = e.Observaciones,
+                    PrescripcionEjercicioId = e.PrescripcionEjercicioId,
                     SeriesRealizadas = e.SeriesRealizadas.OrderBy(s => s.OrdenSerie).Select(s => new SerieRealizadaResponseDto
                     {
                         Id = s.Id,

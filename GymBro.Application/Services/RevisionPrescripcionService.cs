@@ -144,6 +144,11 @@ namespace GymBro.Application.Services
                 if (rir is < 0 or > 5) throw new ReglaNegocioException("El RIR debe estar entre 0 y 5.");
                 if (descanso <= 0) throw new ReglaNegocioException("El descanso debe ser mayor a 0.");
 
+                // Etapa 7d (6.4): la rutina queda marcada como modificada solo si un ajuste cambia realmente la dosis.
+                if (series != pe.SeriesObjetivo || repMin != pe.RepeticionesMinimas || repMax != pe.RepeticionesMaximas
+                    || rir != pe.RIRObjetivo || descanso != pe.DescansoObjetivoSegundos)
+                    rutina.EsModificada = true;
+
                 pe.SeriesObjetivo = series;
                 pe.RepeticionesMinimas = repMin;
                 pe.RepeticionesMaximas = repMax;

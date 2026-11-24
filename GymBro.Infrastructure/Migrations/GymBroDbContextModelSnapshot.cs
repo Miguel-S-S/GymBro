@@ -472,6 +472,103 @@ namespace GymBro.Infrastructure.Migrations
                         });
                 });
 
+            modelBuilder.Entity("GymBro.Domain.Entities.EjercicioProtocolo", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<string>("Clase")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("clase");
+
+                    b.Property<Guid>("EjercicioId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("ejercicio_id");
+
+                    b.Property<DateTime>("FechaAlta")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("fecha_alta");
+
+                    b.Property<DateTime?>("FechaBaja")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("fecha_baja");
+
+                    b.Property<DateTime?>("FechaModificacion")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("fecha_modificacion");
+
+                    b.Property<string>("Grupo")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("grupo");
+
+                    b.Property<string>("LumbarExcluirDesde")
+                        .HasColumnType("text")
+                        .HasColumnName("lumbar_excluir_desde");
+
+                    b.Property<short>("OrdenRotacion")
+                        .HasColumnType("smallint")
+                        .HasColumnName("orden_rotacion");
+
+                    b.Property<string>("ProtocoloCodigo")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("protocolo_codigo");
+
+                    b.Property<string>("ProtocoloVersion")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("protocolo_version");
+
+                    b.Property<string>("RodillaExcluirDesde")
+                        .HasColumnType("text")
+                        .HasColumnName("rodilla_excluir_desde");
+
+                    b.Property<string>("Rol")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("rol");
+
+                    b.Property<int>("UsuarioAlta")
+                        .HasColumnType("integer")
+                        .HasColumnName("usuario_alta");
+
+                    b.Property<int?>("UsuarioBaja")
+                        .HasColumnType("integer")
+                        .HasColumnName("usuario_baja");
+
+                    b.Property<int?>("UsuarioModificacion")
+                        .HasColumnType("integer")
+                        .HasColumnName("usuario_modificacion");
+
+                    b.HasKey("Id")
+                        .HasName("pk_ejercicios_protocolo");
+
+                    b.HasIndex("EjercicioId")
+                        .HasDatabaseName("ix_ejercicios_protocolo_ejercicio_id");
+
+                    b.HasIndex("ProtocoloVersion", "EjercicioId")
+                        .IsUnique()
+                        .HasDatabaseName("ix_ejercicios_protocolo_protocolo_version_ejercicio_id")
+                        .HasFilter("fecha_baja IS NULL");
+
+                    b.ToTable("ejercicios_protocolo", null, t =>
+                        {
+                            t.HasCheckConstraint("CK_EjercicioProtocolo_Clase", "clase IN ('Multiarticular', 'Aislamiento')");
+
+                            t.HasCheckConstraint("CK_EjercicioProtocolo_Grupo", "grupo IN ('Cuadriceps', 'Isquiotibiales', 'Pantorrillas')");
+
+                            t.HasCheckConstraint("CK_EjercicioProtocolo_LumbarExcluirDesde", "lumbar_excluir_desde IS NULL OR lumbar_excluir_desde IN ('SinLimitacion', 'Moderada', 'Alta')");
+
+                            t.HasCheckConstraint("CK_EjercicioProtocolo_RodillaExcluirDesde", "rodilla_excluir_desde IS NULL OR rodilla_excluir_desde IN ('SinLimitacion', 'Moderada', 'Alta')");
+
+                            t.HasCheckConstraint("CK_EjercicioProtocolo_Rol", "rol IN ('Referencia', 'Variable')");
+                        });
+                });
+
             modelBuilder.Entity("GymBro.Domain.Entities.EquipamientoGimnasio", b =>
                 {
                     b.Property<Guid>("Id")
@@ -859,6 +956,11 @@ namespace GymBro.Infrastructure.Migrations
                         .HasColumnType("uuid")
                         .HasColumnName("id");
 
+                    b.Property<decimal?>("CargaSugeridaKg")
+                        .HasPrecision(7, 2)
+                        .HasColumnType("numeric(7,2)")
+                        .HasColumnName("carga_sugerida_kg");
+
                     b.Property<int>("DescansoObjetivoSegundos")
                         .HasColumnType("integer")
                         .HasColumnName("descanso_objetivo_segundos");
@@ -878,6 +980,14 @@ namespace GymBro.Infrastructure.Migrations
                     b.Property<DateTime?>("FechaModificacion")
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("fecha_modificacion");
+
+                    b.Property<string>("Grupo")
+                        .HasColumnType("text")
+                        .HasColumnName("grupo");
+
+                    b.Property<string>("MotivoSeleccion")
+                        .HasColumnType("jsonb")
+                        .HasColumnName("motivo_seleccion");
 
                     b.Property<string>("Observaciones")
                         .HasMaxLength(500)
@@ -904,9 +1014,17 @@ namespace GymBro.Infrastructure.Migrations
                         .HasColumnType("integer")
                         .HasColumnName("repeticiones_minimas");
 
+                    b.Property<string>("Rol")
+                        .HasColumnType("text")
+                        .HasColumnName("rol");
+
                     b.Property<int>("SeriesObjetivo")
                         .HasColumnType("integer")
                         .HasColumnName("series_objetivo");
+
+                    b.Property<short?>("TempoExcentricoSeg")
+                        .HasColumnType("smallint")
+                        .HasColumnName("tempo_excentrico_seg");
 
                     b.Property<int>("UsuarioAlta")
                         .HasColumnType("integer")
@@ -932,7 +1050,11 @@ namespace GymBro.Infrastructure.Migrations
 
                     b.ToTable("prescripciones_ejercicios", null, t =>
                         {
+                            t.HasCheckConstraint("CK_PrescripcionEjercicio_CargaSugeridaKg", "carga_sugerida_kg IS NULL OR carga_sugerida_kg >= 0");
+
                             t.HasCheckConstraint("CK_PrescripcionEjercicio_DescansoObjetivoSegundos", "descanso_objetivo_segundos > 0");
+
+                            t.HasCheckConstraint("CK_PrescripcionEjercicio_Grupo", "grupo IS NULL OR grupo IN ('Cuadriceps', 'Isquiotibiales', 'Pantorrillas')");
 
                             t.HasCheckConstraint("CK_PrescripcionEjercicio_Orden", "orden > 0");
 
@@ -942,7 +1064,11 @@ namespace GymBro.Infrastructure.Migrations
 
                             t.HasCheckConstraint("CK_PrescripcionEjercicio_RepeticionesMinimas", "repeticiones_minimas > 0");
 
+                            t.HasCheckConstraint("CK_PrescripcionEjercicio_Rol", "rol IS NULL OR rol IN ('Referencia', 'Variable')");
+
                             t.HasCheckConstraint("CK_PrescripcionEjercicio_SeriesObjetivo", "series_objetivo > 0");
+
+                            t.HasCheckConstraint("CK_PrescripcionEjercicio_TempoExcentricoSeg", "tempo_excentrico_seg IS NULL OR (tempo_excentrico_seg >= 1 AND tempo_excentrico_seg <= 10)");
                         });
                 });
 
@@ -953,10 +1079,22 @@ namespace GymBro.Infrastructure.Migrations
                         .HasColumnType("uuid")
                         .HasColumnName("id");
 
+                    b.Property<string>("EntradaSnapshot")
+                        .HasColumnType("jsonb")
+                        .HasColumnName("entrada_snapshot");
+
+                    b.Property<bool>("EsModificada")
+                        .HasColumnType("boolean")
+                        .HasColumnName("es_modificada");
+
                     b.Property<string>("Estado")
                         .IsRequired()
                         .HasColumnType("text")
                         .HasColumnName("estado");
+
+                    b.Property<bool>("ExcluidaEstudio")
+                        .HasColumnType("boolean")
+                        .HasColumnName("excluida_estudio");
 
                     b.Property<DateTime>("FechaAlta")
                         .HasColumnType("timestamp with time zone")
@@ -970,16 +1108,33 @@ namespace GymBro.Infrastructure.Migrations
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("fecha_modificacion");
 
+                    b.Property<int?>("NumeroGeneracion")
+                        .HasColumnType("integer")
+                        .HasColumnName("numero_generacion");
+
                     b.Property<string>("Observaciones")
                         .HasMaxLength(500)
                         .HasColumnType("character varying(500)")
                         .HasColumnName("observaciones");
+
+                    b.Property<string>("OrigenDatos")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("origen_datos");
 
                     b.Property<string>("OrigenGeneracion")
                         .IsRequired()
                         .HasMaxLength(50)
                         .HasColumnType("character varying(50)")
                         .HasColumnName("origen_generacion");
+
+                    b.Property<string>("ProtocoloCodigo")
+                        .HasColumnType("text")
+                        .HasColumnName("protocolo_codigo");
+
+                    b.Property<string>("ProtocoloVersion")
+                        .HasColumnType("text")
+                        .HasColumnName("protocolo_version");
 
                     b.Property<Guid>("SocioId")
                         .HasColumnType("uuid")
@@ -1003,7 +1158,17 @@ namespace GymBro.Infrastructure.Migrations
                     b.HasIndex("SocioId")
                         .HasDatabaseName("ix_prescripciones_entrenamiento_socio_id");
 
-                    b.ToTable("prescripciones_entrenamiento", (string)null);
+                    b.HasIndex("SocioId", "ProtocoloCodigo", "NumeroGeneracion")
+                        .IsUnique()
+                        .HasDatabaseName("ix_prescripciones_entrenamiento_socio_protocolo_generacion")
+                        .HasFilter("fecha_baja IS NULL AND protocolo_codigo IS NOT NULL");
+
+                    b.ToTable("prescripciones_entrenamiento", null, t =>
+                        {
+                            t.HasCheckConstraint("CK_PrescripcionEntrenamiento_NumeroGeneracion", "numero_generacion IS NULL OR numero_generacion > 0");
+
+                            t.HasCheckConstraint("CK_PrescripcionEntrenamiento_OrigenDatos", "origen_datos IN ('Sintetico', 'ValidacionFuncional', 'DatasetExterno', 'Real')");
+                        });
                 });
 
             modelBuilder.Entity("GymBro.Domain.Entities.RegistroBienestarDiario", b =>
@@ -1261,6 +1426,10 @@ namespace GymBro.Infrastructure.Migrations
                         .HasColumnType("integer")
                         .HasColumnName("orden");
 
+                    b.Property<Guid?>("PrescripcionEjercicioId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("prescripcion_ejercicio_id");
+
                     b.Property<Guid>("SesionId")
                         .HasColumnType("uuid")
                         .HasColumnName("sesion_id");
@@ -1282,6 +1451,9 @@ namespace GymBro.Infrastructure.Migrations
 
                     b.HasIndex("EjercicioId")
                         .HasDatabaseName("ix_sesiones_ejercicios_ejercicio_id");
+
+                    b.HasIndex("PrescripcionEjercicioId")
+                        .HasDatabaseName("ix_sesiones_ejercicios_prescripcion_ejercicio_id");
 
                     b.HasIndex("SesionId")
                         .HasDatabaseName("ix_sesiones_ejercicios_sesion_id");
@@ -1421,6 +1593,16 @@ namespace GymBro.Infrastructure.Migrations
                         .HasColumnType("uuid")
                         .HasColumnName("gimnasio_id");
 
+                    b.Property<string>("LimitacionLumbar")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("limitacion_lumbar");
+
+                    b.Property<string>("LimitacionRodilla")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("limitacion_rodilla");
+
                     b.Property<string>("Nivel")
                         .IsRequired()
                         .HasColumnType("text")
@@ -1435,6 +1617,11 @@ namespace GymBro.Infrastructure.Migrations
                         .IsRequired()
                         .HasColumnType("text")
                         .HasColumnName("objetivo");
+
+                    b.Property<string>("OrigenDatos")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("origen_datos");
 
                     b.Property<int>("UsuarioAlta")
                         .HasColumnType("integer")
@@ -1462,9 +1649,15 @@ namespace GymBro.Infrastructure.Migrations
                         {
                             t.HasCheckConstraint("CK_Socio_Estado", "estado IN ('Activo', 'Inactivo')");
 
+                            t.HasCheckConstraint("CK_Socio_LimitacionLumbar", "limitacion_lumbar IN ('SinLimitacion', 'Moderada', 'Alta')");
+
+                            t.HasCheckConstraint("CK_Socio_LimitacionRodilla", "limitacion_rodilla IN ('SinLimitacion', 'Moderada', 'Alta')");
+
                             t.HasCheckConstraint("CK_Socio_Nivel", "nivel IN ('Principiante', 'Intermedio', 'Avanzado')");
 
                             t.HasCheckConstraint("CK_Socio_Objetivo", "objetivo IN ('PerdidaPeso', 'GananciaMuscular', 'Mantenimiento')");
+
+                            t.HasCheckConstraint("CK_Socio_OrigenDatos", "origen_datos IN ('Sintetico', 'ValidacionFuncional', 'DatasetExterno', 'Real')");
                         });
                 });
 
@@ -1771,6 +1964,16 @@ namespace GymBro.Infrastructure.Migrations
                     b.Navigation("TipoEquipamiento");
                 });
 
+            modelBuilder.Entity("GymBro.Domain.Entities.EjercicioProtocolo", b =>
+                {
+                    b.HasOne("GymBro.Domain.Entities.Ejercicio", null)
+                        .WithMany()
+                        .HasForeignKey("EjercicioId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired()
+                        .HasConstraintName("fk_ejercicios_protocolo_ejercicios_ejercicio_id");
+                });
+
             modelBuilder.Entity("GymBro.Domain.Entities.EquipamientoGimnasio", b =>
                 {
                     b.HasOne("GymBro.Domain.Entities.Gimnasio", null)
@@ -1901,6 +2104,12 @@ namespace GymBro.Infrastructure.Migrations
                         .IsRequired()
                         .HasConstraintName("fk_sesiones_ejercicios_ejercicios_ejercicio_id");
 
+                    b.HasOne("GymBro.Domain.Entities.PrescripcionEjercicio", "PrescripcionEjercicio")
+                        .WithMany()
+                        .HasForeignKey("PrescripcionEjercicioId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .HasConstraintName("fk_sesiones_ejercicios_prescripciones_ejercicios_prescripcion_");
+
                     b.HasOne("GymBro.Domain.Entities.SesionEntrenamiento", "Sesion")
                         .WithMany("EjerciciosEjecutados")
                         .HasForeignKey("SesionId")
@@ -1909,6 +2118,8 @@ namespace GymBro.Infrastructure.Migrations
                         .HasConstraintName("fk_sesiones_ejercicios_sesiones_sesion_id");
 
                     b.Navigation("Ejercicio");
+
+                    b.Navigation("PrescripcionEjercicio");
 
                     b.Navigation("Sesion");
                 });

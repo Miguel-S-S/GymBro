@@ -1,0 +1,14 @@
+﻿Etapa 7d - linea base sobre main
+Comando: dotnet test GymBro.slnx --no-build
+Commit: c29890f425b3420ab115486bdd98d753e0542c84 (main, arbol sin cambios en archivos versionados; rama etapa7d recien creada)
+Fecha: 2026-11-24 10:26:21 -03:00
+Codigo de salida: 0
+------------------------------------------------------------
+Serie de pruebas para C:\Users\miguel\source\repos\GymBro\GymBro.Tests.Integration\bin\Debug\net10.0\GymBro.Tests.Integration.dll (.NETCoreApp,Version=v10.0)
+Serie de pruebas para C:\Users\miguel\source\repos\GymBro\GymBro.Tests\bin\Debug\net10.0\GymBro.Tests.dll (.NETCoreApp,Version=v10.0)
+1 archivos de prueba en total coincidieron con el patrón especificado.
+1 archivos de prueba en total coincidieron con el patrón especificado.
+
+Correctas! - Con error:     0, Superado:   250, Omitido:     0, Total:   250, Duración: 201 ms - GymBro.Tests.dll (net10.0)
+
+Correctas! - Con error:     0, Superado:   406, Omitido:     0, Total:   406, Duración: 16 s - GymBro.Tests.Integration.dll (net10.0)

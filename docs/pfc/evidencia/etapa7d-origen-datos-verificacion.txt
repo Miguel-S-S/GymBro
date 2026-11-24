@@ -1,0 +1,24 @@
+﻿Etapa 7d - verificacion de la clasificacion por origen de datos en gymbro_db (UPDATE del paso 2 de clasificar-origen-datos.sql ejecutado por el autor; consultas de solo lectura de Claude Code)
+Paso 3 opcional (marcar socios Sintetico): no ejecutado.
+Fecha: 2026-11-24 11:19:34 -03:00
+------------------------------------------------------------
+select origen_datos, count(*) from socios where fecha_baja is null group by 1 order by 2 desc;
+select id, origen_datos, gimnasio_id, (consentimiento_datos_salud_fecha is not null) con_consentimiento from socios where id = 'a0ebb7ab-0e78-4eb8-aa18-abad773a6a44';
+select origen_datos, count(*) from prescripciones_entrenamiento group by 1;
+------------------------------------------------------------
+    origen_datos     | count 
+---------------------+-------
+ DatasetExterno      |   747
+ ValidacionFuncional |     1
+(2 rows)
+
+                  id                  |    origen_datos     |             gimnasio_id              | con_consentimiento 
+--------------------------------------+---------------------+--------------------------------------+--------------------
+ a0ebb7ab-0e78-4eb8-aa18-abad773a6a44 | ValidacionFuncional | f8667ba5-e022-45b0-8981-8b715c189e30 | t
+(1 row)
+
+  origen_datos  | count 
+----------------+-------
+ DatasetExterno |    12
+(1 row)
+

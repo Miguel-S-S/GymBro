@@ -19,7 +19,10 @@ namespace GymBro.Application.DTOs.Comparacion
         /// los campos de repeticiones guardan segundos y los volúmenes en kg valen 0.
         /// </summary>
         public string TipoMedida { get; set; } = "Repeticiones";
-        
+
+        /// <summary>Etapa 7d (aditivo): línea de la prescripción con la que se comparó; null si no hay.</summary>
+        public Guid? PrescripcionEjercicioId { get; set; }
+
         public PrescripcionResumenDto? Prescripcion { get; set; }
         public EjecucionResumenDto? Ejecucion { get; set; }
         public ComparacionGeneralDto Comparacion { get; set; } = new ComparacionGeneralDto();

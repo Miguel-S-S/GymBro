@@ -1,0 +1,467 @@
+﻿Etapa 7d - SQL de la migracion Etapa7d_ProtocoloPiernas (dotnet ef migrations script --idempotent, sin conexion a ninguna base)
+Commit base: c29890f425b3420ab115486bdd98d753e0542c84 (rama etapa7d; arbol con los cambios de la etapa sin commit)
+Fecha: 2026-11-24 10:52:37 -03:00
+Codigos de salida: Up=0 Down=0
+Base local gymbro-db: NO se aplico desde Claude Code. Se aplica al levantar GymBro.Api (Program.cs: MigrateAsync); la aplicacion la confirma el autor.
+Verificacion de Up, Down, siembra (0 y 10 filas), CHECK e indice unico contra PostgreSQL descartable: MigracionProtocoloPiernasTests (ver etapa7d-dotnet-test.txt).
+============================== UP ==============================
+START TRANSACTION;
+
+DO $EF$
+BEGIN
+    IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "migration_id" = '20261124133430_Etapa7d_ProtocoloPiernas') THEN
+    ALTER TABLE socios ADD limitacion_lumbar text NOT NULL DEFAULT 'SinLimitacion';
+    END IF;
+END $EF$;
+
+DO $EF$
+BEGIN
+    IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "migration_id" = '20261124133430_Etapa7d_ProtocoloPiernas') THEN
+    ALTER TABLE socios ADD limitacion_rodilla text NOT NULL DEFAULT 'SinLimitacion';
+    END IF;
+END $EF$;
+
+DO $EF$
+BEGIN
+    IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "migration_id" = '20261124133430_Etapa7d_ProtocoloPiernas') THEN
+    ALTER TABLE socios ADD origen_datos text NOT NULL DEFAULT 'DatasetExterno';
+    END IF;
+END $EF$;
+
+DO $EF$
+BEGIN
+    IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "migration_id" = '20261124133430_Etapa7d_ProtocoloPiernas') THEN
+    ALTER TABLE sesiones_ejercicios ADD prescripcion_ejercicio_id uuid;
+    END IF;
+END $EF$;
+
+DO $EF$
+BEGIN
+    IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "migration_id" = '20261124133430_Etapa7d_ProtocoloPiernas') THEN
+    ALTER TABLE prescripciones_entrenamiento ADD entrada_snapshot jsonb;
+    END IF;
+END $EF$;
+
+DO $EF$
+BEGIN
+    IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "migration_id" = '20261124133430_Etapa7d_ProtocoloPiernas') THEN
+    ALTER TABLE prescripciones_entrenamiento ADD es_modificada boolean NOT NULL DEFAULT FALSE;
+    END IF;
+END $EF$;
+
+DO $EF$
+BEGIN
+    IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "migration_id" = '20261124133430_Etapa7d_ProtocoloPiernas') THEN
+    ALTER TABLE prescripciones_entrenamiento ADD excluida_estudio boolean NOT NULL DEFAULT FALSE;
+    END IF;
+END $EF$;
+
+DO $EF$
+BEGIN
+    IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "migration_id" = '20261124133430_Etapa7d_ProtocoloPiernas') THEN
+    ALTER TABLE prescripciones_entrenamiento ADD numero_generacion integer;
+    END IF;
+END $EF$;
+
+DO $EF$
+BEGIN
+    IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "migration_id" = '20261124133430_Etapa7d_ProtocoloPiernas') THEN
+    ALTER TABLE prescripciones_entrenamiento ADD origen_datos text NOT NULL DEFAULT 'DatasetExterno';
+    END IF;
+END $EF$;
+
+DO $EF$
+BEGIN
+    IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "migration_id" = '20261124133430_Etapa7d_ProtocoloPiernas') THEN
+    ALTER TABLE prescripciones_entrenamiento ADD protocolo_codigo text;
+    END IF;
+END $EF$;
+
+DO $EF$
+BEGIN
+    IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "migration_id" = '20261124133430_Etapa7d_ProtocoloPiernas') THEN
+    ALTER TABLE prescripciones_entrenamiento ADD protocolo_version text;
+    END IF;
+END $EF$;
+
+DO $EF$
+BEGIN
+    IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "migration_id" = '20261124133430_Etapa7d_ProtocoloPiernas') THEN
+    ALTER TABLE prescripciones_ejercicios ADD carga_sugerida_kg numeric(7,2);
+    END IF;
+END $EF$;
+
+DO $EF$
+BEGIN
+    IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "migration_id" = '20261124133430_Etapa7d_ProtocoloPiernas') THEN
+    ALTER TABLE prescripciones_ejercicios ADD grupo text;
+    END IF;
+END $EF$;
+
+DO $EF$
+BEGIN
+    IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "migration_id" = '20261124133430_Etapa7d_ProtocoloPiernas') THEN
+    ALTER TABLE prescripciones_ejercicios ADD motivo_seleccion jsonb;
+    END IF;
+END $EF$;
+
+DO $EF$
+BEGIN
+    IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "migration_id" = '20261124133430_Etapa7d_ProtocoloPiernas') THEN
+    ALTER TABLE prescripciones_ejercicios ADD rol text;
+    END IF;
+END $EF$;
+
+DO $EF$
+BEGIN
+    IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "migration_id" = '20261124133430_Etapa7d_ProtocoloPiernas') THEN
+    ALTER TABLE prescripciones_ejercicios ADD tempo_excentrico_seg smallint;
+    END IF;
+END $EF$;
+
+DO $EF$
+BEGIN
+    IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "migration_id" = '20261124133430_Etapa7d_ProtocoloPiernas') THEN
+    CREATE TABLE ejercicios_protocolo (
+        id uuid NOT NULL,
+        protocolo_codigo text NOT NULL,
+        protocolo_version text NOT NULL,
+        ejercicio_id uuid NOT NULL,
+        grupo text NOT NULL,
+        rol text NOT NULL,
+        clase text NOT NULL,
+        rodilla_excluir_desde text,
+        lumbar_excluir_desde text,
+        orden_rotacion smallint NOT NULL,
+        fecha_alta timestamp with time zone NOT NULL,
+        usuario_alta integer NOT NULL,
+        fecha_modificacion timestamp with time zone,
+        usuario_modificacion integer,
+        fecha_baja timestamp with time zone,
+        usuario_baja integer,
+        CONSTRAINT pk_ejercicios_protocolo PRIMARY KEY (id),
+        CONSTRAINT "CK_EjercicioProtocolo_Clase" CHECK (clase IN ('Multiarticular', 'Aislamiento')),
+        CONSTRAINT "CK_EjercicioProtocolo_Grupo" CHECK (grupo IN ('Cuadriceps', 'Isquiotibiales', 'Pantorrillas')),
+        CONSTRAINT "CK_EjercicioProtocolo_LumbarExcluirDesde" CHECK (lumbar_excluir_desde IS NULL OR lumbar_excluir_desde IN ('SinLimitacion', 'Moderada', 'Alta')),
+        CONSTRAINT "CK_EjercicioProtocolo_RodillaExcluirDesde" CHECK (rodilla_excluir_desde IS NULL OR rodilla_excluir_desde IN ('SinLimitacion', 'Moderada', 'Alta')),
+        CONSTRAINT "CK_EjercicioProtocolo_Rol" CHECK (rol IN ('Referencia', 'Variable')),
+        CONSTRAINT fk_ejercicios_protocolo_ejercicios_ejercicio_id FOREIGN KEY (ejercicio_id) REFERENCES ejercicios (id) ON DELETE RESTRICT
+    );
+    END IF;
+END $EF$;
+
+DO $EF$
+BEGIN
+    IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "migration_id" = '20261124133430_Etapa7d_ProtocoloPiernas') THEN
+    ALTER TABLE socios ADD CONSTRAINT "CK_Socio_LimitacionLumbar" CHECK (limitacion_lumbar IN ('SinLimitacion', 'Moderada', 'Alta'));
+    END IF;
+END $EF$;
+
+DO $EF$
+BEGIN
+    IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "migration_id" = '20261124133430_Etapa7d_ProtocoloPiernas') THEN
+    ALTER TABLE socios ADD CONSTRAINT "CK_Socio_LimitacionRodilla" CHECK (limitacion_rodilla IN ('SinLimitacion', 'Moderada', 'Alta'));
+    END IF;
+END $EF$;
+
+DO $EF$
+BEGIN
+    IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "migration_id" = '20261124133430_Etapa7d_ProtocoloPiernas') THEN
+    ALTER TABLE socios ADD CONSTRAINT "CK_Socio_OrigenDatos" CHECK (origen_datos IN ('Sintetico', 'ValidacionFuncional', 'DatasetExterno', 'Real'));
+    END IF;
+END $EF$;
+
+DO $EF$
+BEGIN
+    IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "migration_id" = '20261124133430_Etapa7d_ProtocoloPiernas') THEN
+    CREATE INDEX ix_sesiones_ejercicios_prescripcion_ejercicio_id ON sesiones_ejercicios (prescripcion_ejercicio_id);
+    END IF;
+END $EF$;
+
+DO $EF$
+BEGIN
+    IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "migration_id" = '20261124133430_Etapa7d_ProtocoloPiernas') THEN
+    CREATE UNIQUE INDEX ix_prescripciones_entrenamiento_socio_protocolo_generacion ON prescripciones_entrenamiento (socio_id, protocolo_codigo, numero_generacion) WHERE fecha_baja IS NULL AND protocolo_codigo IS NOT NULL;
+    END IF;
+END $EF$;
+
+DO $EF$
+BEGIN
+    IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "migration_id" = '20261124133430_Etapa7d_ProtocoloPiernas') THEN
+    ALTER TABLE prescripciones_entrenamiento ADD CONSTRAINT "CK_PrescripcionEntrenamiento_NumeroGeneracion" CHECK (numero_generacion IS NULL OR numero_generacion > 0);
+    END IF;
+END $EF$;
+
+DO $EF$
+BEGIN
+    IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "migration_id" = '20261124133430_Etapa7d_ProtocoloPiernas') THEN
+    ALTER TABLE prescripciones_entrenamiento ADD CONSTRAINT "CK_PrescripcionEntrenamiento_OrigenDatos" CHECK (origen_datos IN ('Sintetico', 'ValidacionFuncional', 'DatasetExterno', 'Real'));
+    END IF;
+END $EF$;
+
+DO $EF$
+BEGIN
+    IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "migration_id" = '20261124133430_Etapa7d_ProtocoloPiernas') THEN
+    ALTER TABLE prescripciones_ejercicios ADD CONSTRAINT "CK_PrescripcionEjercicio_CargaSugeridaKg" CHECK (carga_sugerida_kg IS NULL OR carga_sugerida_kg >= 0);
+    END IF;
+END $EF$;
+
+DO $EF$
+BEGIN
+    IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "migration_id" = '20261124133430_Etapa7d_ProtocoloPiernas') THEN
+    ALTER TABLE prescripciones_ejercicios ADD CONSTRAINT "CK_PrescripcionEjercicio_Grupo" CHECK (grupo IS NULL OR grupo IN ('Cuadriceps', 'Isquiotibiales', 'Pantorrillas'));
+    END IF;
+END $EF$;
+
+DO $EF$
+BEGIN
+    IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "migration_id" = '20261124133430_Etapa7d_ProtocoloPiernas') THEN
+    ALTER TABLE prescripciones_ejercicios ADD CONSTRAINT "CK_PrescripcionEjercicio_Rol" CHECK (rol IS NULL OR rol IN ('Referencia', 'Variable'));
+    END IF;
+END $EF$;
+
+DO $EF$
+BEGIN
+    IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "migration_id" = '20261124133430_Etapa7d_ProtocoloPiernas') THEN
+    ALTER TABLE prescripciones_ejercicios ADD CONSTRAINT "CK_PrescripcionEjercicio_TempoExcentricoSeg" CHECK (tempo_excentrico_seg IS NULL OR (tempo_excentrico_seg >= 1 AND tempo_excentrico_seg <= 10));
+    END IF;
+END $EF$;
+
+DO $EF$
+BEGIN
+    IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "migration_id" = '20261124133430_Etapa7d_ProtocoloPiernas') THEN
+    CREATE INDEX ix_ejercicios_protocolo_ejercicio_id ON ejercicios_protocolo (ejercicio_id);
+    END IF;
+END $EF$;
+
+DO $EF$
+BEGIN
+    IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "migration_id" = '20261124133430_Etapa7d_ProtocoloPiernas') THEN
+    CREATE UNIQUE INDEX ix_ejercicios_protocolo_protocolo_version_ejercicio_id ON ejercicios_protocolo (protocolo_version, ejercicio_id) WHERE fecha_baja IS NULL;
+    END IF;
+END $EF$;
+
+DO $EF$
+BEGIN
+    IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "migration_id" = '20261124133430_Etapa7d_ProtocoloPiernas') THEN
+    ALTER TABLE sesiones_ejercicios ADD CONSTRAINT fk_sesiones_ejercicios_prescripciones_ejercicios_prescripcion_ FOREIGN KEY (prescripcion_ejercicio_id) REFERENCES prescripciones_ejercicios (id) ON DELETE RESTRICT;
+    END IF;
+END $EF$;
+
+DO $EF$
+BEGIN
+    IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "migration_id" = '20261124133430_Etapa7d_ProtocoloPiernas') THEN
+    INSERT INTO ejercicios_protocolo (id, protocolo_codigo, protocolo_version, ejercicio_id, grupo, rol, clase,
+        rodilla_excluir_desde, lumbar_excluir_desde, orden_rotacion, fecha_alta, usuario_alta)
+    SELECT gen_random_uuid(), 'PIERNAS', 'piernas-1.0', e.id, v.grupo, v.rol, v.clase, v.rodilla, v.lumbar, v.orden, now(), 1
+    FROM (VALUES
+        ('69e15aaf-ca0d-433b-be03-6b496450b1d2'::uuid, 'Cuadriceps', 'Referencia', 'Multiarticular', 'Alta', 'Alta', 1::smallint),
+        ('c7499d5c-48c5-4d16-a691-54a96079ca49'::uuid, 'Cuadriceps', 'Referencia', 'Multiarticular', 'Alta', NULL::text, 2::smallint),
+        ('3203840d-5a79-4c84-9758-b40238f7c85f'::uuid, 'Cuadriceps', 'Variable', 'Multiarticular', 'Alta', 'Moderada', 1::smallint),
+        ('1537a321-40ab-4a60-b3b8-e73cab167c28'::uuid, 'Cuadriceps', 'Variable', 'Multiarticular', 'Alta', 'Alta', 2::smallint),
+        ('15a5f846-25f5-48a5-a570-264c2b894462'::uuid, 'Cuadriceps', 'Variable', 'Aislamiento', 'Moderada', NULL::text, 3::smallint),
+        ('14a284c5-5159-4bdb-83f7-733154e07228'::uuid, 'Isquiotibiales', 'Referencia', 'Aislamiento', NULL::text, NULL::text, 1::smallint),
+        ('2e9d6c61-6be0-4f4a-8f1b-348869e07a65'::uuid, 'Isquiotibiales', 'Variable', 'Aislamiento', NULL::text, NULL::text, 1::smallint),
+        ('a33d764a-d3f2-437e-a527-38e877fdba0f'::uuid, 'Isquiotibiales', 'Variable', 'Multiarticular', NULL::text, 'Moderada', 2::smallint),
+        ('bca285fb-60ee-40a7-bdc9-771b201365a1'::uuid, 'Pantorrillas', 'Variable', 'Aislamiento', NULL::text, NULL::text, 1::smallint),
+        ('608e091b-1ddb-4a05-abb7-c0c03e48eee6'::uuid, 'Pantorrillas', 'Variable', 'Aislamiento', NULL::text, NULL::text, 2::smallint)
+    ) AS v(ejercicio_id, grupo, rol, clase, rodilla, lumbar, orden)
+    JOIN ejercicios e ON e.id = v.ejercicio_id AND e.fecha_baja IS NULL
+    ON CONFLICT DO NOTHING;
+    END IF;
+END $EF$;
+
+DO $EF$
+BEGIN
+    IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "migration_id" = '20261124133430_Etapa7d_ProtocoloPiernas') THEN
+    INSERT INTO "__EFMigrationsHistory" (migration_id, product_version)
+    VALUES ('20261124133430_Etapa7d_ProtocoloPiernas', '10.0.11');
+    END IF;
+END $EF$;
+COMMIT;
+
+============================== DOWN ==============================
+START TRANSACTION;
+DO $EF$
+BEGIN
+    IF EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "migration_id" = '20261124133430_Etapa7d_ProtocoloPiernas') THEN
+    ALTER TABLE sesiones_ejercicios DROP CONSTRAINT fk_sesiones_ejercicios_prescripciones_ejercicios_prescripcion_;
+    END IF;
+END $EF$;
+DO $EF$
+BEGIN
+    IF EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "migration_id" = '20261124133430_Etapa7d_ProtocoloPiernas') THEN
+    DROP TABLE ejercicios_protocolo;
+    END IF;
+END $EF$;
+DO $EF$
+BEGIN
+    IF EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "migration_id" = '20261124133430_Etapa7d_ProtocoloPiernas') THEN
+    ALTER TABLE socios DROP CONSTRAINT "CK_Socio_LimitacionLumbar";
+    END IF;
+END $EF$;
+DO $EF$
+BEGIN
+    IF EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "migration_id" = '20261124133430_Etapa7d_ProtocoloPiernas') THEN
+    ALTER TABLE socios DROP CONSTRAINT "CK_Socio_LimitacionRodilla";
+    END IF;
+END $EF$;
+DO $EF$
+BEGIN
+    IF EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "migration_id" = '20261124133430_Etapa7d_ProtocoloPiernas') THEN
+    ALTER TABLE socios DROP CONSTRAINT "CK_Socio_OrigenDatos";
+    END IF;
+END $EF$;
+DO $EF$
+BEGIN
+    IF EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "migration_id" = '20261124133430_Etapa7d_ProtocoloPiernas') THEN
+    DROP INDEX ix_sesiones_ejercicios_prescripcion_ejercicio_id;
+    END IF;
+END $EF$;
+DO $EF$
+BEGIN
+    IF EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "migration_id" = '20261124133430_Etapa7d_ProtocoloPiernas') THEN
+    DROP INDEX ix_prescripciones_entrenamiento_socio_protocolo_generacion;
+    END IF;
+END $EF$;
+DO $EF$
+BEGIN
+    IF EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "migration_id" = '20261124133430_Etapa7d_ProtocoloPiernas') THEN
+    ALTER TABLE prescripciones_entrenamiento DROP CONSTRAINT "CK_PrescripcionEntrenamiento_NumeroGeneracion";
+    END IF;
+END $EF$;
+DO $EF$
+BEGIN
+    IF EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "migration_id" = '20261124133430_Etapa7d_ProtocoloPiernas') THEN
+    ALTER TABLE prescripciones_entrenamiento DROP CONSTRAINT "CK_PrescripcionEntrenamiento_OrigenDatos";
+    END IF;
+END $EF$;
+DO $EF$
+BEGIN
+    IF EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "migration_id" = '20261124133430_Etapa7d_ProtocoloPiernas') THEN
+    ALTER TABLE prescripciones_ejercicios DROP CONSTRAINT "CK_PrescripcionEjercicio_CargaSugeridaKg";
+    END IF;
+END $EF$;
+DO $EF$
+BEGIN
+    IF EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "migration_id" = '20261124133430_Etapa7d_ProtocoloPiernas') THEN
+    ALTER TABLE prescripciones_ejercicios DROP CONSTRAINT "CK_PrescripcionEjercicio_Grupo";
+    END IF;
+END $EF$;
+DO $EF$
+BEGIN
+    IF EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "migration_id" = '20261124133430_Etapa7d_ProtocoloPiernas') THEN
+    ALTER TABLE prescripciones_ejercicios DROP CONSTRAINT "CK_PrescripcionEjercicio_Rol";
+    END IF;
+END $EF$;
+DO $EF$
+BEGIN
+    IF EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "migration_id" = '20261124133430_Etapa7d_ProtocoloPiernas') THEN
+    ALTER TABLE prescripciones_ejercicios DROP CONSTRAINT "CK_PrescripcionEjercicio_TempoExcentricoSeg";
+    END IF;
+END $EF$;
+DO $EF$
+BEGIN
+    IF EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "migration_id" = '20261124133430_Etapa7d_ProtocoloPiernas') THEN
+    ALTER TABLE socios DROP COLUMN limitacion_lumbar;
+    END IF;
+END $EF$;
+DO $EF$
+BEGIN
+    IF EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "migration_id" = '20261124133430_Etapa7d_ProtocoloPiernas') THEN
+    ALTER TABLE socios DROP COLUMN limitacion_rodilla;
+    END IF;
+END $EF$;
+DO $EF$
+BEGIN
+    IF EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "migration_id" = '20261124133430_Etapa7d_ProtocoloPiernas') THEN
+    ALTER TABLE socios DROP COLUMN origen_datos;
+    END IF;
+END $EF$;
+DO $EF$
+BEGIN
+    IF EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "migration_id" = '20261124133430_Etapa7d_ProtocoloPiernas') THEN
+    ALTER TABLE sesiones_ejercicios DROP COLUMN prescripcion_ejercicio_id;
+    END IF;
+END $EF$;
+DO $EF$
+BEGIN
+    IF EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "migration_id" = '20261124133430_Etapa7d_ProtocoloPiernas') THEN
+    ALTER TABLE prescripciones_entrenamiento DROP COLUMN entrada_snapshot;
+    END IF;
+END $EF$;
+DO $EF$
+BEGIN
+    IF EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "migration_id" = '20261124133430_Etapa7d_ProtocoloPiernas') THEN
+    ALTER TABLE prescripciones_entrenamiento DROP COLUMN es_modificada;
+    END IF;
+END $EF$;
+DO $EF$
+BEGIN
+    IF EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "migration_id" = '20261124133430_Etapa7d_ProtocoloPiernas') THEN
+    ALTER TABLE prescripciones_entrenamiento DROP COLUMN excluida_estudio;
+    END IF;
+END $EF$;
+DO $EF$
+BEGIN
+    IF EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "migration_id" = '20261124133430_Etapa7d_ProtocoloPiernas') THEN
+    ALTER TABLE prescripciones_entrenamiento DROP COLUMN numero_generacion;
+    END IF;
+END $EF$;
+DO $EF$
+BEGIN
+    IF EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "migration_id" = '20261124133430_Etapa7d_ProtocoloPiernas') THEN
+    ALTER TABLE prescripciones_entrenamiento DROP COLUMN origen_datos;
+    END IF;
+END $EF$;
+DO $EF$
+BEGIN
+    IF EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "migration_id" = '20261124133430_Etapa7d_ProtocoloPiernas') THEN
+    ALTER TABLE prescripciones_entrenamiento DROP COLUMN protocolo_codigo;
+    END IF;
+END $EF$;
+DO $EF$
+BEGIN
+    IF EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "migration_id" = '20261124133430_Etapa7d_ProtocoloPiernas') THEN
+    ALTER TABLE prescripciones_entrenamiento DROP COLUMN protocolo_version;
+    END IF;
+END $EF$;
+DO $EF$
+BEGIN
+    IF EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "migration_id" = '20261124133430_Etapa7d_ProtocoloPiernas') THEN
+    ALTER TABLE prescripciones_ejercicios DROP COLUMN carga_sugerida_kg;
+    END IF;
+END $EF$;
+DO $EF$
+BEGIN
+    IF EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "migration_id" = '20261124133430_Etapa7d_ProtocoloPiernas') THEN
+    ALTER TABLE prescripciones_ejercicios DROP COLUMN grupo;
+    END IF;
+END $EF$;
+DO $EF$
+BEGIN
+    IF EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "migration_id" = '20261124133430_Etapa7d_ProtocoloPiernas') THEN
+    ALTER TABLE prescripciones_ejercicios DROP COLUMN motivo_seleccion;
+    END IF;
+END $EF$;
+DO $EF$
+BEGIN
+    IF EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "migration_id" = '20261124133430_Etapa7d_ProtocoloPiernas') THEN
+    ALTER TABLE prescripciones_ejercicios DROP COLUMN rol;
+    END IF;
+END $EF$;
+DO $EF$
+BEGIN
+    IF EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "migration_id" = '20261124133430_Etapa7d_ProtocoloPiernas') THEN
+    ALTER TABLE prescripciones_ejercicios DROP COLUMN tempo_excentrico_seg;
+    END IF;
+END $EF$;
+DO $EF$
+BEGIN
+    IF EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "migration_id" = '20261124133430_Etapa7d_ProtocoloPiernas') THEN
+    DELETE FROM "__EFMigrationsHistory"
+    WHERE migration_id = '20261124133430_Etapa7d_ProtocoloPiernas';
+    END IF;
+END $EF$;
+COMMIT;
+

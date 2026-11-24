@@ -66,6 +66,30 @@ namespace GymBro.Tests.Integration
             Assert.Equivalent(d.Limites, cfg.Limites, strict: true);
         }
 
+        /// <summary>Etapa 7d: los parámetros del protocolo de piernas se vinculan desde "ProtocoloPiernas" y coinciden con el código.</summary>
+        [Fact]
+        public void Los_parametros_de_ProtocoloPiernas_se_vinculan_y_coinciden_con_los_valores_por_defecto()
+        {
+            var cfg = Ejemplo().GetSection("ProtocoloPiernas").Get<GymBro.Domain.Rules.ProtocoloPiernasConfig>()!;
+            var d = new GymBro.Domain.Rules.ProtocoloPiernasConfig();
+            Assert.Equivalent(d, cfg, strict: true);
+            Assert.Equal(6, cfg.ComposicionEfectiva().Count);
+            Assert.Equal(GymBro.Application.Services.PrescripcionPiernasService.HuellaConfiguracion(d),
+                GymBro.Application.Services.PrescripcionPiernasService.HuellaConfiguracion(cfg));
+        }
+
+        /// <summary>Etapa 7d: un parámetro cambiado en la configuración llega al planificador.</summary>
+        [Fact]
+        public void Un_parametro_del_protocolo_cambiado_en_la_configuracion_se_usa()
+        {
+            var cfg = new ConfigurationBuilder().AddInMemoryCollection(new Dictionary<string, string?>
+            {
+                ["ProtocoloPiernas:TempoExcentricoSeg"] = "2",
+                ["ProtocoloPiernas:RepeticionesPantorrilla:Maximas"] = "25",
+            }).Build().GetSection("ProtocoloPiernas").Get<GymBro.Domain.Rules.ProtocoloPiernasConfig>()!;
+            Assert.Equal((2, 15, 25), (cfg.TempoExcentricoSeg, cfg.RepeticionesPantorrilla.Minimas, cfg.RepeticionesPantorrilla.Maximas));
+        }
+
         /// <summary>Etapa 10a: un umbral cambiado en la configuración llega a las reglas (no hay valores fijos en el código).</summary>
         [Fact]
         public void Un_umbral_cambiado_en_la_configuracion_se_usa()

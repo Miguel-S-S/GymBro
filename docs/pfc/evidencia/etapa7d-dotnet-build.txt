@@ -1,0 +1,23 @@
+﻿Etapa 7d - build y pruebas con los cambios de la etapa
+Comando: dotnet build GymBro.slnx
+Commit: c29890f425b3420ab115486bdd98d753e0542c84 (rama etapa7d sobre c29890f; cambios de la etapa sin commit (no autorizado todavia))
+Fecha: 2026-11-24 10:52:50 -03:00
+Codigo de salida: 0
+------------------------------------------------------------
+  Determinando los proyectos que se van a restaurar...
+  Todos los proyectos están actualizados para la restauración.
+  WorkingDirectory: C:\Users\miguel\source\repos\GymBro\GymBro.Web
+  ProcessStartInfo.WorkingDirectory: C:\Users\miguel\source\repos\GymBro\GymBro.Web\
+  GymBro.IA -> C:\Users\miguel\source\repos\GymBro\GymBro.IA\bin\Debug\net10.0\GymBro.IA.dll
+  GymBro.Domain -> C:\Users\miguel\source\repos\GymBro\GymBro.Domain\bin\Debug\net10.0\GymBro.Domain.dll
+  GymBro.Application -> C:\Users\miguel\source\repos\GymBro\GymBro.Application\bin\Debug\net10.0\GymBro.Application.dll
+  GymBro.Tests -> C:\Users\miguel\source\repos\GymBro\GymBro.Tests\bin\Debug\net10.0\GymBro.Tests.dll
+  GymBro.Infrastructure -> C:\Users\miguel\source\repos\GymBro\GymBro.Infrastructure\bin\Debug\net10.0\GymBro.Infrastructure.dll
+  GymBro.Api -> C:\Users\miguel\source\repos\GymBro\GymBro.Api\bin\Debug\net10.0\GymBro.Api.dll
+  GymBro.Tests.Integration -> C:\Users\miguel\source\repos\GymBro\GymBro.Tests.Integration\bin\Debug\net10.0\GymBro.Tests.Integration.dll
+
+Compilación correcta.
+    0 Advertencia(s)
+    0 Errores
+
+Tiempo transcurrido 00:00:02.69

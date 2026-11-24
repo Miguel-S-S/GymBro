@@ -1,0 +1,19 @@
+﻿Etapa 7d - build y pruebas con los cambios de la etapa
+Comando: npx ng test --watch=false
+Commit: c29890f425b3420ab115486bdd98d753e0542c84 (rama etapa7d sobre c29890f; cambios de la etapa sin commit (no autorizado todavia))
+Fecha: 2026-11-24 10:53:27 -03:00
+Codigo de salida: 0
+------------------------------------------------------------
+> Building...
+√ Building...
+Application bundle generation complete. [4.112 seconds] - 2026-11-24T13:53:33.600Z
+
+
+ RUN  v5.1.0 C:/Users/miguel/source/repos/GymBro/GymBro.Web
+
+
+ Test Files  33 passed (33)
+      Tests  211 passed (211)
+   Start at  10:53:33
+   Duration  6.74s (environment 71%, tests 14%, import 7%, setup 6%, transform 2%)
+

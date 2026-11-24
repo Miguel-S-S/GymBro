@@ -137,7 +137,8 @@ namespace GymBro.Infrastructure.Persistence.Seeders
                     Genero = row.Gender ?? "O",
                     FechaNacimiento = DateTime.TryParse(row.Birth_Date, out DateTime fecha) ? DateTime.SpecifyKind(fecha, DateTimeKind.Utc) : DateTime.UtcNow.AddYears(-20),
                     Objetivo = ObjetivoEntrenamiento.Mantenimiento,
-                    Nivel = NivelExperiencia.Intermedio
+                    Nivel = NivelExperiencia.Intermedio,
+                    OrigenDatos = OrigenDatos.DatasetExterno   // Etapa 7d (P1): socios del dataset de Kaggle
                 };
 
                 var medicion = new MedicionFisica

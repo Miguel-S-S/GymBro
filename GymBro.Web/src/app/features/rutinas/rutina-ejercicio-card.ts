@@ -47,6 +47,13 @@ interface Control {
         </div>
       }
 
+      @if (detalleProtocolo(); as detalle) {
+        <div class="protocolo">{{ detalle }}</div>
+      }
+      @if (cargaSugerida(); as carga) {
+        <div class="protocolo">Carga sugerida: {{ carga }} kg <span class="leyenda">(sugerencia informativa)</span></div>
+      }
+
       @if (ejercicio().observaciones) {
         <p class="nota">{{ ejercicio().observaciones }}</p>
       }
@@ -63,6 +70,8 @@ interface Control {
     .etiqueta { font: var(--mat-sys-label-small); color: var(--mat-sys-on-surface-variant); }
     .stepper { display: flex; align-items: center; }
     .valor { min-width: 52px; text-align: center; font: var(--mat-sys-title-small); }
+    .protocolo { margin: 4px 0 0 34px; font: var(--mat-sys-body-small); color: var(--mat-sys-on-surface-variant); }
+    .leyenda { font-style: italic; }
     .nota { margin: 6px 0 0 34px; font: var(--mat-sys-body-small); color: var(--mat-sys-on-surface-variant); }
   `,
 })
@@ -86,6 +95,21 @@ export class RutinaEjercicioCard {
 
   resumen(): string {
     return resumenEjercicio(this.ejercicio());
+  }
+
+  /** Etapa 7d: rol y tempo excéntrico de una línea del protocolo de piernas (`Referencia · tempo excéntrico 3 s`). */
+  detalleProtocolo(): string | null {
+    const e = this.ejercicio();
+    const partes: string[] = [];
+    if (e.rol) partes.push(e.rol);
+    if (e.tempoExcentricoSeg) partes.push(`tempo excéntrico ${e.tempoExcentricoSeg} s`);
+    return partes.length ? partes.join(' · ') : null;
+  }
+
+  /** Etapa 7d: carga sugerida con coma decimal (`102,5`), o null si no hay. */
+  cargaSugerida(): string | null {
+    const kg = this.ejercicio().cargaSugeridaKg;
+    return kg === null || kg === undefined ? null : `${kg}`.replace('.', ',');
   }
 
   valor(campo: CampoRutina): number | string {

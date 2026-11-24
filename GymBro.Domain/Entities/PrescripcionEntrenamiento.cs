@@ -18,6 +18,32 @@ namespace GymBro.Domain.Entities
 
         public string? Observaciones { get; set; }
 
+        // ---- Etapa 7d: trazabilidad del protocolo y del estudio piloto ----
+
+        /// <summary>Código del protocolo que generó la rutina (PIERNAS). Null en las rutinas que no salen de un protocolo.</summary>
+        public string? ProtocoloCodigo { get; set; }
+
+        /// <summary>Versión del protocolo (por ejemplo, piernas-1.0).</summary>
+        public string? ProtocoloVersion { get; set; }
+
+        /// <summary>Número de generación del socio en el protocolo (1, 2, ...). No se reutiliza aunque la rutina se rechace.</summary>
+        public int? NumeroGeneracion { get; set; }
+
+        /// <summary>
+        /// Procedencia de los datos, copiada del socio al generar el protocolo. Las rutinas de otros generadores quedan con
+        /// el valor inicial (Real), que es conservador: el estudio filtra además por el origen del socio.
+        /// </summary>
+        public OrigenDatos OrigenDatos { get; set; } = OrigenDatos.Real;
+
+        /// <summary>Marca manual para dejar la rutina fuera de los indicadores del estudio.</summary>
+        public bool ExcluidaEstudio { get; set; }
+
+        /// <summary>True si una revisión con ajustes cambió algún valor de la dosis (Etapa 7d, 6.4).</summary>
+        public bool EsModificada { get; set; }
+
+        /// <summary>JSON (jsonb) con las entradas usadas en la generación, sin datos personales identificatorios.</summary>
+        public string? EntradaSnapshot { get; set; }
+
         public ICollection<PrescripcionEjercicio> EjerciciosPrescritos { get; set; } = new List<PrescripcionEjercicio>();
         public ICollection<SesionEntrenamiento> Sesiones { get; set; } = new List<SesionEntrenamiento>();
         public ICollection<RevisionPrescripcion> Revisiones { get; set; } = new List<RevisionPrescripcion>();

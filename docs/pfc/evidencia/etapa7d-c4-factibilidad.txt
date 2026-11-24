@@ -1,0 +1,29 @@
+﻿-- Etapa 7d, B13/C4: factibilidad con el socio de validacion (consulta de solo lectura sobre gymbro_db, 24/11/2026)
+with f as (
+  select tipo_equipamiento_id id from equipamientos_gimnasio where gimnasio_id='f8667ba5-e022-45b0-8981-8b715c189e30'
+  union select id from tipos_equipamiento where siempre_disponible and (gimnasio_id is null or gimnasio_id='f8667ba5-e022-45b0-8981-8b715c189e30'))
+select e.id, e.nombre, e.origen, e.gimnasio_id, e.tipo_equipamiento_id in (select id from f) factible
+from ejercicios e where e.id in ('2e9d6c61-6be0-4f4a-8f1b-348869e07a65','14a284c5-5159-4bdb-83f7-733154e07228','bca285fb-60ee-40a7-bdc9-771b201365a1','608e091b-1ddb-4a05-abb7-c0c03e48eee6','15a5f846-25f5-48a5-a570-264c2b894462','a33d764a-d3f2-437e-a527-38e877fdba0f','69e15aaf-ca0d-433b-be03-6b496450b1d2','1537a321-40ab-4a60-b3b8-e73cab167c28','c7499d5c-48c5-4d16-a691-54a96079ca49','3203840d-5a79-4c84-9758-b40238f7c85f') and e.fecha_baja is null order by 2;
+select s.gimnasio_id, s.nivel, (s.consentimiento_datos_salud_fecha is not null) consentimiento, date_part('year', age(s.fecha_nacimiento)) edad,
+ (select count(*) from mediciones_fisicas m where m.socio_id=s.id) mediciones,
+ (select count(*) from prescripciones_entrenamiento p where p.socio_id=s.id) prescripciones
+from socios s where s.id='a0ebb7ab-0e78-4eb8-aa18-abad773a6a44';
+                  id                  |               nombre               |  origen  | gimnasio_id | factible 
+--------------------------------------+------------------------------------+----------+-------------+----------
+ 2e9d6c61-6be0-4f4a-8f1b-348869e07a65 | Curl femoral acostado en camilla   | Proyecto |             | t
+ 14a284c5-5159-4bdb-83f7-733154e07228 | Curl femoral sentado en máquina    | Proyecto |             | t
+ bca285fb-60ee-40a7-bdc9-771b201365a1 | Elevación de talones de pie        | Proyecto |             | t
+ 608e091b-1ddb-4a05-abb7-c0c03e48eee6 | Elevación de talones sentado       | Proyecto |             | t
+ 15a5f846-25f5-48a5-a570-264c2b894462 | Extensión de cuádriceps en camilla | Proyecto |             | t
+ a33d764a-d3f2-437e-a527-38e877fdba0f | Peso muerto rumano con barra       | Proyecto |             | t
+ 69e15aaf-ca0d-433b-be03-6b496450b1d2 | Prensa de piernas 45 grados        | Proyecto |             | t
+ 1537a321-40ab-4a60-b3b8-e73cab167c28 | Sentadilla frontal con barra       | Proyecto |             | t
+ c7499d5c-48c5-4d16-a691-54a96079ca49 | Sentadilla Hack en máquina         | Proyecto |             | t
+ 3203840d-5a79-4c84-9758-b40238f7c85f | Sentadilla trasera con barra libre | Proyecto |             | t
+(10 rows)
+
+             gimnasio_id              |    nivel     | consentimiento | edad | mediciones | prescripciones 
+--------------------------------------+--------------+----------------+------+------------+----------------
+ f8667ba5-e022-45b0-8981-8b715c189e30 | Principiante | t              |   43 |          1 |              0
+(1 row)
+

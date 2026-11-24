@@ -84,6 +84,15 @@ builder.Services.AddScoped<IValidadorPrescripcionService, ValidadorPrescripcionS
 builder.Services.AddScoped<IReglasSeguridadService, ReglasSeguridadService>();
 builder.Services.AddScoped<IAlertasService, AlertasService>();
 
+// Etapa 7d: protocolo de piernas (generación determinista), limitaciones articulares y KPIs. Parámetros en
+// "ProtocoloPiernas" (valores por defecto en código; provisionales, sin validación clínica).
+builder.Services.AddSingleton(builder.Configuration.GetSection("ProtocoloPiernas").Get<ProtocoloPiernasConfig>() ?? new ProtocoloPiernasConfig());
+builder.Services.AddScoped<IProtocoloPiernasRepository, ProtocoloPiernasRepository>();
+builder.Services.AddScoped<IPrescripcionPiernasService, PrescripcionPiernasService>();
+builder.Services.AddScoped<ILimitacionesArticularesService, LimitacionesArticularesService>();
+builder.Services.AddScoped<IKpiProgresionRepository, KpiProgresionRepository>();
+builder.Services.AddScoped<IKpiProgresionService, KpiProgresionService>();
+
 builder.Services.Configure<JwtOptions>(builder.Configuration.GetSection(JwtOptions.Seccion));
 var jwt = builder.Configuration.GetSection(JwtOptions.Seccion).Get<JwtOptions>() ?? new JwtOptions();
 if (string.IsNullOrWhiteSpace(jwt.Key) || Encoding.UTF8.GetByteCount(jwt.Key) < 32)
@@ -165,6 +174,13 @@ using (var scope = app.Services.CreateScope())
 
     // Etapa 9a-2: tipos globales de equipamiento y su asignación a los ejercicios globales (todos los entornos).
     await EquipamientoSeeder.SeedAsync(context);
+
+    // Etapa 7d: el catálogo del protocolo de piernas lo siembra la migración solo donde existen los 10 ejercicios
+    // curados. Si falta algún grupo o fila, se advierte (el generador falla con un mensaje que indica el grupo).
+    var faltantesPiernas = await VerificacionProtocoloPiernas.DescribirFaltantesAsync(context,
+        services.GetRequiredService<GymBro.Domain.Rules.ProtocoloPiernasConfig>());
+    if (faltantesPiernas is not null)
+        app.Logger.LogWarning("Protocolo de piernas incompleto: {Detalle}", faltantesPiernas);
 
     await AccesoSeeder.SeedSuperAdministradorAsync(context, services.GetRequiredService<IHasheadorContrasena>(),
         app.Configuration["SuperAdmin:Email"], app.Configuration["SuperAdmin:Password"]);

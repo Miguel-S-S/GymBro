@@ -18,6 +18,12 @@ namespace GymBro.Application.DTOs
         public Guid EjercicioId { get; set; }
         public int Orden { get; set; }
         public string? Observaciones { get; set; }
+
+        /// <summary>
+        /// Etapa 7d (opcional): línea de la prescripción que se ejecuta. Si se indica, debe pertenecer a la prescripción de
+        /// la sesión y ser del mismo ejercicio; si no, se resuelve por ejercicio (y orden si hay más de una línea).
+        /// </summary>
+        public Guid? PrescripcionEjercicioId { get; set; }
         public List<SerieRealizadaRequestDto> SeriesRealizadas { get; set; } = new List<SerieRealizadaRequestDto>();
     }
 

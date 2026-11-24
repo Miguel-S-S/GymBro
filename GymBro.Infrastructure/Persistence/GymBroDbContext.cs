@@ -37,6 +37,7 @@ namespace GymBro.Infrastructure.Persistence
         public DbSet<AlertaSeguridad> AlertasSeguridad { get; set; }
         public DbSet<TipoEquipamiento> TiposEquipamiento { get; set; }
         public DbSet<EquipamientoGimnasio> EquipamientosGimnasio { get; set; }
+        public DbSet<EjercicioProtocolo> EjerciciosProtocolo { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -178,6 +179,7 @@ namespace GymBro.Infrastructure.Persistence
             ConfigurarBienestarDiario(modelBuilder);
             ConfigurarAlertasSeguridad(modelBuilder);
             ConfigurarCatalogoGimnasio(modelBuilder);
+            ConfigurarProtocoloPiernas(modelBuilder);
 
             // 5. Conversión de Enums a texto puro en la base de datos
             modelBuilder.Entity<Socio>().Property(s => s.Objetivo).HasConversion<string>();
@@ -277,6 +279,92 @@ namespace GymBro.Infrastructure.Persistence
                 e.ToTable(t => t.HasCheckConstraint("CK_Ejercicio_OrigenGimnasio",
                     "(origen = 'Gimnasio' AND gimnasio_id IS NOT NULL) OR (origen <> 'Gimnasio' AND gimnasio_id IS NULL)"));
             });
+        }
+
+        /// <summary>
+        /// Etapa 7d: catálogo del protocolo de piernas (global, sin datos de salud), limitaciones articulares y origen de
+        /// datos del socio (las limitaciones son datos de salud: el filtro de socios ya excluye al Administrador de la
+        /// Plataforma), trazabilidad de la prescripción y de sus líneas, y vínculo directo sesión -> línea de prescripción.
+        /// Los enums se guardan como texto con CHECK; los valores por defecto de las filas existentes los fija la migración
+        /// (no llevan HasDefaultValue, igual que socios.estado).
+        /// </summary>
+        private static void ConfigurarProtocoloPiernas(ModelBuilder modelBuilder)
+        {
+            modelBuilder.Entity<EjercicioProtocolo>(e =>
+            {
+                e.ToTable("ejercicios_protocolo", t =>
+                {
+                    t.HasCheckConstraint("CK_EjercicioProtocolo_Grupo", GuardaEnums.CondicionTexto<GrupoMuscularPiernas>("grupo"));
+                    t.HasCheckConstraint("CK_EjercicioProtocolo_Rol", GuardaEnums.CondicionTexto<RolEjercicioProtocolo>("rol"));
+                    t.HasCheckConstraint("CK_EjercicioProtocolo_Clase", GuardaEnums.CondicionTexto<ClaseEjercicio>("clase"));
+                    t.HasCheckConstraint("CK_EjercicioProtocolo_RodillaExcluirDesde",
+                        GuardaEnums.CondicionTexto<NivelLimitacion>("rodilla_excluir_desde", admiteNulo: true));
+                    t.HasCheckConstraint("CK_EjercicioProtocolo_LumbarExcluirDesde",
+                        GuardaEnums.CondicionTexto<NivelLimitacion>("lumbar_excluir_desde", admiteNulo: true));
+                });
+                e.HasQueryFilter(x => x.FechaBaja == null);
+                e.Property(x => x.ProtocoloCodigo).IsRequired();
+                e.Property(x => x.ProtocoloVersion).IsRequired();
+                e.Property(x => x.Grupo).HasConversion<string>();
+                e.Property(x => x.Rol).HasConversion<string>();
+                e.Property(x => x.Clase).HasConversion<string>();
+                e.Property(x => x.RodillaExcluirDesde).HasConversion<string>();
+                e.Property(x => x.LumbarExcluirDesde).HasConversion<string>();
+                e.HasOne<Ejercicio>().WithMany().HasForeignKey(x => x.EjercicioId).OnDelete(DeleteBehavior.Restrict);
+                e.HasIndex(x => new { x.ProtocoloVersion, x.EjercicioId }).IsUnique().HasFilter("fecha_baja IS NULL");
+            });
+
+            modelBuilder.Entity<Socio>(e =>
+            {
+                e.Property(s => s.LimitacionRodilla).HasConversion<string>();
+                e.Property(s => s.LimitacionLumbar).HasConversion<string>();
+                e.Property(s => s.OrigenDatos).HasConversion<string>();
+                e.ToTable(t =>
+                {
+                    t.HasCheckConstraint("CK_Socio_LimitacionRodilla", GuardaEnums.CondicionTexto<NivelLimitacion>("limitacion_rodilla"));
+                    t.HasCheckConstraint("CK_Socio_LimitacionLumbar", GuardaEnums.CondicionTexto<NivelLimitacion>("limitacion_lumbar"));
+                    t.HasCheckConstraint("CK_Socio_OrigenDatos", GuardaEnums.CondicionTexto<OrigenDatos>("origen_datos"));
+                });
+            });
+
+            modelBuilder.Entity<PrescripcionEntrenamiento>(e =>
+            {
+                e.Property(p => p.OrigenDatos).HasConversion<string>();
+                e.Property(p => p.EntradaSnapshot).HasColumnType("jsonb");
+                e.ToTable(t =>
+                {
+                    t.HasCheckConstraint("CK_PrescripcionEntrenamiento_OrigenDatos", GuardaEnums.CondicionTexto<OrigenDatos>("origen_datos"));
+                    t.HasCheckConstraint("CK_PrescripcionEntrenamiento_NumeroGeneracion", "numero_generacion IS NULL OR numero_generacion > 0");
+                });
+                e.HasIndex(p => new { p.SocioId, p.ProtocoloCodigo, p.NumeroGeneracion }).IsUnique()
+                    .HasFilter("fecha_baja IS NULL AND protocolo_codigo IS NOT NULL")
+                    .HasDatabaseName("ix_prescripciones_entrenamiento_socio_protocolo_generacion");
+                // El índice parcial anterior no cubre las filas sin protocolo: se declara el índice existente de la FK
+                // para que EF no lo elimine (la migración de la etapa es solo aditiva).
+                e.HasIndex(p => p.SocioId);
+            });
+
+            modelBuilder.Entity<PrescripcionEjercicio>(e =>
+            {
+                e.Property(p => p.Rol).HasConversion<string>();
+                e.Property(p => p.Grupo).HasConversion<string>();
+                e.Property(p => p.CargaSugeridaKg).HasPrecision(7, 2);
+                e.Property(p => p.MotivoSeleccion).HasColumnType("jsonb");
+                e.ToTable(t =>
+                {
+                    t.HasCheckConstraint("CK_PrescripcionEjercicio_Rol", GuardaEnums.CondicionTexto<RolEjercicioProtocolo>("rol", admiteNulo: true));
+                    t.HasCheckConstraint("CK_PrescripcionEjercicio_Grupo", GuardaEnums.CondicionTexto<GrupoMuscularPiernas>("grupo", admiteNulo: true));
+                    t.HasCheckConstraint("CK_PrescripcionEjercicio_TempoExcentricoSeg",
+                        "tempo_excentrico_seg IS NULL OR (tempo_excentrico_seg >= 1 AND tempo_excentrico_seg <= 10)");
+                    t.HasCheckConstraint("CK_PrescripcionEjercicio_CargaSugeridaKg", "carga_sugerida_kg IS NULL OR carga_sugerida_kg >= 0");
+                });
+            });
+
+            modelBuilder.Entity<SesionEjercicio>()
+                .HasOne(se => se.PrescripcionEjercicio)
+                .WithMany()
+                .HasForeignKey(se => se.PrescripcionEjercicioId)
+                .OnDelete(DeleteBehavior.Restrict);
         }
 
         /// <summary>

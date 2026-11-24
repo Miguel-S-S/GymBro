@@ -1,6 +1,6 @@
 # Etapa 7d — Protocolo de piernas: generación determinista, trazabilidad y KPIs (texto para el informe y registro de decisiones)
 
-**Fecha:** 24/11/2026. **Rama de trabajo:** `etapa7d`, creada desde `main` en `c29890f`. **Commits:** código, migración, pruebas, evidencia y este informe en un único commit local de la rama `etapa7d`, autorizado por el autor el 24/11/2026 (sin push). La evidencia final se generó sobre el árbol de trabajo con esos mismos cambios, inmediatamente antes del commit.
+**Fecha:** 24/11/2026. **Rama de trabajo:** `etapa7d`, creada desde `main` en `c29890f`. **Commits:** `0cdbe67` (código, migración, pruebas, evidencia e informe) y un segundo commit de cierre documental (solo `docs/`). La rama `etapa7d` está en GitHub (`origin/etapa7d`); todavía no hay pull request a `main`, que abre el autor desde el navegador. Los registros de build y pruebas (`etapa7d-dotnet-*.txt`, `etapa7d-ng-*.txt`) se regeneraron sobre `0cdbe67` con el árbol limpio.
 **Especificación:** v3 del 23/11/2026 (Claude Web), con P1, P2 y P3 confirmadas por el autor el 24/11/2026 antes de empezar.
 **Evidencia:** `docs/pfc/evidencia/`:
 - `etapa7d-base-*.txt`: línea base sobre `main` (`c29890f`) antes de cualquier cambio: build sin advertencias; 250 + 406 pruebas .NET; 204 pruebas del cliente; `ng build` correcto.
@@ -74,7 +74,7 @@ Criterio común: sesión efectiva = al menos una serie sin calentamiento; solo c
 
 ## Texto propuesto para 4.6 (verificación)
 
-**Estado: Implementado y verificado con pruebas automáticas.** Cifras de `etapa7d-dotnet-test.txt` y `etapa7d-ng-test.txt`: GymBro.Tests 342 pruebas (250 anteriores + 92 nuevas), GymBro.Tests.Integration 468 (406 anteriores + 62 nuevas), cliente 211 (204 + 7), todas en verde; build .NET con 0 advertencias y `ng build` correcto. Ninguna prueba existente se modificó: en `MatrizAutorizacionTests`, `EnumsNoDefinidosTests` y `ConfiguracionEjemploTests` solo se agregaron casos.
+**Estado: Implementado y verificado con pruebas automáticas.** Cifras de `etapa7d-dotnet-test.txt` y `etapa7d-ng-test.txt`: GymBro.Tests 342 pruebas (250 anteriores + 92 nuevas), GymBro.Tests.Integration 468 (406 anteriores + 62 nuevas), cliente 211 (204 + 7), todas en verde; `ng build` correcto. El build .NET no tiene advertencias nuevas. El registro sobre árbol limpio muestra 1 advertencia, `CS2008`: la da el proyecto contenedor `GymBro.IA`, que no tiene código C#, cada vez que se recompila desde cero. Es anterior a la etapa y figura también en la evidencia de build de 10a, 9a-2c, 9a-2b, 9a-1, 8c y 8b. Ninguna prueba existente se modificó: en `MatrizAutorizacionTests`, `EnumsNoDefinidosTests` y `ConfiguracionEjemploTests` solo se agregaron casos.
 
 - **Planificador (unitarias):** determinismo (dos corridas idénticas e independencia del orden de entrada); rotación en las generaciones 1 a 6 con 1, 2 y 3 candidatos; las 9 combinaciones de limitación de rodilla y lumbar (ningún ejercicio excluido se prescribe y todas las exclusiones quedan en el motivo; rodilla Alta ⇒ error que nombra Cuádriceps); exclusión por equipamiento; omisión de referencia sin sustitución; edad ≥ 40 y limitación moderada (tempo 4, descanso 180); alerta (−30 %, piso 2, 4 → 3); RIR nunca 0 aun con configuración 0; Principiante con RIR ≥ 2; tope de 18 series; grupo faltante ⇒ error; las tres vías de la carga sugerida, más segundos y cargas no uniformes.
 - **Servicio (dobles):** consentimiento, medición, pendiente de revisión, socio inexistente; número de generación = máximo + 1 aunque la anterior se haya rechazado; copia del origen de datos; snapshot y observaciones sin nombre, email, DNI ni condición médica; violación de R-LIM ⇒ no persiste ni audita; auditoría `GENERACION_PIERNAS`; huella de la configuración.
@@ -114,7 +114,7 @@ Criterio común: sesión efectiva = al menos una serie sin calentamiento; solo c
 | # | Decisión | Motivo |
 |---|---|---|
 | T1 | Se declara en el modelo el índice existente `ix_prescripciones_entrenamiento_socio_id` | EF quería eliminarlo por considerarlo cubierto por el índice nuevo, pero el nuevo es parcial (`protocolo_codigo IS NOT NULL`) y no cubre las demás filas. Así el Up queda sin `DROP` |
-| T2 | El máximo de `numero_generacion` se toma por socio y **código** de protocolo (la especificación dice "socio y versión") | Coincide con el índice único `(socio_id, protocolo_codigo, numero_generacion)`; con "versión" un cambio de versión reiniciaría el número y chocaría con el índice. Incluye rutinas dadas de baja |
+| T2 | El máximo de `numero_generacion` se toma por socio y **código** de protocolo (la especificación dice "socio y versión") | Coincide con el índice único `(socio_id, protocolo_codigo, numero_generacion)`; con "versión" un cambio de versión reiniciaría el número y chocaría con el índice. Incluye rutinas dadas de baja. La especificación v3 queda enmendada en este punto (revisión de Claude Web del 24/11/2026): el máximo es por código de protocolo |
 | T3 | Reducción por alerta: `min(series, max(piso, round(series × 0,7)))` | Con los valores por defecto da lo mismo que la fórmula de la especificación; solo evita que una configuración con menos de 2 series base termine **subiendo** las series |
 | T4 | Las referencias se identifican por `(grupo, rol Referencia, orden_rotacion)` y no por UUID en la configuración | Evita escribir UUID de la base del autor en `appsettings` |
 | T5 | El `GET api/Socio/{id}/prescripciones` lo sirve `PrescripcionPiernasService.ListarDeSocioAsync` | No se podía tocar `PrescripcionBaselineService`; la consulta y el mapeo son los mismos más los campos aditivos. `ListarDeSocioAsync` del baseline queda intacto y probado |
@@ -139,20 +139,37 @@ Criterio común: sesión efectiva = al menos una serie sin calentamiento; solo c
 9. **Listado de rutinas pendientes de revisión:** `RevisionPrescripcionService` solo admitía el cambio de 6.4, así que la pantalla de revisión no muestra todavía rol, tempo ni carga sugerida (sí el historial del socio).
 10. **Socios de demostración** (`DemoSeeder`, no modificado) quedan con origen `Real`.
 
+## Revisión de Claude Web (24/11/2026)
+
+**Veredicto:** conforme con la especificación v3 en todo lo revisado. Ningún hallazgo exige cambiar código. Antes de integrar a `main` quedan tres condiciones: la prueba manual en pantalla, corregir el informe y completar la evidencia del catálogo, y decidir el paso 3 de la clasificación de socios. Claude Web no compiló ni ejecutó pruebas: las cifras son las de los registros de Claude Code.
+
+**Alcance:** Claude Web no revisó línea por línea `KpisProgresion.cs`, `LimitacionesArticularesService`, el `Designer` y el snapshot de la migración, ni el contenido de las pruebas nuevas. CA6 queda verificado en la base real solo en su estructura, porque todavía no se generó ninguna rutina con el protocolo. CA11 queda parcial hasta este cierre.
+
+| # | Severidad | Hallazgo | Estado tras el cierre documental |
+|---|---|---|---|
+| M1 | Media | Informe desactualizado (decía "sin push" y presentaba los 14 socios como una diferencia sin explicar) | Resuelto: encabezado, pendiente 2 y pendiente 10 corregidos |
+| M2 | Media | Faltaban `corregir-catalogo-piernas.sql` y `etapa7d-catalogo-antes.txt` | Script copiado al repositorio. Evidencia "antes": ver pendiente 3 |
+| M3 | Media | Sin prueba manual en pantalla; CA6 verificado solo en estructura | Abierto (pendiente 4). La lista de pasos y resultados esperados está en la sección 5 de la revisión |
+| M4 | Media | Paso 3 de la clasificación sin decidir | Abierto (pendiente 2). Recomendación: `ValidacionFuncional` para las cuentas de prueba confirmadas, nunca `Sintetico` |
+| L1 | Baja | La pantalla de revisión no muestra rol, tempo ni carga sugerida | Aceptado como limitación (desvío 9); se resuelve en la 7c |
+| L2 | Baja | Dos generaciones simultáneas: la segunda falla con 500 | Aceptado (desvío 7). Mejora futura: responder 409 con un mensaje claro |
+| L3 | Baja | Registros de build y pruebas generados antes del commit | Resuelto: regenerados sobre `0cdbe67` con el árbol limpio. Mismas cifras: 342, 468 y 211 |
+| L4 | Baja | T2 cambia el texto de la especificación | Resuelto: aceptada; la v3 queda enmendada (ver T2) |
+
 ## Pendientes
 
 | # | Pendiente | Responsable |
 |---|---|---|
 | 1 | ~~Aplicar la migración en `gymbro-db`~~ Hecho por el autor el 24/11/2026; siembra verificada (`etapa7d-siembra-verificacion.txt`) | Autor |
-| 2 | ~~Ejecutar el paso 2 de `clasificar-origen-datos.sql`~~ Hecho por el autor el 24/11/2026. El perfil de validación quedó en `ValidacionFuncional`; los 747 socios restantes, en `DatasetExterno`; las 12 prescripciones anteriores, en `DatasetExterno`, porque el origen se copia solo al generar. Ver `etapa7d-origen-datos-verificacion.txt`. Se ejecutó el `UPDATE` directo porque la primera corrida conservaba el texto `REEMPLAZAR_POR_TU_ID` y no cambió nada; ese `UPDATE` no actualiza `fecha_modificacion`. El paso 3 (marcar socios `Sintetico`) **no** se ejecutó: hoy hay 14 socios sin la firma del dataset (el Paso 0b indicaba 13) y su naturaleza está sin confirmar | Autor |
-| 3 | Copiar al repositorio `docs/pfc/scripts/corregir-catalogo-piernas.sql` (ya ejecutado, pero su texto no llegó a Claude Code) y aportar `etapa7d-catalogo-antes.txt` | Autor / Claude Web |
+| 2 | ~~Ejecutar el paso 2 de `clasificar-origen-datos.sql`~~ Hecho por el autor el 24/11/2026. El perfil de validación quedó en `ValidacionFuncional`; los 747 socios restantes, en `DatasetExterno`; las 12 prescripciones anteriores, en `DatasetExterno`, porque el origen se copia solo al generar. Ver `etapa7d-origen-datos-verificacion.txt`. Se ejecutó el `UPDATE` directo porque la primera corrida conservaba el texto `REEMPLAZAR_POR_TU_ID` y no cambió nada; ese `UPDATE` no actualiza `fecha_modificacion`. Hoy hay 14 socios activos sin la firma del dataset: son los 13 del Paso 0b más el socio de validación, dado de alta el 24/11/2026 (verificado por `fecha_alta`, con una lectura). El paso 3 sigue sin ejecutar, a la espera de la decisión del autor. Claude Web recomienda `ValidacionFuncional` para las cuentas de prueba confirmadas, nunca `Sintetico` | Autor |
+| 3 | Script: **resuelto**, `docs/pfc/scripts/corregir-catalogo-piernas.sql` copiado tal cual del archivo del autor (sin ejecutarlo). Evidencia "antes" (`etapa7d-catalogo-antes.txt`): **abierta**. Tiene que ser la salida literal de B12 del Paso 0b (23/11/2026), que no está guardada en el repositorio ni en la sesión de ese paso, y no se puede regenerar porque la base ya está corregida | Autor / Claude Web |
 | 4 | Prueba manual en pantalla (tarjeta de piernas, limitaciones y tarjeta de ejercicio) con el perfil de validación | Autor |
 | 5 | Revisión de parámetros y contraindicaciones por la Personal Trainer; incluye la consecuencia del desvío 3 | Autor |
 | 6 | Literatura revisada por pares para volumen, tempo excéntrico y proximidad al fallo | Claude Web |
 | 7 | Protocolo del estudio piloto v0.3 | Claude Web |
 | 8 | Etapa 7e (datos sintéticos, regla de una generación por semana, validar edad: hay dos socios con 96 años) | Claude Web |
 | 9 | Etapa 7c (armado y edición de ejercicios, regla A3) y pantallas de KPIs (Etapa 12) | Claude Web |
-| 10 | Revisión de Claude Web, push e integración a `main` (sin autorización todavía) | Autor |
+| 10 | La rama está en `origin/etapa7d`. La integración a `main` está pendiente de la revisión de Claude Web y de la prueba manual (pendiente 4); el pull request lo abre el autor desde el navegador | Autor / Claude Web |
 
 ## Trazabilidad objetivo → requisito → componente → prueba → evidencia
 

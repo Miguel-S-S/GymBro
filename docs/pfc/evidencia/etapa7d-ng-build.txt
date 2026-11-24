@@ -1,7 +1,7 @@
-﻿Etapa 7d - build y pruebas con los cambios de la etapa
+﻿Etapa 7d - build y pruebas sobre el commit 0cdbe67 (cierre documental)
 Comando: npx ng build
-Commit: c29890f425b3420ab115486bdd98d753e0542c84 (rama etapa7d sobre c29890f; cambios de la etapa sin commit (no autorizado todavia))
-Fecha: 2026-11-24 10:53:20 -03:00
+Commit: 0cdbe671ab8ac4efe86e70bfed02911c6309f2b3 (rama etapa7d = origin/etapa7d; arbol limpio: git status sin cambios en archivos rastreados al iniciar la corrida)
+Fecha: 2026-11-24 11:39:13 -03:00
 Codigo de salida: 0
 ------------------------------------------------------------
 > Building...
@@ -31,7 +31,7 @@ chunk-CUbvyjnA.js   | -                   |  12.05 kB |                 2.56 kB
 chunk-mHmSScyM.js   | equipamiento        |  11.39 kB |                 3.58 kB
 ...and 33 more lazy chunks files. Use "--verbose" to show all the files.
 
-Application bundle generation complete. [4.301 seconds] - 2026-11-24T13:53:27.162Z
+Application bundle generation complete. [6.801 seconds] - 2026-11-24T14:39:24.777Z
 
 Output location: C:\Users\miguel\source\repos\GymBro\GymBro.Web\dist\gymbro-web
 

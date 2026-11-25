@@ -155,8 +155,8 @@ namespace GymBro.Tests.Integration
 
             var lista = await dueno1.GetFromJsonAsync<List<Cuota>>("/api/cuotas?anio=2030&mes=1");
             Assert.Equal(new[] { _e.SocioA.Id, _e.SocioB.Id }.OrderBy(x => x), lista!.Select(c => c.SocioId).OrderBy(x => x));
-            Assert.All(lista, c => Assert.Equal(15000.50m, c.Monto));
-            Assert.DoesNotContain(lista, c => c.SocioId == _e.SocioI.Id);
+            Assert.All(lista!, c => Assert.Equal(15000.50m, c.Monto));
+            Assert.DoesNotContain(lista!, c => c.SocioId == _e.SocioI.Id);
         }
 
         [Fact]
@@ -172,7 +172,7 @@ namespace GymBro.Tests.Integration
             var junio = morosos!.Where(c => c.Anio == 2029 && c.Mes == 6).ToList();
             Assert.Equal(2, junio.Count);
             Assert.All(junio, c => { Assert.True(c.Vencida); Assert.Equal("Pendiente", c.Estado); Assert.Equal(1, c.DiasVencida); });
-            Assert.DoesNotContain(morosos, c => c.Anio == 2029 && c.Mes == 7);
+            Assert.DoesNotContain(morosos!, c => c.Anio == 2029 && c.Mes == 7);
 
             var deA = junio.Single(c => c.SocioId == _e.SocioA.Id);
             var pago = await dueno1.PutAsJsonAsync($"/api/cuotas/{deA.Id}/pago", new { });

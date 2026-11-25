@@ -1,0 +1,145 @@
+﻿Etapa 11 - SQL de la migracion Etapa11_AsistenciaYCuotas (dotnet ef migrations script --idempotent, sin conexion a ninguna base)
+Commit: 468872db49e179e79cf3a64f326244f03617a302 (rama cierre-pfc)
+Fecha: 2026-11-25 18:13:31 -03:00
+Codigos de salida: Up=0 Down=0
+Base local gymbro-db: NO se aplico desde Claude Code. Se aplica al levantar GymBro.Api (Program.cs: MigrateAsync); la aplicacion la confirma el desarrollador.
+Verificacion de Up y Down contra PostgreSQL descartable: AsistenciaCuotasTests.La_migracion_tiene_Down_y_Up_reversibles (ver etapa11-dotnet-test.txt).
+============================== UP ==============================
+START TRANSACTION;
+
+DO $EF$
+BEGIN
+    IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "migration_id" = '20261125210310_Etapa11_AsistenciaYCuotas') THEN
+    CREATE TABLE asistencias (
+        id uuid NOT NULL,
+        socio_id uuid NOT NULL,
+        gimnasio_id uuid NOT NULL,
+        instante timestamp with time zone NOT NULL,
+        fecha date NOT NULL,
+        metodo character varying(20) NOT NULL,
+        registrado_por_usuario_id uuid NOT NULL,
+        origen_datos character varying(30) NOT NULL,
+        fecha_alta timestamp with time zone NOT NULL,
+        usuario_alta integer NOT NULL,
+        fecha_modificacion timestamp with time zone,
+        usuario_modificacion integer,
+        fecha_baja timestamp with time zone,
+        usuario_baja integer,
+        CONSTRAINT pk_asistencias PRIMARY KEY (id),
+        CONSTRAINT "CK_Asistencia_Metodo" CHECK (metodo IN ('Qr', 'Manual')),
+        CONSTRAINT "CK_Asistencia_OrigenDatos" CHECK (origen_datos IN ('Sintetico', 'ValidacionFuncional', 'DatasetExterno', 'Real')),
+        CONSTRAINT fk_asistencias_gimnasios_gimnasio_id FOREIGN KEY (gimnasio_id) REFERENCES gimnasios (id) ON DELETE RESTRICT,
+        CONSTRAINT fk_asistencias_socios_socio_id FOREIGN KEY (socio_id) REFERENCES socios (id) ON DELETE RESTRICT,
+        CONSTRAINT fk_asistencias_usuarios_registrado_por_usuario_id FOREIGN KEY (registrado_por_usuario_id) REFERENCES usuarios (id) ON DELETE RESTRICT
+    );
+    END IF;
+END $EF$;
+
+DO $EF$
+BEGIN
+    IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "migration_id" = '20261125210310_Etapa11_AsistenciaYCuotas') THEN
+    CREATE TABLE cuotas_socio (
+        id uuid NOT NULL,
+        socio_id uuid NOT NULL,
+        gimnasio_id uuid NOT NULL,
+        anio integer NOT NULL,
+        mes integer NOT NULL,
+        monto numeric(10,2) NOT NULL,
+        vencimiento date NOT NULL,
+        fecha_pago date,
+        estado character varying(20) NOT NULL,
+        origen_datos character varying(30) NOT NULL,
+        fecha_alta timestamp with time zone NOT NULL,
+        usuario_alta integer NOT NULL,
+        fecha_modificacion timestamp with time zone,
+        usuario_modificacion integer,
+        fecha_baja timestamp with time zone,
+        usuario_baja integer,
+        CONSTRAINT pk_cuotas_socio PRIMARY KEY (id),
+        CONSTRAINT "CK_CuotaSocio_Estado" CHECK (estado IN ('Pendiente', 'Pagada')),
+        CONSTRAINT "CK_CuotaSocio_Monto" CHECK (monto > 0),
+        CONSTRAINT "CK_CuotaSocio_OrigenDatos" CHECK (origen_datos IN ('Sintetico', 'ValidacionFuncional', 'DatasetExterno', 'Real')),
+        CONSTRAINT "CK_CuotaSocio_Pago" CHECK ((estado = 'Pagada' AND fecha_pago IS NOT NULL) OR (estado = 'Pendiente' AND fecha_pago IS NULL)),
+        CONSTRAINT "CK_CuotaSocio_Periodo" CHECK (anio >= 2000 AND anio <= 2100 AND mes >= 1 AND mes <= 12),
+        CONSTRAINT fk_cuotas_socio_gimnasios_gimnasio_id FOREIGN KEY (gimnasio_id) REFERENCES gimnasios (id) ON DELETE RESTRICT,
+        CONSTRAINT fk_cuotas_socio_socios_socio_id FOREIGN KEY (socio_id) REFERENCES socios (id) ON DELETE RESTRICT
+    );
+    END IF;
+END $EF$;
+
+DO $EF$
+BEGIN
+    IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "migration_id" = '20261125210310_Etapa11_AsistenciaYCuotas') THEN
+    CREATE INDEX ix_asistencias_gimnasio_id_fecha ON asistencias (gimnasio_id, fecha);
+    END IF;
+END $EF$;
+
+DO $EF$
+BEGIN
+    IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "migration_id" = '20261125210310_Etapa11_AsistenciaYCuotas') THEN
+    CREATE INDEX ix_asistencias_registrado_por_usuario_id ON asistencias (registrado_por_usuario_id);
+    END IF;
+END $EF$;
+
+DO $EF$
+BEGIN
+    IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "migration_id" = '20261125210310_Etapa11_AsistenciaYCuotas') THEN
+    CREATE UNIQUE INDEX ix_asistencias_socio_id_fecha ON asistencias (socio_id, fecha) WHERE fecha_baja IS NULL;
+    END IF;
+END $EF$;
+
+DO $EF$
+BEGIN
+    IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "migration_id" = '20261125210310_Etapa11_AsistenciaYCuotas') THEN
+    CREATE INDEX ix_cuotas_socio_gimnasio_id_anio_mes ON cuotas_socio (gimnasio_id, anio, mes);
+    END IF;
+END $EF$;
+
+DO $EF$
+BEGIN
+    IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "migration_id" = '20261125210310_Etapa11_AsistenciaYCuotas') THEN
+    CREATE INDEX ix_cuotas_socio_gimnasio_id_estado_vencimiento ON cuotas_socio (gimnasio_id, estado, vencimiento);
+    END IF;
+END $EF$;
+
+DO $EF$
+BEGIN
+    IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "migration_id" = '20261125210310_Etapa11_AsistenciaYCuotas') THEN
+    CREATE UNIQUE INDEX ix_cuotas_socio_socio_id_anio_mes ON cuotas_socio (socio_id, anio, mes) WHERE fecha_baja IS NULL;
+    END IF;
+END $EF$;
+
+DO $EF$
+BEGIN
+    IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "migration_id" = '20261125210310_Etapa11_AsistenciaYCuotas') THEN
+    INSERT INTO "__EFMigrationsHistory" (migration_id, product_version)
+    VALUES ('20261125210310_Etapa11_AsistenciaYCuotas', '10.0.11');
+    END IF;
+END $EF$;
+COMMIT;
+
+
+============================== DOWN ==============================
+START TRANSACTION;
+DO $EF$
+BEGIN
+    IF EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "migration_id" = '20261125210310_Etapa11_AsistenciaYCuotas') THEN
+    DROP TABLE asistencias;
+    END IF;
+END $EF$;
+DO $EF$
+BEGIN
+    IF EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "migration_id" = '20261125210310_Etapa11_AsistenciaYCuotas') THEN
+    DROP TABLE cuotas_socio;
+    END IF;
+END $EF$;
+DO $EF$
+BEGIN
+    IF EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "migration_id" = '20261125210310_Etapa11_AsistenciaYCuotas') THEN
+    DELETE FROM "__EFMigrationsHistory"
+    WHERE migration_id = '20261125210310_Etapa11_AsistenciaYCuotas';
+    END IF;
+END $EF$;
+COMMIT;
+
+

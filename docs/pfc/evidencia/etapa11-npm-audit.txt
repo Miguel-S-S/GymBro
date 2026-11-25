@@ -1,0 +1,8 @@
+﻿Etapa 11 - auditoria de dependencias de produccion del cliente tras agregar qrcode-generator@2.0.4
+Comando: npm audit --omit=dev --audit-level=low (script audit:prod de package.json)
+Commit: 468872db49e179e79cf3a64f326244f03617a302
+Fecha: 2026-11-25 18:13:41 -03:00
+Codigo de salida: 0
+------------------------------------------------------------
+found 0 vulnerabilities
+

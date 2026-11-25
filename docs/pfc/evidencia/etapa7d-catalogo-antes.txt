@@ -1,0 +1,23 @@
+Etapa 7d - estado del catalogo de piernas ANTES de ejecutar corregir-catalogo-piernas.sql
+Origen: consulta B12 del Paso 0b (23/11/2026), ejecutada por Claude Code en una transaccion BEGIN READ ONLY sobre gymbro_db (sin escritura).
+Nota: esta salida fue transcrita por Claude Web desde el informe del Paso 0b que pego el autor; el archivo original de la corrida quedo en la maquina del autor, no en el repositorio.
+Lectura: la Prensa de piernas 45 grados figura con origen = Gimnasio, gimnasio_id = f8667ba5-... y tipo MAQUINA_ASISTIDA; la Sentadilla Hack, con tipo MAQUINA_OTRA; los otros 8, con origen = Dataset. Despues de la correccion: ver etapa7d-catalogo-despues.txt.
+------------------------------------------------------------
+SELECT e.id, e.nombre, e.equipamiento, e.tipo_equipamiento_id, te.clave AS tipo_clave,
+       e.origen, e.gimnasio_id, e.creado_por_usuario_id IS NOT NULL AS creado_por_usuario
+FROM ejercicios e LEFT JOIN tipos_equipamiento te ON te.id = e.tipo_equipamiento_id
+WHERE e.id IN (los 10 ids del protocolo);
+------------------------------------------------------------
+                  id                  |               nombre               |       equipamiento       |         tipo_equipamiento_id         |      tipo_clave       |  origen  |             gimnasio_id              | creado_por_usuario
+--------------------------------------+------------------------------------+--------------------------+--------------------------------------+-----------------------+----------+--------------------------------------+--------------------
+ 2e9d6c61-6be0-4f4a-8f1b-348869e07a65 | Curl femoral acostado en camilla   | Máquina selectorizada    | caac69ff-cc79-4696-9c9f-e50b07c55ab1 | MAQUINA_SELECTORIZADA | Dataset  |                                      | f
+ 14a284c5-5159-4bdb-83f7-733154e07228 | Curl femoral sentado en máquina    | Máquina selectorizada    | caac69ff-cc79-4696-9c9f-e50b07c55ab1 | MAQUINA_SELECTORIZADA | Dataset  |                                      | f
+ bca285fb-60ee-40a7-bdc9-771b201365a1 | Elevación de talones de pie        | Máquina selectorizada    | caac69ff-cc79-4696-9c9f-e50b07c55ab1 | MAQUINA_SELECTORIZADA | Dataset  |                                      | f
+ 608e091b-1ddb-4a05-abb7-c0c03e48eee6 | Elevación de talones sentado       | Máquina selectorizada    | caac69ff-cc79-4696-9c9f-e50b07c55ab1 | MAQUINA_SELECTORIZADA | Dataset  |                                      | f
+ 15a5f846-25f5-48a5-a570-264c2b894462 | Extensión de cuádriceps en camilla | Máquina selectorizada    | caac69ff-cc79-4696-9c9f-e50b07c55ab1 | MAQUINA_SELECTORIZADA | Dataset  |                                      | f
+ a33d764a-d3f2-437e-a527-38e877fdba0f | Peso muerto rumano con barra       | Barra olímpica           | f074c56b-b849-4c46-ba64-a820830c47a4 | BARRA                 | Dataset  |                                      | f
+ 69e15aaf-ca0d-433b-be03-6b496450b1d2 | Prensa de piernas 45 grados        | Máquina prensa 45 grados | b81c5672-8f7b-459f-b65a-e628fa77dbe6 | MAQUINA_ASISTIDA      | Gimnasio | f8667ba5-e022-45b0-8981-8b715c189e30 | f
+ 1537a321-40ab-4a60-b3b8-e73cab167c28 | Sentadilla frontal con barra       | Barra olímpica           | f074c56b-b849-4c46-ba64-a820830c47a4 | BARRA                 | Dataset  |                                      | f
+ c7499d5c-48c5-4d16-a691-54a96079ca49 | Sentadilla Hack en máquina         | Máquina Hack (trineo)    | 24925b08-8e4f-449c-b88b-e0d8d252a67f | MAQUINA_OTRA          | Dataset  |                                      | f
+ 3203840d-5a79-4c84-9758-b40238f7c85f | Sentadilla trasera con barra libre | Barra olímpica           | f074c56b-b849-4c46-ba64-a820830c47a4 | BARRA                 | Dataset  |                                      | f
+(10 rows)

@@ -1,0 +1,22 @@
+Etapa 9b-1 - conteo de ejercicios con y sin embedding (consulta de solo lectura, BEGIN READ ONLY)
+Base: gymbro-db (contenedor local, puerto 5433, base gymbro_db); credenciales tomadas del entorno del contenedor, no se registran
+Commit del repositorio: c29890f425b3420ab115486bdd98d753e0542c84 (rama etapa9b1 recien creada desde main)
+Fecha: 2026-11-19 18:50:26 -0300
+Consulta: BEGIN READ ONLY; SELECT origen, (gimnasio_id IS NULL) AS global, activo, (fecha_baja IS NULL) AS sin_baja, COUNT(*) AS total, COUNT(embedding) AS con_embedding, COUNT(*) - COUNT(embedding) AS sin_embedding FROM ejercicios GROUP BY 1,2,3,4 ORDER BY 1,2,3,4; SELECT origen, nombre, activo, fecha_alta::date, (embedding IS NULL) AS sin_embedding FROM ejercicios WHERE embedding IS NULL; COMMIT;
+------------------------------------------------------------
+BEGIN
+  origen  | global | activo | sin_baja | total | con_embedding | sin_embedding 
+----------+--------+--------+----------+-------+---------------+---------------
+ Dataset  | t      | f      | t        |     1 |             1 |             0
+ Dataset  | t      | t      | t        |   687 |           687 |             0
+ Gimnasio | f      | t      | t        |     1 |             0 |             1
+ Proyecto | t      | t      | t        |     8 |             8 |             0
+(4 rows)
+
+  origen  |      nombre      | activo | fecha_alta | sin_embedding 
+----------+------------------+--------+------------+---------------
+ Gimnasio | PRENSA DE PIERNA | t      | 2026-11-19 | t
+(1 row)
+
+COMMIT
+Codigo de salida: 0

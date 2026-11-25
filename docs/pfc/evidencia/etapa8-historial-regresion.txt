@@ -1,0 +1,46 @@
+Etapa 8 - correccion de conteos del historial, prueba de regresion sobre el commit 5b9de14
+Prueba: GymBro.Tests.Integration.SesionesAislamientoTests.ListadoDeSesiones_IncluyeEjerciciosYSeriesRegistradas
+Procedimiento: se reemplaza temporalmente GymBro.Infrastructure/Repositories/SesionEntrenamientoRepository.cs por su version del commit c11022b (sin los Include), se corre la prueba, se restaura el archivo y se vuelve a correr.
+Commit: 5b9de14fee1ba98428aec45a40b2aa77659b98ea (rama etapa7d = origin/etapa7d; unico archivo rastreado marcado como modificado: GymBro.Web/angular.json, con git diff vacio (contenido identico al commit))
+Fecha: 2026-11-25 12:47:00 -03:00
+Archivo restaurado al estado del commit: si (git diff vacio)
+Nota: Salida en .tmp-artifacts (--artifacts-path) porque GymBro.Api estaba en ejecucion desde Visual Studio y bloqueaba GymBro.Api/bin; la carpeta se borra al terminar
+============================================================
+1) SIN la correccion (repositorio de c11022b). Comando: dotnet test GymBro.Tests.Integration --artifacts-path .tmp-artifacts --filter "FullyQualifiedName~ListadoDeSesiones_IncluyeEjerciciosYSeriesRegistradas"
+Codigo de salida: 1 (se espera distinto de 0)
+------------------------------------------------------------
+  Determinando los proyectos que se van a restaurar...
+  Todos los proyectos están actualizados para la restauración.
+  GymBro.Domain -> C:\Users\miguel\source\repos\GymBro\.tmp-artifacts\bin\GymBro.Domain\debug\GymBro.Domain.dll
+  GymBro.Application -> C:\Users\miguel\source\repos\GymBro\.tmp-artifacts\bin\GymBro.Application\debug\GymBro.Application.dll
+  GymBro.Infrastructure -> C:\Users\miguel\source\repos\GymBro\.tmp-artifacts\bin\GymBro.Infrastructure\debug\GymBro.Infrastructure.dll
+  GymBro.Api -> C:\Users\miguel\source\repos\GymBro\.tmp-artifacts\bin\GymBro.Api\debug\GymBro.Api.dll
+  GymBro.Tests.Integration -> C:\Users\miguel\source\repos\GymBro\.tmp-artifacts\bin\GymBro.Tests.Integration\debug\GymBro.Tests.Integration.dll
+Serie de pruebas para C:\Users\miguel\source\repos\GymBro\.tmp-artifacts\bin\GymBro.Tests.Integration\debug\GymBro.Tests.Integration.dll (.NETCoreApp,Version=v10.0)
+1 archivos de prueba en total coincidieron con el patrón especificado.
+[xUnit.net 00:00:11.27]     GymBro.Tests.Integration.SesionesAislamientoTests.ListadoDeSesiones_IncluyeEjerciciosYSeriesRegistradas [FAIL]
+  Con error GymBro.Tests.Integration.SesionesAislamientoTests.ListadoDeSesiones_IncluyeEjerciciosYSeriesRegistradas [956 ms]
+  Mensaje de error:
+   Assert.Equal() Failure: Values differ
+Expected: 2
+Actual:   0
+  Seguimiento de la pila:
+     at GymBro.Tests.Integration.SesionesAislamientoTests.ListadoDeSesiones_IncluyeEjerciciosYSeriesRegistradas() in C:\Users\miguel\source\repos\GymBro\GymBro.Tests.Integration\SesionesAislamientoTests.cs:line 166
+--- End of stack trace from previous location ---
+
+Con error! - Con error:     1, Superado:     0, Omitido:     0, Total:     1, Duración: 1 s - GymBro.Tests.Integration.dll (net10.0)
+============================================================
+2) CON la correccion (commit 5b9de14). Mismo comando.
+Codigo de salida: 0 (se espera 0)
+------------------------------------------------------------
+  Determinando los proyectos que se van a restaurar...
+  Todos los proyectos están actualizados para la restauración.
+  GymBro.Domain -> C:\Users\miguel\source\repos\GymBro\.tmp-artifacts\bin\GymBro.Domain\debug\GymBro.Domain.dll
+  GymBro.Application -> C:\Users\miguel\source\repos\GymBro\.tmp-artifacts\bin\GymBro.Application\debug\GymBro.Application.dll
+  GymBro.Infrastructure -> C:\Users\miguel\source\repos\GymBro\.tmp-artifacts\bin\GymBro.Infrastructure\debug\GymBro.Infrastructure.dll
+  GymBro.Api -> C:\Users\miguel\source\repos\GymBro\.tmp-artifacts\bin\GymBro.Api\debug\GymBro.Api.dll
+  GymBro.Tests.Integration -> C:\Users\miguel\source\repos\GymBro\.tmp-artifacts\bin\GymBro.Tests.Integration\debug\GymBro.Tests.Integration.dll
+Serie de pruebas para C:\Users\miguel\source\repos\GymBro\.tmp-artifacts\bin\GymBro.Tests.Integration\debug\GymBro.Tests.Integration.dll (.NETCoreApp,Version=v10.0)
+1 archivos de prueba en total coincidieron con el patrón especificado.
+
+Correctas! - Con error:     0, Superado:     1, Omitido:     0, Total:     1, Duración: 1 s - GymBro.Tests.Integration.dll (net10.0)

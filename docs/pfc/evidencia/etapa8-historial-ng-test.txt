@@ -1,0 +1,19 @@
+Etapa 8 - correccion de conteos del historial, build y pruebas sobre el commit 5b9de14
+Comando: npx ng test --watch=false
+Commit: 5b9de14fee1ba98428aec45a40b2aa77659b98ea (rama etapa7d = origin/etapa7d; unico archivo rastreado marcado como modificado: GymBro.Web/angular.json, con git diff vacio (contenido identico al commit))
+Fecha: 2026-11-25 12:47:38 -03:00
+Codigo de salida: 0
+------------------------------------------------------------
+❯ Building...
+✔ Building...
+Application bundle generation complete. [7.359 seconds] - 2026-11-25T15:47:25.556Z
+
+
+ RUN  v5.1.0 C:/Users/miguel/source/repos/GymBro/GymBro.Web
+
+
+ Test Files  33 passed (33)
+      Tests  212 passed (212)
+   Start at  12:47:26
+   Duration  12.40s (environment 71%, tests 13%, import 7%, setup 6%, transform 3%)
+

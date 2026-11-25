@@ -1,0 +1,15 @@
+Etapa 8 - correccion de conteos del historial, build y pruebas sobre el commit 5b9de14
+Comando: dotnet test GymBro.slnx --artifacts-path .tmp-artifacts --no-build
+Commit: 5b9de14fee1ba98428aec45a40b2aa77659b98ea (rama etapa7d = origin/etapa7d; unico archivo rastreado marcado como modificado: GymBro.Web/angular.json, con git diff vacio (contenido identico al commit))
+Fecha: 2026-11-25 12:46:18 -03:00
+Codigo de salida: 0
+Nota: Salida en .tmp-artifacts (--artifacts-path) porque GymBro.Api estaba en ejecucion desde Visual Studio y bloqueaba GymBro.Api/bin; la carpeta se borra al terminar
+------------------------------------------------------------
+Serie de pruebas para C:\Users\miguel\source\repos\GymBro\.tmp-artifacts\bin\GymBro.Tests\debug\GymBro.Tests.dll (.NETCoreApp,Version=v10.0)
+Serie de pruebas para C:\Users\miguel\source\repos\GymBro\.tmp-artifacts\bin\GymBro.Tests.Integration\debug\GymBro.Tests.Integration.dll (.NETCoreApp,Version=v10.0)
+1 archivos de prueba en total coincidieron con el patrón especificado.
+1 archivos de prueba en total coincidieron con el patrón especificado.
+
+Correctas! - Con error:     0, Superado:   342, Omitido:     0, Total:   342, Duración: 683 ms - GymBro.Tests.dll (net10.0)
+
+Correctas! - Con error:     0, Superado:   469, Omitido:     0, Total:   469, Duración: 37 s - GymBro.Tests.Integration.dll (net10.0)

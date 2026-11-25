@@ -12,11 +12,12 @@ import { AjusteEjercicio, DecisionRevision, RutinaEjercicio, RutinaPendiente } f
 import { mensajeDeError } from '../../core/util/api-error';
 import { RutinaEjercicioCard } from '../rutinas/rutina-ejercicio-card';
 import { AdvertenciasLimites } from './advertencias-limites';
+import { SustitutosPanel } from './sustitutos-panel';
 
 /** Dueño y Personal Trainer: aprueban, editan o rechazan las rutinas generadas por la IA. */
 @Component({
   selector: 'app-revisiones-pendientes',
-  imports: [DatePipe, FormsModule, MatButtonModule, MatFormFieldModule, MatIconModule, MatInputModule, MatProgressBarModule, RutinaEjercicioCard, AdvertenciasLimites],
+  imports: [DatePipe, FormsModule, MatButtonModule, MatFormFieldModule, MatIconModule, MatInputModule, MatProgressBarModule, RutinaEjercicioCard, AdvertenciasLimites, SustitutosPanel],
   template: `
     <div class="encabezado">
       <div><h1>Rutinas para revisar</h1><p class="subtitulo">{{ rutinas().length }} pendientes</p></div>
@@ -39,6 +40,10 @@ import { AdvertenciasLimites } from './advertencias-limites';
 
           @for (e of r.ejercicios; track e.id) {
             <app-rutina-ejercicio-card [ejercicio]="e" [editable]="editando() === r.id" />
+            <!-- Etapa 9b-2: sugerencia de sustitutos (no en el protocolo de piernas). -->
+            @if (editando() !== r.id && r.origenGeneracion !== 'PROTOCOLO_PIERNAS_DETERMINISTA') {
+              <app-sustitutos-panel [rutinaId]="r.id" [lineaId]="e.id" />
+            }
           }
 
           <mat-form-field class="comentario">

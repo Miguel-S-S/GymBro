@@ -1,4 +1,5 @@
-﻿using GymBro.Application.DTOs.Acceso;
+﻿using GymBro.Application.DTOs;
+using GymBro.Application.DTOs.Acceso;
 using GymBro.Application.Services;
 using GymBro.Domain.Enums;
 using Microsoft.AspNetCore.Authorization;
@@ -13,7 +14,13 @@ namespace GymBro.Api.Controllers
     public class RevisionesController : ControllerBase
     {
         private readonly IRevisionPrescripcionService _revisiones;
-        public RevisionesController(IRevisionPrescripcionService revisiones) { _revisiones = revisiones; }
+        private readonly ISugerenciaSustitutosService _sustitutos;
+
+        public RevisionesController(IRevisionPrescripcionService revisiones, ISugerenciaSustitutosService sustitutos)
+        {
+            _revisiones = revisiones;
+            _sustitutos = sustitutos;
+        }
 
         [HttpGet("pendientes")]
         public async Task<IActionResult> Pendientes() => Ok(await _revisiones.ListarPendientesAsync());
@@ -21,5 +28,14 @@ namespace GymBro.Api.Controllers
         [HttpPost("{prescripcionId:guid}")]
         public async Task<IActionResult> Revisar(Guid prescripcionId, [FromBody] RevisarRutinaRequest request) =>
 Ok(await _revisiones.RevisarAsync(prescripcionId, request));
+
+        /// <summary>
+        /// Etapa 9b-2 (caso a): sugerencia de sustitutos de una línea de una rutina pendiente de revisión, elegidos por el
+        /// modelo local solo entre los candidatos recuperados y verificados en código. No modifica la rutina ni llega al Socio.
+        /// </summary>
+        [HttpPost("{prescripcionId:guid}/lineas/{lineaId:guid}/sustitutos")]
+        public async Task<ActionResult<SugerenciaSustitutosDto>> SugerirSustitutos(Guid prescripcionId, Guid lineaId,
+            [FromBody] SugerirSustitutosRequest request) =>
+            Ok(await _sustitutos.SugerirAsync(prescripcionId, lineaId, request));
     }
 }

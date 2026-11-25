@@ -24,6 +24,14 @@ builder.Services.AddHttpClient<IIaService, IaService>(client =>
     client.BaseAddress = new Uri(builder.Configuration["Ia:UrlBase"] ?? "http://127.0.0.1:8000");
 });
 
+// Etapa 9b-2: sustitutos con el modelo de lenguaje local (GymBro.IA /sugerir-sustitutos/). La generación puede tardar
+// más que un embedding: tiempo máximo configurable (Ia:TiempoMaximoGeneracionSegundos, 60 por defecto).
+builder.Services.AddHttpClient<IGeneradorSustitutos, GeneradorSustitutosIa>(client =>
+{
+    client.BaseAddress = new Uri(builder.Configuration["Ia:UrlBase"] ?? "http://127.0.0.1:8000");
+    client.Timeout = TimeSpan.FromSeconds(builder.Configuration.GetValue<int?>("Ia:TiempoMaximoGeneracionSegundos") ?? 60);
+});
+
 // Add services to the container.
 builder.Services.AddDbContext<GymBroDbContext>(options =>
     options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection"),
@@ -61,6 +69,7 @@ builder.Services.AddScoped<IGimnasioService, GimnasioService>();
 builder.Services.AddScoped<IPersonalService, PersonalService>();
 builder.Services.AddScoped<IVinculacionService, VinculacionService>();
 builder.Services.AddScoped<IRevisionPrescripcionService, RevisionPrescripcionService>();
+builder.Services.AddScoped<ISugerenciaSustitutosService, SugerenciaSustitutosService>();
 builder.Services.AddSingleton(builder.Configuration.GetSection("Baseline").Get<BaselineConfig>() ?? new BaselineConfig());
 builder.Services.AddScoped<IBaselineRepository, BaselineRepository>();
 builder.Services.AddScoped<IPrescripcionBaselineService, PrescripcionBaselineService>();

@@ -10,7 +10,11 @@ import ollama
 from fastapi import Body, FastAPI, HTTPException
 from pydantic import BaseModel
 
+from sustitutos import router as router_sustitutos
+
 app = FastAPI(title="GymBro AI Microservice")
+# Etapa 9b-2: sustitutos de ejercicios con el modelo de lenguaje local (OLLAMA_MODELO_GENERACION).
+app.include_router(router_sustitutos)
 
 MODELO_EMBEDDINGS = os.environ.get("OLLAMA_MODELO_EMBEDDINGS", "nomic-embed-text")
 

@@ -101,6 +101,10 @@ namespace GymBro.Tests.Integration
             Fila("GET", "/api/revisiones/pendientes", AttrRevisiones,
                 (Anonimo, 401, Fallback), (SuperAdmin, 403, null), (Dueno, 200, null), (Trainer, 200, null), (Socio, 403, null));
             Fila("POST", "/api/revisiones/{X}", AttrRevisiones, (Anonimo, 401, Fallback), (SuperAdmin, 403, null), (Socio, 403, null));
+            // Etapa 9b-2: sugerencia de sustitutos (datos de salud de la rutina: la plataforma no accede).
+            Fila("POST", "/api/revisiones/{X}/lineas/{X}/sustitutos", AttrRevisiones,
+                (Anonimo, 401, Fallback), (SuperAdmin, 403, null), (Socio, 403, null),
+                (Dueno, 400, CuerpoInvalido + " (motivo vacío)"), (Trainer, 400, CuerpoInvalido + " (motivo vacío)"));
 
             // ---- Sesiones ----
             Fila("GET", "/api/Sesiones?socioId={A}", AttrSesiones,

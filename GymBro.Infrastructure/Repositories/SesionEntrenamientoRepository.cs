@@ -35,9 +35,16 @@ namespace GymBro.Infrastructure.Repositories
             return sesion;
         }
 
+        /// <summary>
+        /// Correccion Etapa 8 (conteos del historial): el listado carga ejercicios y series en la misma consulta
+        /// (JOIN por Include), sin una consulta adicional por sesion. Sin estos Include la coleccion quedaba vacia y
+        /// el historial mostraba "0 ejercicios - 0 series". No se incluye Ejercicio (ver EjerciciosDeHistorial).
+        /// </summary>
         public async Task<IEnumerable<SesionEntrenamiento>> GetAllBySocioIdAsync(Guid socioId)
         {
             return await _context.Sesiones
+                .Include(s => s.EjerciciosEjecutados)
+                    .ThenInclude(e => e.SeriesRealizadas)
                 .Where(s => s.SocioId == socioId)
                 .OrderByDescending(s => s.Inicio)
                 .ToListAsync();

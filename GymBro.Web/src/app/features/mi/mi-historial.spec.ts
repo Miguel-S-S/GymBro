@@ -3,8 +3,9 @@ import { provideRouter } from '@angular/router';
 import { of } from 'rxjs';
 import { EjerciciosApi } from '../../core/api/ejercicios.api';
 import { SesionesApi } from '../../core/api/sesiones.api';
+import { AuthService } from '../../core/auth/auth.service';
 import { ComparacionSesion, Sesion } from '../../core/models/sesion.models';
-import { MiSesionDetalle } from './mi-historial';
+import { MiHistorial, MiSesionDetalle } from './mi-historial';
 
 // Etapa 9a-1. Datos sintéticos de prueba: plancha (segundos) y crunch (repeticiones) en la misma sesión.
 const SESION: Sesion = {
@@ -53,5 +54,39 @@ describe('MiSesionDetalle (Socio): tipo de medida', () => {
     expect(texto(crunch)).toContain('Objetivo: 3 × 10–15 reps');
     expect(texto(crunch)).toContain('0 kg × 12');
     expect(texto(crunch)).toContain('Volumen efectivo');
+  });
+});
+
+// Correccion Etapa 8: conteos del listado. Datos sinteticos: press en dos posiciones (cuenta una vez) y sentadilla;
+// 1 serie de calentamiento + 4 efectivas (el calentamiento no cuenta, mismo criterio que la comparacion).
+const s = (orden: number, calentamiento = false) => ({
+  id: `sr${orden}${calentamiento}`, ordenSerie: orden, pesoLevantadoKg: 40, repeticiones: 10, rir: 2,
+  esCalentamiento: calentamiento, tiempoDescansoSegundos: null,
+});
+const CON_SERIES: Sesion = {
+  ...SESION,
+  ejercicios: [
+    { id: 'e1', ejercicioId: 'ej-press', orden: 1, observaciones: null, seriesRealizadas: [s(1, true), s(2), s(3)] },
+    { id: 'e2', ejercicioId: 'ej-sentadilla', orden: 2, observaciones: null, seriesRealizadas: [s(1)] },
+    { id: 'e3', ejercicioId: 'ej-press', orden: 3, observaciones: null, seriesRealizadas: [s(1)] },
+  ],
+};
+
+describe('MiHistorial (Socio): conteos del listado', () => {
+  it('muestra ejercicios distintos y series efectivas registradas por sesion', async () => {
+    TestBed.configureTestingModule({
+      providers: [
+        provideRouter([]),
+        { provide: SesionesApi, useValue: { listarPorSocio: () => of([CON_SERIES]) } },
+        { provide: AuthService, useValue: { sesion: () => ({ socioId: 's1' }) } },
+      ],
+    });
+    const fixture = TestBed.createComponent(MiHistorial);
+    fixture.detectChanges();
+    await fixture.whenStable();
+    fixture.detectChanges();
+
+    const meta = ((fixture.nativeElement as HTMLElement).querySelector('.item .meta')?.textContent ?? '').replace(/\s+/g, ' ');
+    expect(meta).toContain('2 ejercicios · 4 series');
   });
 });

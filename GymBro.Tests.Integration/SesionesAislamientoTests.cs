@@ -132,6 +132,47 @@ namespace GymBro.Tests.Integration
             Assert.Equal(HttpStatusCode.OK, lista.StatusCode);
         }
 
+        /// <summary>
+        /// Correccion Etapa 8 (conteos del historial): el listado GET /api/Sesiones?socioId= devuelve los ejercicios y
+        /// las series de cada sesion. Antes la coleccion llegaba vacia y el historial mostraba "0 ejercicios - 0 series".
+        /// </summary>
+        [Fact]
+        public async Task ListadoDeSesiones_IncluyeEjerciciosYSeriesRegistradas()
+        {
+            var cliente = _api.ClienteComo(_usuarioA);
+            var serie = (int orden, bool calentamiento) => new
+            {
+                ordenSerie = orden, pesoLevantadoKg = 40m, repeticiones = 10, rir = (int?)2,
+                esCalentamiento = calentamiento, tiempoDescansoSegundos = (int?)90
+            };
+            var alta = await cliente.PostAsJsonAsync("/api/Sesiones", new
+            {
+                socioId = _socioA.Id,
+                prescripcionEntrenamientoId = (Guid?)null,
+                inicio = DateTime.UtcNow.AddHours(-1),
+                fin = DateTime.UtcNow,
+                ejercicios = new[]
+                {
+                    new { ejercicioId = _ejercicio.Id, orden = 1, seriesRealizadas = new[] { serie(1, true), serie(2, false), serie(3, false) } },
+                    new { ejercicioId = _ejercicio.Id, orden = 2, seriesRealizadas = new[] { serie(1, false) } }
+                }
+            });
+            Assert.Equal(HttpStatusCode.Created, alta.StatusCode);
+            var creada = await alta.Content.ReadFromJsonAsync<SesionListada>();
+
+            var lista = await cliente.GetFromJsonAsync<List<SesionListada>>($"/api/Sesiones?socioId={_socioA.Id}");
+            var sesion = Assert.Single(lista!, x => x.Id == creada!.Id);
+
+            Assert.Equal(2, sesion.Ejercicios.Count);
+            Assert.Single(sesion.Ejercicios.Select(e => e.EjercicioId).Distinct());
+            Assert.Equal(4, sesion.Ejercicios.Sum(e => e.SeriesRealizadas.Count));
+            Assert.Equal(3, sesion.Ejercicios.Sum(e => e.SeriesRealizadas.Count(sr => !sr.EsCalentamiento)));
+        }
+
+        private sealed record SesionListada(Guid Id, List<EjercicioListado> Ejercicios);
+        private sealed record EjercicioListado(Guid EjercicioId, List<SerieListada> SeriesRealizadas);
+        private sealed record SerieListada(bool EsCalentamiento);
+
         [Fact]
         public async Task SinToken_Responde401()
         {

@@ -27,7 +27,7 @@ import { enSegundos, rangoConUnidad } from '../../core/util/rutina-formato';
         <a class="item" [routerLink]="['/mi/historial', s.id]">
           <div>
             <strong>{{ s.inicio | date: 'EEE dd/MM/yyyy HH:mm' }}</strong>
-            <p class="meta">{{ s.ejercicios.length }} ejercicios · {{ series(s) }} series ·
+            <p class="meta">{{ ejerciciosDistintos(s) }} ejercicios · {{ series(s) }} series ·
               {{ s.prescripcionEntrenamientoId ? 'con rutina' : 'libre' }}</p>
           </div>
           <mat-icon>chevron_right</mat-icon>
@@ -65,6 +65,12 @@ export class MiHistorial {
     });
   }
 
+  /** Ejercicios distintos de la sesion (un mismo ejercicio en dos posiciones cuenta una vez). */
+  ejerciciosDistintos(s: Sesion): number {
+    return new Set(s.ejercicios.map((e) => e.ejercicioId)).size;
+  }
+
+  /** Series efectivas registradas (sin calentamiento), mismo criterio que la comparacion con la prescripcion. */
   series(s: Sesion): number {
     return s.ejercicios.reduce((n, e) => n + e.seriesRealizadas.filter((x) => !x.esCalentamiento).length, 0);
   }

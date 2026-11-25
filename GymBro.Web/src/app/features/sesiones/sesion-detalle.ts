@@ -11,6 +11,7 @@ import { EjerciciosApi } from '../../core/api/ejercicios.api';
 import { SesionesApi } from '../../core/api/sesiones.api';
 import { ComparacionSesion, Sesion } from '../../core/models/sesion.models';
 import { mensajeDeError } from '../../core/util/api-error';
+import { indicadoresCumplimiento } from '../../core/util/cumplimiento';
 import { duracionLegible, oSinDato } from '../../core/util/formato';
 import { columnaMedida, rangoConUnidad } from '../../core/util/rutina-formato';
 
@@ -57,7 +58,14 @@ import { columnaMedida, rangoConUnidad } from '../../core/util/rutina-formato';
               @if (p.rirObjetivo !== null) { · RIR {{ p.rirObjetivo }} }
               · descanso {{ p.descansoObjetivoSegundos }} s
             </p>
-            <p class="comparacion">{{ ej.comparacion.series.mensaje }}</p>
+            <!-- Etapa 8e: indicadores de la 8d en lugar del veredicto "Cumple objetivo" / "Excedieron N series". -->
+            @let ind = indicadores(ej);
+            <p class="indicadores">
+              <span class="indicador">Series: {{ ind.series }} de {{ p.seriesObjetivo }}</span>
+              @if (ind.series > 0) {
+                <span class="indicador">{{ ind.etiquetaRango }} en rango: {{ ind.enRango }} de {{ ind.series }} series</span>
+              }
+            </p>
           }
 
           @if (ej.ejecucion; as x) {
@@ -141,6 +149,7 @@ import { columnaMedida, rangoConUnidad } from '../../core/util/rutina-formato';
       background: var(--mat-sys-primary); color: var(--mat-sys-on-primary); font: var(--mat-sys-label-medium);
     }
     .objetivo, .obs { display: flex; align-items: center; gap: 6px; margin: 4px 0; font: var(--mat-sys-body-medium); }
+    .indicadores { display: flex; flex-wrap: wrap; gap: 4px 16px; margin: 4px 0 8px; font: var(--mat-sys-label-large); }
     .comparacion { margin: 4px 0 8px; color: var(--mat-sys-on-surface-variant); font: var(--mat-sys-body-small); }
     .metricas { display: flex; flex-wrap: wrap; gap: 16px; margin: 8px 0 12px; font: var(--mat-sys-body-medium); }
     tr.calentamiento td { color: var(--mat-sys-on-surface-variant); font-style: italic; }
@@ -152,6 +161,8 @@ export class SesionDetalle {
   /** Etapa 9a-1: unidad y encabezado según el tipo de medida del ejercicio. */
   readonly rango = rangoConUnidad;
   readonly columna = columnaMedida;
+  /** Etapa 8e: misma lógica que la vista del Socio (core/util/cumplimiento.ts). */
+  readonly indicadores = indicadoresCumplimiento;
   private readonly sesiones = inject(SesionesApi);
   private readonly ejercicios = inject(EjerciciosApi);
 

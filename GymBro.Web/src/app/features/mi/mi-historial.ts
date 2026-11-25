@@ -8,32 +8,10 @@ import { forkJoin } from 'rxjs';
 import { EjerciciosApi } from '../../core/api/ejercicios.api';
 import { SesionesApi } from '../../core/api/sesiones.api';
 import { AuthService } from '../../core/auth/auth.service';
-import { ComparacionSesion, EjercicioComparado, Sesion } from '../../core/models/sesion.models';
+import { ComparacionSesion, Sesion } from '../../core/models/sesion.models';
 import { mensajeDeError } from '../../core/util/api-error';
+import { indicadoresCumplimiento } from '../../core/util/cumplimiento';
 import { enSegundos, rangoConUnidad } from '../../core/util/rutina-formato';
-
-/** Etapa 8d: indicadores de cumplimiento de un ejercicio, sin veredicto global. */
-export interface IndicadoresCumplimiento {
-  /** Series efectivas registradas (sin calentamiento). Más series que el objetivo no es incumplimiento. */
-  series: number;
-  /** Series efectivas con minimo <= valor <= maximo (extremos incluidos). */
-  enRango: number;
-  /** "Repeticiones" o "Segundos", segun el tipo de medida del ejercicio (Etapa 9a-1). */
-  etiquetaRango: string;
-}
-
-/**
- * Etapa 8d: calcula "Series: N de M" y "Repeticiones en rango: K de N series" con los datos que ya devuelve
- * GET /api/Sesiones/{id}/comparacion (sin cambiar el contrato). El RIR no participa.
- */
-export function indicadoresCumplimiento(e: EjercicioComparado): IndicadoresCumplimiento {
-  const efectivas = (e.ejecucion?.detallesSeries ?? []).filter((s) => !s.esCalentamiento);
-  const p = e.prescripcion;
-  const enRango = p
-    ? efectivas.filter((s) => s.repeticiones >= p.repeticionesMinimas && s.repeticiones <= p.repeticionesMaximas).length
-    : 0;
-  return { series: efectivas.length, enRango, etiquetaRango: enSegundos(e.tipoMedida) ? 'Segundos' : 'Repeticiones' };
-}
 
 /** Historial del Socio: sesiones registradas, de la más reciente a la más antigua. */
 @Component({

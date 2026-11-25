@@ -51,3 +51,82 @@ describe('SesionDetalle (personal): tipo de medida', () => {
     expect(crunch.querySelector('th.mat-column-reps')!.textContent).toContain('Reps');
   });
 });
+
+// Etapa 8e. Datos sinteticos de prueba: prensa con rango 8-12 y objetivo de 3 series.
+type SerieDato = [peso: number, reps: number, calentamiento?: boolean];
+const PRENSA = { seriesObjetivo: 3, repeticionesMinimas: 8, repeticionesMaximas: 12, rirObjetivo: 2, descansoObjetivoSegundos: 90 };
+
+function prensa(series: SerieDato[] | null, tipoMedida: 'Repeticiones' | 'Segundos' = 'Repeticiones', mensaje = 'Cumple objetivo') {
+  const detalles = (series ?? []).map(([peso, reps, cal = false], i) => ({
+    ordenSerie: i + 1, pesoLevantadoKg: peso, repeticiones: reps, rir: null, esCalentamiento: cal,
+    tiempoDescansoSegundos: null, volumen: peso * reps,
+    repeticionesComparacion: cal ? null
+      : { cumpleObjetivo: reps >= 8 && reps <= 12, desviacion: 0, mensaje: reps >= 8 && reps <= 12 ? 'Dentro del rango' : 'Fuera' },
+    rirComparacion: null,
+  }));
+  const efectivas = detalles.filter((d) => !d.esCalentamiento).length;
+  return {
+    ejercicioId: 'ej-prensa', orden: 1, tipoMedida, prescripcion: PRENSA,
+    // El veredicto anterior sigue en el contrato (obsoleto); la pantalla no debe mostrarlo.
+    comparacion: { series: { prescritas: 3, realizadasEfectivas: efectivas, diferencia: efectivas - 3, mensaje } },
+    ejecucion: series === null ? null : {
+      cantidadSeriesTotales: detalles.length, cantidadSeriesEfectivas: efectivas, cantidadSeriesCalentamiento: detalles.length - efectivas,
+      volumenTotalKg: 0, volumenEfectivoKg: 0, volumenCalentamientoKg: 0, detallesSeries: detalles,
+    },
+  };
+}
+
+async function textoPersonal(ej: ReturnType<typeof prensa>) {
+  const comparacion: ComparacionSesion = { sesionId: 'ses1', prescripcionEntrenamientoId: 'p1', ejercicios: [ej] };
+  TestBed.configureTestingModule({
+    providers: [provideRouter([]),
+      { provide: SesionesApi, useValue: { obtener: () => of(SESION), comparacion: () => of(comparacion) } },
+      { provide: EjerciciosApi, useValue: { nombres: () => of({ 'ej-prensa': 'Prensa de piernas' }) } }],
+  });
+  const fixture = TestBed.createComponent(SesionDetalle);
+  fixture.componentRef.setInput('id', 'ses1');
+  fixture.detectChanges();
+  await fixture.whenStable();
+  fixture.detectChanges();
+  return ((fixture.nativeElement as HTMLElement).textContent ?? '').replace(/\s+/g, ' ');
+}
+
+describe('SesionDetalle (Dueño y Personal Trainer): indicadores de cumplimiento (Etapa 8e)', () => {
+  it('3 de 3 series con 8, 8 y 5 (rango 8-12): dos de tres en rango y sin "Cumple objetivo"', async () => {
+    const t = await textoPersonal(prensa([[58, 8], [59, 8], [75, 5]]));
+    expect(t).toContain('Series: 3 de 3');
+    expect(t).toContain('Repeticiones en rango: 2 de 3 series');
+    expect(t).not.toMatch(/cumple objetivo/i);
+  });
+
+  it('4 series con objetivo 3: "Series: 4 de 3" y sin "Excedieron 1 series"', async () => {
+    const t = await textoPersonal(prensa([[50, 10], [50, 10], [50, 9], [50, 8]], 'Repeticiones', 'Excedieron 1 series'));
+    expect(t).toContain('Series: 4 de 3');
+    expect(t).toContain('Repeticiones en rango: 4 de 4 series');
+    expect(t).not.toMatch(/excedieron|cumple objetivo/i);
+  });
+
+  it('2 series con objetivo 3: "Series: 2 de 3" y sin "Faltaron 1 series"', async () => {
+    const t = await textoPersonal(prensa([[50, 10], [50, 9]], 'Repeticiones', 'Faltaron 1 series'));
+    expect(t).toContain('Series: 2 de 3');
+    expect(t).not.toMatch(/faltaron/i);
+  });
+
+  it('ejercicio prescrito sin ejecutar: "Series: 0 de 3" y sin indicador de repeticiones', async () => {
+    const t = await textoPersonal(prensa(null, 'Repeticiones', 'Faltaron 3 series'));
+    expect(t).toContain('Series: 0 de 3');
+    expect(t).not.toContain('en rango');
+    expect(t).toContain('Este ejercicio estaba prescrito pero no se ejecutó.');
+  });
+
+  it('las series de calentamiento no cuentan en ninguno de los dos indicadores', async () => {
+    const t = await textoPersonal(prensa([[30, 15, true], [20, 10, true], [60, 9], [60, 6]]));
+    expect(t).toContain('Series: 2 de 3');
+    expect(t).toContain('Repeticiones en rango: 1 de 2 series');
+  });
+
+  it('en ejercicios por tiempo el indicador dice "Segundos en rango"', async () => {
+    const t = await textoPersonal(prensa([[0, 10], [0, 30]], 'Segundos'));
+    expect(t).toContain('Segundos en rango: 1 de 2 series');
+  });
+});

@@ -84,7 +84,8 @@ namespace GymBro.Application.DTOs.Comparacion
         /// <summary>
         /// Obsoleto desde la Etapa 8d: veredicto "Cumple objetivo" / "Faltaron N series" / "Excedieron N series". La
         /// interfaz del Socio lo reemplazo por dos indicadores (series y repeticiones en rango) calculados con los demas
-        /// campos. Se conserva para no cambiar el contrato; hoy lo sigue mostrando la vista del Personal Trainer.
+        /// campos. Etapa 8e: la vista del Dueno y del Personal Trainer tampoco lo muestra; ya no lo lee ninguna pantalla.
+        /// Se conserva para no cambiar el contrato publico (la 8e es sin cambios de API); su retiro queda como propuesta.
         /// </summary>
         [Obsolete("Etapa 8d: usar Prescritas, RealizadasEfectivas y DetallesSeries; el veredicto unico ya no se muestra al Socio.")]
         public string Mensaje { get; set; } = string.Empty;

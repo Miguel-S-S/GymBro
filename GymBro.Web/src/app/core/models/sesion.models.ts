@@ -107,8 +107,8 @@ export interface EjercicioComparado {
       diferencia: number;
       /**
        * @deprecated Etapa 8d: veredicto "Cumple objetivo" / "Faltaron N" / "Excedieron N". La interfaz del Socio ya no
-       * lo muestra (usa indicadoresCumplimiento). Se conserva en el contrato; hoy lo sigue usando la vista del
-       * Personal Trainer (sesiones/sesion-detalle.ts).
+       * lo muestra (usa indicadoresCumplimiento). Etapa 8e: la vista del Dueño y del Personal Trainer
+       * (sesiones/sesion-detalle.ts) tampoco. Ninguna pantalla lo lee; se conserva en el contrato (sin cambios de API).
        */
       mensaje: string;
     };

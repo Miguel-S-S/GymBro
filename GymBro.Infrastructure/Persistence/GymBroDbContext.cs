@@ -38,6 +38,8 @@ namespace GymBro.Infrastructure.Persistence
         public DbSet<TipoEquipamiento> TiposEquipamiento { get; set; }
         public DbSet<EquipamientoGimnasio> EquipamientosGimnasio { get; set; }
         public DbSet<EjercicioProtocolo> EjerciciosProtocolo { get; set; }
+        public DbSet<Asistencia> Asistencias { get; set; }
+        public DbSet<CuotaSocio> CuotasSocio { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -180,6 +182,7 @@ namespace GymBro.Infrastructure.Persistence
             ConfigurarAlertasSeguridad(modelBuilder);
             ConfigurarCatalogoGimnasio(modelBuilder);
             ConfigurarProtocoloPiernas(modelBuilder);
+            ConfigurarAsistenciaYCuotas(modelBuilder);
 
             // 5. Conversión de Enums a texto puro en la base de datos
             modelBuilder.Entity<Socio>().Property(s => s.Objetivo).HasConversion<string>();
@@ -365,6 +368,68 @@ namespace GymBro.Infrastructure.Persistence
                 .WithMany()
                 .HasForeignKey(se => se.PrescripcionEjercicioId)
                 .OnDelete(DeleteBehavior.Restrict);
+        }
+
+        /// <summary>
+        /// Etapa 11: asistencia y cuotas. No son datos de salud: el Administrador de la Plataforma las lee entre gimnasios
+        /// (solo lectura, lo aplica el servicio); el personal, las de su gimnasio; el Socio, las suyas. Enums como texto con
+        /// CHECK. La morosidad no se guarda: se deriva de estado Pendiente y vencimiento anterior a hoy.
+        /// </summary>
+        private void ConfigurarAsistenciaYCuotas(ModelBuilder modelBuilder)
+        {
+            modelBuilder.Entity<Asistencia>(e =>
+            {
+                e.ToTable("asistencias", t =>
+                {
+                    t.HasCheckConstraint("CK_Asistencia_Metodo", GuardaEnums.CondicionTexto<MetodoAsistencia>("metodo"));
+                    t.HasCheckConstraint("CK_Asistencia_OrigenDatos", GuardaEnums.CondicionTexto<OrigenDatos>("origen_datos"));
+                });
+                e.HasQueryFilter(a => a.FechaBaja == null && (
+                    _actual.EsProcesoDeSistema
+                    || _actual.Rol == RolUsuario.SuperAdministrador
+                    || (_actual.GimnasioId != null && a.GimnasioId == _actual.GimnasioId)
+                    || (_actual.SocioId != null && a.SocioId == _actual.SocioId)));
+                e.Property(a => a.Metodo).HasConversion<string>().HasMaxLength(20);
+                e.Property(a => a.OrigenDatos).HasConversion<string>().HasMaxLength(30);
+                e.Property(a => a.Fecha).HasColumnType("date");
+                e.HasOne(a => a.Socio).WithMany().HasForeignKey(a => a.SocioId).OnDelete(DeleteBehavior.Restrict);
+                e.HasOne<Gimnasio>().WithMany().HasForeignKey(a => a.GimnasioId).OnDelete(DeleteBehavior.Restrict);
+                e.HasOne<Usuario>().WithMany().HasForeignKey(a => a.RegistradoPorUsuarioId).OnDelete(DeleteBehavior.Restrict);
+                // Una asistencia por socio y día local entre las filas vigentes (idempotencia).
+                e.HasIndex(a => new { a.SocioId, a.Fecha }).IsUnique().HasFilter("fecha_baja IS NULL");
+                e.HasIndex(a => new { a.GimnasioId, a.Fecha });
+                e.HasIndex(a => a.RegistradoPorUsuarioId);
+            });
+
+            modelBuilder.Entity<CuotaSocio>(e =>
+            {
+                e.ToTable("cuotas_socio", t =>
+                {
+                    t.HasCheckConstraint("CK_CuotaSocio_Estado", GuardaEnums.CondicionTexto<EstadoCuota>("estado"));
+                    t.HasCheckConstraint("CK_CuotaSocio_OrigenDatos", GuardaEnums.CondicionTexto<OrigenDatos>("origen_datos"));
+                    t.HasCheckConstraint("CK_CuotaSocio_Periodo", $"anio >= {RangosCuota.AnioMin} AND anio <= {RangosCuota.AnioMax} AND mes >= 1 AND mes <= 12");
+                    t.HasCheckConstraint("CK_CuotaSocio_Monto", "monto > 0");
+                    // Pagada si y solo si tiene fecha de pago.
+                    t.HasCheckConstraint("CK_CuotaSocio_Pago",
+                        "(estado = 'Pagada' AND fecha_pago IS NOT NULL) OR (estado = 'Pendiente' AND fecha_pago IS NULL)");
+                });
+                e.HasQueryFilter(c => c.FechaBaja == null && (
+                    _actual.EsProcesoDeSistema
+                    || _actual.Rol == RolUsuario.SuperAdministrador
+                    || (_actual.GimnasioId != null && c.GimnasioId == _actual.GimnasioId)
+                    || (_actual.SocioId != null && c.SocioId == _actual.SocioId)));
+                e.Property(c => c.Estado).HasConversion<string>().HasMaxLength(20);
+                e.Property(c => c.OrigenDatos).HasConversion<string>().HasMaxLength(30);
+                e.Property(c => c.Monto).HasPrecision(10, 2);
+                e.Property(c => c.Vencimiento).HasColumnType("date");
+                e.Property(c => c.FechaPago).HasColumnType("date");
+                e.HasOne(c => c.Socio).WithMany().HasForeignKey(c => c.SocioId).OnDelete(DeleteBehavior.Restrict);
+                e.HasOne<Gimnasio>().WithMany().HasForeignKey(c => c.GimnasioId).OnDelete(DeleteBehavior.Restrict);
+                // Una cuota por socio y período entre las filas vigentes (generación idempotente).
+                e.HasIndex(c => new { c.SocioId, c.Anio, c.Mes }).IsUnique().HasFilter("fecha_baja IS NULL");
+                e.HasIndex(c => new { c.GimnasioId, c.Anio, c.Mes });
+                e.HasIndex(c => new { c.GimnasioId, c.Estado, c.Vencimiento });
+            });
         }
 
         /// <summary>

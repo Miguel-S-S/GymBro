@@ -135,6 +135,34 @@ describe('rutas por rol (Etapa 8c, T2)', () => {
     expect(navegar('gimnasio/equipamiento')).toBe('/mi');
   });
 
+  // Etapa 11: asistencia (personal y plataforma) y cuotas (Dueño y plataforma); el Socio, su QR y sus cuotas en /mi.
+  it.each<Rol>(['AdministradorGimnasio', 'Entrenador', 'SuperAdministrador'])('%s abre /gimnasio/asistencia', (rol) => {
+    guardar(rol);
+    expect(navegar('gimnasio/asistencia')).toBe(true);
+  });
+
+  it.each<Rol>(['AdministradorGimnasio', 'SuperAdministrador'])('%s abre /gimnasio/cuotas', (rol) => {
+    guardar(rol);
+    expect(navegar('gimnasio/cuotas')).toBe(true);
+  });
+
+  it('el Personal Trainer no abre /gimnasio/cuotas', () => {
+    guardar('Entrenador');
+    expect(navegar('gimnasio/cuotas')).not.toBe(true);
+  });
+
+  it('el Socio no abre las pantallas de gestión de asistencia y cuotas, y sí /mi/asistencia', () => {
+    guardar('Socio');
+    expect(navegar('gimnasio/asistencia')).toBe('/mi');
+    expect(navegar('gimnasio/cuotas')).toBe('/mi');
+    expect(navegar('mi/asistencia')).toBe(true);
+  });
+
+  it.each<Rol>(['Entrenador', 'AdministradorGimnasio', 'SuperAdministrador'])('%s no entra a /mi/asistencia', (rol) => {
+    guardar(rol);
+    expect(navegar('mi/asistencia')).not.toBe(true);
+  });
+
   it('sin sesión, las pantallas del personal llevan a /login', () => {
     expect(navegar('socios')).toBe('/login');
   });

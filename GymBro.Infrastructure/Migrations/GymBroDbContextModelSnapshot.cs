@@ -208,6 +208,91 @@ namespace GymBro.Infrastructure.Migrations
                     b.ToTable("asignaciones", (string)null);
                 });
 
+            modelBuilder.Entity("GymBro.Domain.Entities.Asistencia", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<DateOnly>("Fecha")
+                        .HasColumnType("date")
+                        .HasColumnName("fecha");
+
+                    b.Property<DateTime>("FechaAlta")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("fecha_alta");
+
+                    b.Property<DateTime?>("FechaBaja")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("fecha_baja");
+
+                    b.Property<DateTime?>("FechaModificacion")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("fecha_modificacion");
+
+                    b.Property<Guid>("GimnasioId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("gimnasio_id");
+
+                    b.Property<DateTime>("Instante")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("instante");
+
+                    b.Property<string>("Metodo")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)")
+                        .HasColumnName("metodo");
+
+                    b.Property<string>("OrigenDatos")
+                        .IsRequired()
+                        .HasMaxLength(30)
+                        .HasColumnType("character varying(30)")
+                        .HasColumnName("origen_datos");
+
+                    b.Property<Guid>("RegistradoPorUsuarioId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("registrado_por_usuario_id");
+
+                    b.Property<Guid>("SocioId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("socio_id");
+
+                    b.Property<int>("UsuarioAlta")
+                        .HasColumnType("integer")
+                        .HasColumnName("usuario_alta");
+
+                    b.Property<int?>("UsuarioBaja")
+                        .HasColumnType("integer")
+                        .HasColumnName("usuario_baja");
+
+                    b.Property<int?>("UsuarioModificacion")
+                        .HasColumnType("integer")
+                        .HasColumnName("usuario_modificacion");
+
+                    b.HasKey("Id")
+                        .HasName("pk_asistencias");
+
+                    b.HasIndex("RegistradoPorUsuarioId")
+                        .HasDatabaseName("ix_asistencias_registrado_por_usuario_id");
+
+                    b.HasIndex("GimnasioId", "Fecha")
+                        .HasDatabaseName("ix_asistencias_gimnasio_id_fecha");
+
+                    b.HasIndex("SocioId", "Fecha")
+                        .IsUnique()
+                        .HasDatabaseName("ix_asistencias_socio_id_fecha")
+                        .HasFilter("fecha_baja IS NULL");
+
+                    b.ToTable("asistencias", null, t =>
+                        {
+                            t.HasCheckConstraint("CK_Asistencia_Metodo", "metodo IN ('Qr', 'Manual')");
+
+                            t.HasCheckConstraint("CK_Asistencia_OrigenDatos", "origen_datos IN ('Sintetico', 'ValidacionFuncional', 'DatasetExterno', 'Real')");
+                        });
+                });
+
             modelBuilder.Entity("GymBro.Domain.Entities.AuditLog", b =>
                 {
                     b.Property<Guid>("Id")
@@ -264,6 +349,106 @@ namespace GymBro.Infrastructure.Migrations
                         .HasDatabaseName("ix_audit_logs_gimnasio_id");
 
                     b.ToTable("audit_logs", (string)null);
+                });
+
+            modelBuilder.Entity("GymBro.Domain.Entities.CuotaSocio", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<int>("Anio")
+                        .HasColumnType("integer")
+                        .HasColumnName("anio");
+
+                    b.Property<string>("Estado")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)")
+                        .HasColumnName("estado");
+
+                    b.Property<DateTime>("FechaAlta")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("fecha_alta");
+
+                    b.Property<DateTime?>("FechaBaja")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("fecha_baja");
+
+                    b.Property<DateTime?>("FechaModificacion")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("fecha_modificacion");
+
+                    b.Property<DateOnly?>("FechaPago")
+                        .HasColumnType("date")
+                        .HasColumnName("fecha_pago");
+
+                    b.Property<Guid>("GimnasioId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("gimnasio_id");
+
+                    b.Property<int>("Mes")
+                        .HasColumnType("integer")
+                        .HasColumnName("mes");
+
+                    b.Property<decimal>("Monto")
+                        .HasPrecision(10, 2)
+                        .HasColumnType("numeric(10,2)")
+                        .HasColumnName("monto");
+
+                    b.Property<string>("OrigenDatos")
+                        .IsRequired()
+                        .HasMaxLength(30)
+                        .HasColumnType("character varying(30)")
+                        .HasColumnName("origen_datos");
+
+                    b.Property<Guid>("SocioId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("socio_id");
+
+                    b.Property<int>("UsuarioAlta")
+                        .HasColumnType("integer")
+                        .HasColumnName("usuario_alta");
+
+                    b.Property<int?>("UsuarioBaja")
+                        .HasColumnType("integer")
+                        .HasColumnName("usuario_baja");
+
+                    b.Property<int?>("UsuarioModificacion")
+                        .HasColumnType("integer")
+                        .HasColumnName("usuario_modificacion");
+
+                    b.Property<DateOnly>("Vencimiento")
+                        .HasColumnType("date")
+                        .HasColumnName("vencimiento");
+
+                    b.HasKey("Id")
+                        .HasName("pk_cuotas_socio");
+
+                    b.HasIndex("GimnasioId", "Anio", "Mes")
+                        .HasDatabaseName("ix_cuotas_socio_gimnasio_id_anio_mes");
+
+                    b.HasIndex("GimnasioId", "Estado", "Vencimiento")
+                        .HasDatabaseName("ix_cuotas_socio_gimnasio_id_estado_vencimiento");
+
+                    b.HasIndex("SocioId", "Anio", "Mes")
+                        .IsUnique()
+                        .HasDatabaseName("ix_cuotas_socio_socio_id_anio_mes")
+                        .HasFilter("fecha_baja IS NULL");
+
+                    b.ToTable("cuotas_socio", null, t =>
+                        {
+                            t.HasCheckConstraint("CK_CuotaSocio_Estado", "estado IN ('Pendiente', 'Pagada')");
+
+                            t.HasCheckConstraint("CK_CuotaSocio_Monto", "monto > 0");
+
+                            t.HasCheckConstraint("CK_CuotaSocio_OrigenDatos", "origen_datos IN ('Sintetico', 'ValidacionFuncional', 'DatasetExterno', 'Real')");
+
+                            t.HasCheckConstraint("CK_CuotaSocio_Pago", "(estado = 'Pagada' AND fecha_pago IS NOT NULL) OR (estado = 'Pendiente' AND fecha_pago IS NULL)");
+
+                            t.HasCheckConstraint("CK_CuotaSocio_Periodo", "anio >= 2000 AND anio <= 2100 AND mes >= 1 AND mes <= 12");
+                        });
                 });
 
             modelBuilder.Entity("GymBro.Domain.Entities.DosificacionVolumetrica", b =>
@@ -1935,6 +2120,51 @@ namespace GymBro.Infrastructure.Migrations
                         .HasConstraintName("fk_asignaciones_socios_socio_id");
 
                     b.Navigation("EntrenadorUsuario");
+
+                    b.Navigation("Socio");
+                });
+
+            modelBuilder.Entity("GymBro.Domain.Entities.Asistencia", b =>
+                {
+                    b.HasOne("GymBro.Domain.Entities.Gimnasio", null)
+                        .WithMany()
+                        .HasForeignKey("GimnasioId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired()
+                        .HasConstraintName("fk_asistencias_gimnasios_gimnasio_id");
+
+                    b.HasOne("GymBro.Domain.Entities.Usuario", null)
+                        .WithMany()
+                        .HasForeignKey("RegistradoPorUsuarioId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired()
+                        .HasConstraintName("fk_asistencias_usuarios_registrado_por_usuario_id");
+
+                    b.HasOne("GymBro.Domain.Entities.Socio", "Socio")
+                        .WithMany()
+                        .HasForeignKey("SocioId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired()
+                        .HasConstraintName("fk_asistencias_socios_socio_id");
+
+                    b.Navigation("Socio");
+                });
+
+            modelBuilder.Entity("GymBro.Domain.Entities.CuotaSocio", b =>
+                {
+                    b.HasOne("GymBro.Domain.Entities.Gimnasio", null)
+                        .WithMany()
+                        .HasForeignKey("GimnasioId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired()
+                        .HasConstraintName("fk_cuotas_socio_gimnasios_gimnasio_id");
+
+                    b.HasOne("GymBro.Domain.Entities.Socio", "Socio")
+                        .WithMany()
+                        .HasForeignKey("SocioId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired()
+                        .HasConstraintName("fk_cuotas_socio_socios_socio_id");
 
                     b.Navigation("Socio");
                 });

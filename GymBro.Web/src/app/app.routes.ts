@@ -40,6 +40,12 @@ export const routes: Routes = [
         loadComponent: () => import('./features/mi/mi-mediciones').then((m) => m.MiMediciones),
       },
       {
+        // Etapa 11: QR de asistencia y estado de las cuotas del Socio (desde el menú de la barra superior).
+        path: 'asistencia',
+        title: 'Asistencia y cuotas · GymBro',
+        loadComponent: () => import('./features/mi/mi-asistencia').then((m) => m.MiAsistencia),
+      },
+      {
         path: 'gimnasio',
         title: 'Mi gimnasio · GymBro',
         loadComponent: () => import('./features/socio-portal/vinculacion').then((m) => m.Vinculacion),
@@ -117,6 +123,20 @@ export const routes: Routes = [
         title: 'Equipamiento · GymBro',
         canActivate: [rolGuard('AdministradorGimnasio', 'Entrenador', 'SuperAdministrador')],
         loadComponent: () => import('./features/gimnasio/equipamiento').then((m) => m.Equipamiento),
+      },
+
+      // Etapa 11: asistencia (registra el personal; la plataforma lee) y cuotas (gestiona el Dueño; la plataforma lee).
+      {
+        path: 'gimnasio/asistencia',
+        title: 'Asistencia · GymBro',
+        canActivate: [rolGuard('AdministradorGimnasio', 'Entrenador', 'SuperAdministrador')],
+        loadComponent: () => import('./features/gestion/asistencia').then((m) => m.AsistenciaDia),
+      },
+      {
+        path: 'gimnasio/cuotas',
+        title: 'Cuotas · GymBro',
+        canActivate: [rolGuard('AdministradorGimnasio', 'SuperAdministrador')],
+        loadComponent: () => import('./features/gestion/cuotas').then((m) => m.Cuotas),
       },
 
       // Dueño y Personal Trainer

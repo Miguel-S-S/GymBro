@@ -55,6 +55,14 @@ namespace GymBro.Tests.Integration
         private const string AttrKpis = "KpisProgresionController: [Authorize(AdministradorGimnasio,Entrenador,Socio)] (Etapa 7d; datos de salud)";
         private const string AttrAlertas ="AlertasController: [Authorize(AdministradorGimnasio,Entrenador,Socio)] (Etapa 10a; datos de salud)";
 
+        private const string AttrAsistenciaQr = "AsistenciaController.GenerarQr: [Authorize(Roles = Socio)] (Etapa 11)";
+        private const string AttrAsistenciaRegistro = "AsistenciaController: [Authorize(Roles = PersonalGimnasio)] en la acción (Etapa 11)";
+        private const string AttrAsistenciaLectura = "AsistenciaController.DelDia: [Authorize(SuperAdministrador,AdministradorGimnasio,Entrenador)] (Etapa 11)";
+        private const string AttrCuotasDueno = "CuotasController: [Authorize(Roles = AdministradorGimnasio)] en la acción (Etapa 11)";
+        private const string AttrCuotasLectura = "CuotasController: [Authorize(SuperAdministrador,AdministradorGimnasio)] en la acción (Etapa 11)";
+        private const string AttrCuotasSocio = "CuotasController.Mias: [Authorize(Roles = Socio)] (Etapa 11)";
+        private const string CodigoInvalido = "AsistenciaService: token vacío -> ReglaNegocio (400), sin efectos";
+
         public static TheoryData<string, string, string, int, string> Celdas()
         {
             var d = new TheoryData<string, string, string, int, string>();
@@ -226,6 +234,32 @@ namespace GymBro.Tests.Integration
                 (Anonimo, 401, Fallback), (SuperAdmin, 403, null), (Dueno, 200, AccesoSocio), (Trainer, 200, AccesoSocio + " (asignado)"), (Socio, 200, AccesoSocio + " (propio)"));
             Fila("GET", "/api/Socio/{B}/kpis-progresion", NoVisible, (Trainer, 404, NoVisible + " (no asignado)"), (Socio, 404, NoVisible + " (ajeno)"));
             Fila("GET", "/api/Socio/{C}/kpis-progresion", NoVisible, (Dueno, 404, Tenant + " + " + NoVisible));
+
+            // ---- Etapa 11: asistencia y cuotas (no son datos de salud: la plataforma lee entre gimnasios, sin escribir) ----
+            Fila("POST", "/api/asistencia/qr", AttrAsistenciaQr,
+                (Anonimo, 401, Fallback), (SuperAdmin, 403, null), (Dueno, 403, null), (Trainer, 403, null), (Socio, 200, null));
+            Fila("POST", "/api/asistencia/qr/validar", AttrAsistenciaRegistro,
+                (Anonimo, 401, Fallback), (SuperAdmin, 403, null), (Socio, 403, null),
+                (Dueno, 400, CodigoInvalido), (Trainer, 400, CodigoInvalido));
+            Fila("POST", "/api/asistencia/manual", AttrAsistenciaRegistro,
+                (Anonimo, 401, Fallback), (SuperAdmin, 403, null), (Socio, 403, null),
+                (Dueno, 400, CuerpoInvalido), (Trainer, 400, CuerpoInvalido));
+            Fila("GET", "/api/asistencia", AttrAsistenciaLectura,
+                (Anonimo, 401, Fallback), (SuperAdmin, 200, "AsistenciaService: plataforma sin gimnasio = todos (solo lectura)"),
+                (Dueno, 200, null), (Trainer, 200, null), (Socio, 403, null));
+            Fila("GET", "/api/asistencia?gimnasioId={G2}", OtroGimnasio, (SuperAdmin, 200, AttrAsistenciaLectura), (Dueno, 404, null), (Trainer, 404, null));
+            Fila("POST", "/api/cuotas/generar", AttrCuotasDueno,
+                (Anonimo, 401, Fallback), (SuperAdmin, 403, null), (Trainer, 403, null), (Socio, 403, null), (Dueno, 400, CuerpoInvalido));
+            Fila("PUT", "/api/cuotas/{X}/pago", AttrCuotasDueno,
+                (Anonimo, 401, Fallback), (SuperAdmin, 403, null), (Trainer, 403, null), (Socio, 403, null),
+                (Dueno, 404, "CuotaService: cuota inexistente -> RecursoNoEncontrado"));
+            Fila("GET", "/api/cuotas?anio=2030&mes=1", AttrCuotasLectura,
+                (Anonimo, 401, Fallback), (SuperAdmin, 200, null), (Dueno, 200, null), (Trainer, 403, null), (Socio, 403, null));
+            Fila("GET", "/api/cuotas?anio=2030&mes=1&gimnasioId={G2}", OtroGimnasio, (SuperAdmin, 200, AttrCuotasLectura), (Dueno, 404, null));
+            Fila("GET", "/api/cuotas/morosos", AttrCuotasLectura,
+                (Anonimo, 401, Fallback), (SuperAdmin, 200, null), (Dueno, 200, null), (Trainer, 403, null), (Socio, 403, null));
+            Fila("GET", "/api/cuotas/mias", AttrCuotasSocio,
+                (Anonimo, 401, Fallback), (SuperAdmin, 403, null), (Dueno, 403, null), (Trainer, 403, null), (Socio, 200, null));
 
             // ---- Auditoría ----
             Fila("GET", "/api/auditoria", AttrAuditoria,

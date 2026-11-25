@@ -30,6 +30,7 @@ interface ItemNav {
       </button>
       <mat-menu #menu="matMenu">
         <div class="usuario" mat-menu-item disabled>{{ auth.sesion()?.nombreCompleto }}</div>
+        <a mat-menu-item routerLink="/mi/asistencia"><mat-icon>qr_code_2</mat-icon><span>Asistencia y cuotas</span></a>
         <a mat-menu-item routerLink="/mi/gimnasio"><mat-icon>store</mat-icon><span>Mi gimnasio</span></a>
         <button mat-menu-item (click)="auth.cerrarSesion()"><mat-icon>logout</mat-icon><span>Cerrar sesión</span></button>
       </mat-menu>

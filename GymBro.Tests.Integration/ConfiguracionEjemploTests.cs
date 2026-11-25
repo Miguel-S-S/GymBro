@@ -29,6 +29,18 @@ namespace GymBro.Tests.Integration
             Assert.DoesNotContain(claves, k => k.Equals("Jwt:Key", StringComparison.OrdinalIgnoreCase));
             Assert.DoesNotContain(claves, k => k.Contains("Password", StringComparison.OrdinalIgnoreCase));
             Assert.DoesNotContain(claves, k => k.StartsWith("SuperAdmin", StringComparison.OrdinalIgnoreCase));
+            // Etapa 11: la clave del QR de asistencia es un secreto (user-secrets o Asistencia__ClaveQr).
+            Assert.DoesNotContain(claves, k => k.Equals("Asistencia:ClaveQr", StringComparison.OrdinalIgnoreCase));
+        }
+
+        /// <summary>Etapa 11: la duración del QR del ejemplo coincide con la del código (2 minutos).</summary>
+        [Fact]
+        public void La_duracion_del_QR_de_asistencia_se_vincula_y_coincide_con_el_codigo()
+        {
+            var cfg = Ejemplo().GetSection(AsistenciaConfig.Seccion).Get<AsistenciaConfig>()!;
+            Assert.Equal(new AsistenciaConfig().DuracionTokenSegundos, cfg.DuracionTokenSegundos);
+            Assert.Equal(120, cfg.DuracionTokenSegundos);
+            Assert.False(cfg.QrHabilitado);
         }
 
         [Fact]

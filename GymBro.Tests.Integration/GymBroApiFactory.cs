@@ -21,6 +21,9 @@ namespace GymBro.Tests.Integration
         // Clave solo para pruebas (no es un secreto real): firma los JWT de la API levantada en el test.
         private const string ClaveJwtDePrueba = "clave-de-prueba-gymbro-integracion-0123456789";
 
+        /// <summary>Etapa 11: clave del QR de asistencia de las pruebas (no es un secreto real).</summary>
+        public const string ClaveQrDePrueba = "clave-qr-de-prueba-gymbro-integracion-0123";
+
         private readonly PostgreSqlContainer _db = new PostgreSqlBuilder("pgvector/pgvector:pg16").Build();
 
         private readonly string _datasetsVacios = Directory.CreateTempSubdirectory("gymbro-tests-").FullName;
@@ -42,6 +45,8 @@ namespace GymBro.Tests.Integration
             builder.UseSetting("Datasets:Ruta", _datasetsVacios);
             builder.UseSetting("SuperAdmin:Email", "");
             builder.UseSetting("SuperAdmin:Password", "");
+            // Etapa 11: clave solo para pruebas (no es un secreto real) del QR de asistencia.
+            builder.UseSetting("Asistencia:ClaveQr", ClaveQrDePrueba);
             ConfigurarExtra(builder);
         }
 

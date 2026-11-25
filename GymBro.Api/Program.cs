@@ -93,6 +93,14 @@ builder.Services.AddScoped<ILimitacionesArticularesService, LimitacionesArticula
 builder.Services.AddScoped<IKpiProgresionRepository, KpiProgresionRepository>();
 builder.Services.AddScoped<IKpiProgresionService, KpiProgresionService>();
 
+// Etapa 11: asistencia (QR firmado de corta duración) y cuotas. La clave del QR es un secreto (user-secrets o
+// Asistencia__ClaveQr); sin clave el QR queda deshabilitado y el registro manual sigue disponible.
+builder.Services.AddSingleton(builder.Configuration.GetSection(AsistenciaConfig.Seccion).Get<AsistenciaConfig>() ?? new AsistenciaConfig());
+builder.Services.AddScoped<IAsistenciaRepository, AsistenciaRepository>();
+builder.Services.AddScoped<ICuotaRepository, CuotaRepository>();
+builder.Services.AddScoped<IAsistenciaService, AsistenciaService>();
+builder.Services.AddScoped<ICuotaService, CuotaService>();
+
 builder.Services.Configure<JwtOptions>(builder.Configuration.GetSection(JwtOptions.Seccion));
 var jwt = builder.Configuration.GetSection(JwtOptions.Seccion).Get<JwtOptions>() ?? new JwtOptions();
 if (string.IsNullOrWhiteSpace(jwt.Key) || Encoding.UTF8.GetByteCount(jwt.Key) < 32)

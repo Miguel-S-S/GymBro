@@ -76,6 +76,19 @@ import { map } from 'rxjs';
               <span matListItemTitle>Mi gimnasio</span>
             </a>
           }
+          <!-- Etapa 11: asistencia (personal y plataforma en solo lectura) y cuotas (Dueño y plataforma en solo lectura). -->
+          @if (auth.tieneRol('AdministradorGimnasio', 'Entrenador', 'SuperAdministrador')) {
+            <a mat-list-item routerLink="/gimnasio/asistencia" routerLinkActive="activo" (click)="esMovil() && nav.close()">
+              <mat-icon matListItemIcon>door_front</mat-icon>
+              <span matListItemTitle>Asistencia</span>
+            </a>
+          }
+          @if (auth.tieneRol('AdministradorGimnasio', 'SuperAdministrador')) {
+            <a mat-list-item routerLink="/gimnasio/cuotas" routerLinkActive="activo" (click)="esMovil() && nav.close()">
+              <mat-icon matListItemIcon>payments</mat-icon>
+              <span matListItemTitle>Cuotas</span>
+            </a>
+          }
           @if (auth.tieneRol('SuperAdministrador')) {
             <a mat-list-item routerLink="/plataforma/gimnasios" routerLinkActive="activo" (click)="esMovil() && nav.close()">
               <mat-icon matListItemIcon>domain</mat-icon>

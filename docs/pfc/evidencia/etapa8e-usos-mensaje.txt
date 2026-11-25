@@ -1,0 +1,18 @@
+﻿Etapa 8e - usos de ComparacionSeriesDto.Mensaje / series.mensaje en todo el repositorio (excluida la carpeta docs)
+Commit: a081ae99db5cccb875794ce12b1f8295d3e41b2a
+Comando: git grep -n -I -E "series\.mensaje|Series\.Mensaje|ComparacionSeriesDto|Cumple objetivo" -- . ":!docs"
+------------------------------------------------------------
+GymBro.Application/DTOs/Comparacion/ComparacionSesionResponseDto.cs:75:        public ComparacionSeriesDto Series { get; set; } = new ComparacionSeriesDto();
+GymBro.Application/DTOs/Comparacion/ComparacionSesionResponseDto.cs:78:    public class ComparacionSeriesDto
+GymBro.Application/DTOs/Comparacion/ComparacionSesionResponseDto.cs:85:        /// Obsoleto desde la Etapa 8d: veredicto "Cumple objetivo" / "Faltaron N series" / "Excedieron N series". La
+GymBro.Application/Services/SesionEntrenamientoService.cs:305:                    dto.Comparacion.Series = new ComparacionSeriesDto
+GymBro.Application/Services/SesionEntrenamientoService.cs:310:                        Mensaje = realizadasEfectivas == pres.SeriesObjetivo ? "Cumple objetivo" : $"{(realizadasEfectivas < pres.SeriesObjetivo ? "Faltaron" : "Excedieron")} {Math.Abs(realizadasEfectivas - pres.SeriesObjetivo)} series"
+GymBro.Web/src/app/core/models/sesion.models.ts:109:       * @deprecated Etapa 8d: veredicto "Cumple objetivo" / "Faltaron N" / "Excedieron N". La interfaz del Socio ya no
+GymBro.Web/src/app/features/mi/mi-historial.spec.ts:111:    comparacion: { series: { prescritas: 3, realizadasEfectivas: efectivas, diferencia: efectivas - 3, mensaje: 'Cumple objetivo' } },
+GymBro.Web/src/app/features/mi/mi-historial.spec.ts:135:  it('3 de 3 series con 8, 8 y 5 (rango 8-12): dos de tres en rango y sin "Cumple objetivo"', async () => {
+GymBro.Web/src/app/features/sesiones/sesion-detalle.spec.ts:59:function prensa(series: SerieDato[] | null, tipoMedida: 'Repeticiones' | 'Segundos' = 'Repeticiones', mensaje = 'Cumple objetivo') {
+GymBro.Web/src/app/features/sesiones/sesion-detalle.spec.ts:95:  it('3 de 3 series con 8, 8 y 5 (rango 8-12): dos de tres en rango y sin "Cumple objetivo"', async () => {
+GymBro.Web/src/app/features/sesiones/sesion-detalle.ts:61:            <!-- Etapa 8e: indicadores de la 8d en lugar del veredicto "Cumple objetivo" / "Excedieron N series". -->
+------------------------------------------------------------
+Busqueda adicional en GymBro.IA (Python): git grep -n -i mensaje -- GymBro.IA
+(sin resultados en GymBro.IA si no hay lineas arriba)

@@ -1,0 +1,46 @@
+﻿Etapa 8e - indicadores de cumplimiento en la vista del Duenio y del Personal Trainer, build y pruebas
+Comando: npx ng build
+Commit: a081ae99db5cccb875794ce12b1f8295d3e41b2a (rama cierre-pfc)
+Estado del arbol de trabajo (git status --short):
+M GymBro.Web/angular.json
+?? CLAUDE.md
+?? docs/pfc/evidencia/etapaCIERRE-base-dotnet-build.txt
+?? docs/pfc/evidencia/etapaCIERRE-base-dotnet-test.txt
+?? docs/pfc/evidencia/etapaCIERRE-base-ng-build.txt
+?? docs/pfc/evidencia/etapaCIERRE-base-ng-test.txt
+Fecha: 2026-11-25 17:57:50 -03:00
+Codigo de salida: 0
+Nota: GymBro.Web/angular.json modificado solo por fin de linea (git diff vacio); evidencia de linea base etapaCIERRE-base-* aun sin commit
+------------------------------------------------------------
+> Building...
+√ Building...
+Initial chunk files | Names               |  Raw size | Estimated transfer size
+main-V5VPR3WW.js    | main                | 362.03 kB |                70.25 kB
+chunk-8VrOvRrD.js   | -                   | 338.27 kB |                86.79 kB
+styles-56MVVM6I.css | styles              |  25.10 kB |                 3.46 kB
+
+                    | Initial total       | 725.39 kB |               160.49 kB
+
+Lazy chunk files    | Names               |  Raw size | Estimated transfer size
+chunk-DemPDKf1.js   | -                   |  44.69 kB |                 9.57 kB
+chunk-BfTf1nr5.js   | ejercicios-catalogo |  42.59 kB |                10.55 kB
+chunk-74-Gb42n.js   | -                   |  41.04 kB |                 8.72 kB
+chunk-BN7vTODx.js   | -                   |  35.88 kB |                 8.83 kB
+chunk-D2UjiSVT.js   | socio-detalle       |  35.15 kB |                 8.64 kB
+chunk-CIInUMFH.js   | sesion-registro     |  34.48 kB |                 9.94 kB
+chunk-Cj0_er8W.js   | -                   |  30.08 kB |                 7.09 kB
+chunk-5SZ8-rTM.js   | -                   |  29.39 kB |                 4.91 kB
+chunk-Bw8dOrSg.js   | mi-layout           |  29.18 kB |                 8.00 kB
+chunk-D_srJBCR.js   | -                   |  26.53 kB |                 4.48 kB
+chunk-DctTeCAl.js   | -                   |  15.21 kB |                 4.17 kB
+chunk-BCl-87be.js   | mi-bienestar        |  14.15 kB |                 4.50 kB
+chunk-CYLvpKFi.js   | socios-lista        |  12.91 kB |                 4.01 kB
+chunk-BB6aS12n.js   | -                   |  12.05 kB |                 2.55 kB
+chunk-CZd8pLdy.js   | equipamiento        |  11.38 kB |                 3.58 kB
+...and 34 more lazy chunks files. Use "--verbose" to show all the files.
+
+Application bundle generation complete. [5.272 seconds] - 2026-11-25T20:57:57.404Z
+
+Output location: C:\Users\miguel\source\repos\GymBro\GymBro.Web\dist\gymbro-web
+
+

@@ -1,0 +1,24 @@
+﻿Cierre PFC - linea base de la rama cierre-pfc (desde origin/etapa8d 494e55b), build y pruebas
+Comando: npx ng test --watch=false
+Commit: 494e55b416a96bf080cfaf6e6e1c25c0584b1ae2 (rama cierre-pfc)
+Estado del arbol de trabajo (git status --short):
+M GymBro.Web/angular.json
+?? CLAUDE.md
+Fecha: 2026-11-25 17:55:22 -03:00
+Codigo de salida: 0
+Nota: GymBro.Web/angular.json figura modificado solo por fin de linea (git diff vacio); CLAUDE.md no rastreado y fuera del repositorio por decision del desarrollador
+------------------------------------------------------------
+> Building...
+√ Building...
+Application bundle generation complete. [5.256 seconds] - 2026-11-25T20:55:29.898Z
+
+
+ RUN  v5.1.0 C:/Users/miguel/source/repos/GymBro/GymBro.Web
+
+
+ Test Files  33 passed (33)
+      Tests  220 passed (220)
+   Start at  17:55:30
+   Duration  9.98s (environment 72%, tests 14%, import 7%, setup 5%, transform 2%)
+
+

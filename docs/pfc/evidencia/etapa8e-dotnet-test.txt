@@ -1,0 +1,23 @@
+﻿Etapa 8e - indicadores de cumplimiento en la vista del Duenio y del Personal Trainer, build y pruebas
+Comando: dotnet test GymBro.slnx --artifacts-path .tmp-artifacts --no-build
+Commit: a081ae99db5cccb875794ce12b1f8295d3e41b2a (rama cierre-pfc)
+Estado del arbol de trabajo (git status --short):
+M GymBro.Web/angular.json
+?? CLAUDE.md
+?? docs/pfc/evidencia/etapaCIERRE-base-dotnet-build.txt
+?? docs/pfc/evidencia/etapaCIERRE-base-dotnet-test.txt
+?? docs/pfc/evidencia/etapaCIERRE-base-ng-build.txt
+?? docs/pfc/evidencia/etapaCIERRE-base-ng-test.txt
+Fecha: 2026-11-25 17:57:16 -03:00
+Codigo de salida: 0
+Nota: GymBro.Web/angular.json modificado solo por fin de linea (git diff vacio); evidencia de linea base etapaCIERRE-base-* aun sin commit
+------------------------------------------------------------
+Serie de pruebas para C:\Users\miguel\source\repos\GymBro\.tmp-artifacts\bin\GymBro.Tests.Integration\debug\GymBro.Tests.Integration.dll (.NETCoreApp,Version=v10.0)
+Serie de pruebas para C:\Users\miguel\source\repos\GymBro\.tmp-artifacts\bin\GymBro.Tests\debug\GymBro.Tests.dll (.NETCoreApp,Version=v10.0)
+1 archivos de prueba en total coincidieron con el patrón especificado.
+1 archivos de prueba en total coincidieron con el patrón especificado.
+
+Correctas! - Con error:     0, Superado:   342, Omitido:     0, Total:   342, Duración: 235 ms - GymBro.Tests.dll (net10.0)
+
+Correctas! - Con error:     0, Superado:   469, Omitido:     0, Total:   469, Duración: 20 s - GymBro.Tests.Integration.dll (net10.0)
+

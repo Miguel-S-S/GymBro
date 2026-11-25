@@ -1,0 +1,28 @@
+﻿Etapa 8e - indicadores de cumplimiento en la vista del Duenio y del Personal Trainer, build y pruebas
+Comando: npx ng test --watch=false
+Commit: a081ae99db5cccb875794ce12b1f8295d3e41b2a (rama cierre-pfc)
+Estado del arbol de trabajo (git status --short):
+M GymBro.Web/angular.json
+?? CLAUDE.md
+?? docs/pfc/evidencia/etapaCIERRE-base-dotnet-build.txt
+?? docs/pfc/evidencia/etapaCIERRE-base-dotnet-test.txt
+?? docs/pfc/evidencia/etapaCIERRE-base-ng-build.txt
+?? docs/pfc/evidencia/etapaCIERRE-base-ng-test.txt
+Fecha: 2026-11-25 17:57:57 -03:00
+Codigo de salida: 0
+Nota: GymBro.Web/angular.json modificado solo por fin de linea (git diff vacio); evidencia de linea base etapaCIERRE-base-* aun sin commit
+------------------------------------------------------------
+> Building...
+√ Building...
+Application bundle generation complete. [4.388 seconds] - 2026-11-25T20:58:04.090Z
+
+
+ RUN  v5.1.0 C:/Users/miguel/source/repos/GymBro/GymBro.Web
+
+
+ Test Files  34 passed (34)
+      Tests  229 passed (229)
+   Start at  17:58:04
+   Duration  7.80s (environment 71%, tests 14%, import 7%, setup 6%, transform 2%)
+
+

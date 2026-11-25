@@ -61,12 +61,14 @@ namespace GymBro.Application.Services
             // El filtro entre gimnasios ya limita la lista a los socios del gimnasio del Dueño.
             var activos = (await _socios.GetAllAsync())
                 .Where(s => s.GimnasioId == gimnasioId && s.Estado == EstadoSocio.Activo)
-                .Select(s => s.Id).ToList();
+                .ToDictionary(s => s.Id, s => s.OrigenDatos);
             var conCuota = await _cuotas.SociosConCuotaAsync(gimnasioId, request.Anio, request.Mes);
             var ahora = _reloj.GetUtcNow().UtcDateTime;
-            var nuevas = activos.Where(id => !conCuota.Contains(id)).Select(id => new CuotaSocio
+            var nuevas = activos.Keys.Where(id => !conCuota.Contains(id)).OrderBy(id => id).Select(id => new CuotaSocio
             {
                 SocioId = id,
+                // Etapa 7e: la cuota hereda el origen del socio (como la rutina en el planificador).
+                OrigenDatos = activos[id],
                 GimnasioId = gimnasioId,
                 Anio = request.Anio,
                 Mes = request.Mes,

@@ -148,6 +148,8 @@ namespace GymBro.Application.Services
                 Metodo = metodo,
                 RegistradoPorUsuarioId = _actual.UsuarioId ?? throw new AccesoDenegadoException(),
                 FechaAlta = ahora.UtcDateTime,
+                // Etapa 7e: la asistencia hereda el origen del socio (como la rutina en el planificador).
+                OrigenDatos = socio.OrigenDatos,
             };
             _asistencias.Agregar(nueva);
             if (!await _asistencias.GuardarCambiosAsync())

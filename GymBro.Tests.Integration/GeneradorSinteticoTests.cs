@@ -71,7 +71,7 @@ namespace GymBro.Tests.Integration
         }
 
         [Fact]
-        public void El_generador_crea_solo_socios_Sintetico_con_rutinas_Sintetico()
+        public void El_generador_crea_solo_datos_Sintetico_socios_rutinas_asistencias_y_cuotas()
         {
             Assert.Equal(0, _e.NoSinteticosGenerados);
         }
@@ -154,7 +154,9 @@ namespace GymBro.Tests.Integration
                     var ids = Segunda.SociosIds.Concat(OtraSemilla.SociosIds).ToList();
                     NoSinteticosGenerados = await db.Socios.IgnoreQueryFilters().CountAsync(s => ids.Contains(s.Id) && s.OrigenDatos != OrigenDatos.Sintetico)
                         + await db.PrescripcionesEntrenamiento.IgnoreQueryFilters().CountAsync(p => ids.Contains(p.SocioId) && p.OrigenDatos != OrigenDatos.Sintetico)
-                        + await db.Socios.IgnoreQueryFilters().CountAsync(s => s.GimnasioId == Segunda.GimnasioId && s.OrigenDatos != OrigenDatos.Sintetico);
+                        + await db.Socios.IgnoreQueryFilters().CountAsync(s => s.GimnasioId == Segunda.GimnasioId && s.OrigenDatos != OrigenDatos.Sintetico)
+                        + await db.Asistencias.IgnoreQueryFilters().CountAsync(a => ids.Contains(a.SocioId) && a.OrigenDatos != OrigenDatos.Sintetico)
+                        + await db.CuotasSocio.IgnoreQueryFilters().CountAsync(c => ids.Contains(c.SocioId) && c.OrigenDatos != OrigenDatos.Sintetico);
                 });
                 await CalcularKpisAsync(Segunda, Parametros(7));
 

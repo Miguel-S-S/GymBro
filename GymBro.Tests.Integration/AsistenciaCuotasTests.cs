@@ -59,6 +59,9 @@ namespace GymBro.Tests.Integration
             Assert.Equal(primero.Asistencia.Id, segundo.Asistencia.Id);
             Assert.Equal(primero.Asistencia.Id, manual.Asistencia.Id);
             Assert.Equal(1, await ContarAsistenciasAsync(_e.SocioA.Id));
+            // Etapa 7e: la asistencia hereda el origen del socio (Sintetico en este escenario).
+            Assert.Equal(OrigenDatos.Sintetico, await _e.LeerAsync(db => db.Asistencias.IgnoreQueryFilters()
+                .Where(a => a.SocioId == _e.SocioA.Id).Select(a => a.OrigenDatos).SingleAsync()));
         }
 
         [Fact]
@@ -156,6 +159,7 @@ namespace GymBro.Tests.Integration
             var lista = await dueno1.GetFromJsonAsync<List<Cuota>>("/api/cuotas?anio=2030&mes=1");
             Assert.Equal(new[] { _e.SocioA.Id, _e.SocioB.Id }.OrderBy(x => x), lista!.Select(c => c.SocioId).OrderBy(x => x));
             Assert.All(lista!, c => Assert.Equal(15000.50m, c.Monto));
+            Assert.Equal(0, await _e.ContarAsync(db => db.CuotasSocio.IgnoreQueryFilters().CountAsync(c => c.OrigenDatos != OrigenDatos.Sintetico)));
             Assert.DoesNotContain(lista!, c => c.SocioId == _e.SocioI.Id);
         }
 

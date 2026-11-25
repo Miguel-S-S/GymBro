@@ -1,0 +1,40 @@
+Etapa 8d - indicadores de cumplimiento del entrenamiento, build y pruebas
+Comando: dotnet build GymBro.slnx --artifacts-path .tmp-artifacts
+Commit: a17a7f26c114ebf691307cfbac6a0e0cef5d50da (rama etapa8d, creada desde etapa7d en 08e5dc21b6f3e5494c6a40977bfc6b5c58f90e59). Arbol sin cambios en archivos de codigo; unico archivo rastreado marcado como modificado: GymBro.Web/angular.json, con git diff vacio (contenido identico al commit).
+Fecha: 2026-11-25 14:03:16 -03:00
+Codigo de salida: 0
+Archivos del commit respecto de la base 08e5dc21b6f3e5494c6a40977bfc6b5c58f90e59:
+  M	GymBro.Application/DTOs/Comparacion/ComparacionSesionResponseDto.cs
+  M	GymBro.Application/Services/SesionEntrenamientoService.cs
+  M	GymBro.Web/src/app/core/models/sesion.models.ts
+  M	GymBro.Web/src/app/features/mi/mi-entrenar.spec.ts
+  M	GymBro.Web/src/app/features/mi/mi-historial.spec.ts
+  M	GymBro.Web/src/app/features/mi/mi-historial.ts
+Nota: Salida en .tmp-artifacts (--artifacts-path) porque GymBro.Api estaba en ejecucion desde Visual Studio y bloqueaba GymBro.Api/bin; la carpeta se borra al terminar
+------------------------------------------------------------
+  Determinando los proyectos que se van a restaurar...
+  Se ha restaurado C:\Users\miguel\source\repos\GymBro\GymBro.IA\GymBro.IA.csproj (en 93 ms).
+  Se ha restaurado C:\Users\miguel\source\repos\GymBro\GymBro.Application\GymBro.Application.csproj (en 284 ms).
+  Se ha restaurado C:\Users\miguel\source\repos\GymBro\GymBro.Domain\GymBro.Domain.csproj (en 284 ms).
+  Se ha restaurado C:\Users\miguel\source\repos\GymBro\GymBro.Tests\GymBro.Tests.csproj (en 302 ms).
+  Se ha restaurado C:\Users\miguel\source\repos\GymBro\GymBro.Tests.Integration\GymBro.Tests.Integration.csproj (en 359 ms).
+  Se ha restaurado C:\Users\miguel\source\repos\GymBro\GymBro.Infrastructure\GymBro.Infrastructure.csproj (en 370 ms).
+  Se ha restaurado C:\Users\miguel\source\repos\GymBro\GymBro.Api\GymBro.Api.csproj (en 370 ms).
+  WorkingDirectory: C:\Users\miguel\source\repos\GymBro\GymBro.Web
+  ProcessStartInfo.WorkingDirectory: C:\Users\miguel\source\repos\GymBro\GymBro.Web\
+CSC : warning CS2008: No se especificaron archivos de código fuente. [C:\Users\miguel\source\repos\GymBro\GymBro.IA\GymBro.IA.csproj]
+  GymBro.IA -> C:\Users\miguel\source\repos\GymBro\.tmp-artifacts\bin\GymBro.IA\debug\GymBro.IA.dll
+  GymBro.Domain -> C:\Users\miguel\source\repos\GymBro\.tmp-artifacts\bin\GymBro.Domain\debug\GymBro.Domain.dll
+  GymBro.Application -> C:\Users\miguel\source\repos\GymBro\.tmp-artifacts\bin\GymBro.Application\debug\GymBro.Application.dll
+  GymBro.Tests -> C:\Users\miguel\source\repos\GymBro\.tmp-artifacts\bin\GymBro.Tests\debug\GymBro.Tests.dll
+  GymBro.Infrastructure -> C:\Users\miguel\source\repos\GymBro\.tmp-artifacts\bin\GymBro.Infrastructure\debug\GymBro.Infrastructure.dll
+  GymBro.Api -> C:\Users\miguel\source\repos\GymBro\.tmp-artifacts\bin\GymBro.Api\debug\GymBro.Api.dll
+  GymBro.Tests.Integration -> C:\Users\miguel\source\repos\GymBro\.tmp-artifacts\bin\GymBro.Tests.Integration\debug\GymBro.Tests.Integration.dll
+
+Compilación correcta.
+
+CSC : warning CS2008: No se especificaron archivos de código fuente. [C:\Users\miguel\source\repos\GymBro\GymBro.IA\GymBro.IA.csproj]
+    1 Advertencia(s)
+    0 Errores
+
+Tiempo transcurrido 00:00:13.01

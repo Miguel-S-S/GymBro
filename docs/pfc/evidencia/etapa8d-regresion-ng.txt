@@ -1,0 +1,146 @@
+Etapa 8d - prueba de regresion del cliente (detalle de sesion del Socio)
+Procedimiento: se reemplaza temporalmente GymBro.Web/src/app/features/mi/mi-historial.ts por su version de la base 08e5dc21b6f3e5494c6a40977bfc6b5c58f90e59 (veredicto unico "Cumple objetivo"), se corre mi-historial.spec.ts, se restaura el archivo y se vuelve a correr.
+Commit: a17a7f26c114ebf691307cfbac6a0e0cef5d50da (rama etapa8d, creada desde etapa7d en 08e5dc21b6f3e5494c6a40977bfc6b5c58f90e59). Arbol sin cambios en archivos de codigo; unico archivo rastreado marcado como modificado: GymBro.Web/angular.json, con git diff vacio (contenido identico al commit).
+Fecha: 2026-11-25 14:04:31 -03:00
+Archivo restaurado: si (git diff vacio respecto del commit)
+============================================================
+1) SIN la Etapa 8d. Comando: npx ng test --watch=false --include src/app/features/mi/mi-historial.spec.ts
+Codigo de salida: 1 (se espera distinto de 0)
+------------------------------------------------------------
+❯ Building...
+✔ Building...
+Application bundle generation complete. [1.861 seconds] - 2026-11-25T17:04:22.678Z
+
+
+ RUN  v5.1.0 C:/Users/miguel/source/repos/GymBro/GymBro.Web
+
+ ❯  gymbro-web  src/app/features/mi/mi-historial.spec.ts (8 tests | 6 failed) 195ms
+   ❯ MiSesionDetalle (Socio): indicadores de cumplimiento (Etapa 8d) (6)
+     × 3 de 3 series con 8, 8 y 5 (rango 8-12): dos de tres en rango y sin "Cumple objetivo" 23ms
+     × 4 series con objetivo 3: "Series: 4 de 3", sin marcarlo como incumplimiento 17ms
+     × 2 series con objetivo 3: "Series: 2 de 3" 15ms
+     × ejercicio sin series registradas: "Series: 0 de 3" y sin indicador de repeticiones 10ms
+     × las series de calentamiento no cuentan en ninguno de los dos indicadores 11ms
+     × en ejercicios por tiempo el indicador dice "Segundos en rango" 14ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 6 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL   gymbro-web  src/app/features/mi/mi-historial.spec.ts > MiSesionDetalle (Socio): indicadores de cumplimiento (Etapa 8d) > 3 de 3 series con 8, 8 y 5 (rango 8-12): dos de tres en rango y sin "Cumple objetivo"
+AssertionError: expected 'arrow_back HistorialTue 17/11/2026 15…' to contain 'Series: 3 de 3'
+
+Expected: "Series: 3 de 3"
+Received: "arrow_back HistorialTue 17/11/2026 15:00Sesión de tu rutina: objetivo vs. lo que hiciste.1. Prensa de piernasObjetivo: 3 × 8–12 reps · RIR 2 · 90 sCumple objetivo158 kg × 8check_circle259 kg × 8check_circle375 kg × 5errorVolumen efectivo: 0 kg"
+
+ ❯ src/app/features/mi/mi-historial.spec.ts:137:15
+    135|   it('3 de 3 series con 8, 8 y 5 (rango 8-12): dos de tres en rango y …
+    136|     const t = await textoDetalle([[58, 8], [59, 8], [75, 5]]);
+    137|     expect(t).toContain('Series: 3 de 3');
+       |               ^
+    138|     expect(t).toContain('Repeticiones en rango: 2 de 3 series');
+    139|     expect(t).not.toMatch(/cumple objetivo/i);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/6]⎯
+
+ FAIL   gymbro-web  src/app/features/mi/mi-historial.spec.ts > MiSesionDetalle (Socio): indicadores de cumplimiento (Etapa 8d) > 4 series con objetivo 3: "Series: 4 de 3", sin marcarlo como incumplimiento
+AssertionError: expected 'arrow_back HistorialTue 17/11/2026 15…' to contain 'Series: 4 de 3'
+
+Expected: "Series: 4 de 3"
+Received: "arrow_back HistorialTue 17/11/2026 15:00Sesión de tu rutina: objetivo vs. lo que hiciste.1. Prensa de piernasObjetivo: 3 × 8–12 reps · RIR 2 · 90 sCumple objetivo150 kg × 10check_circle250 kg × 10check_circle350 kg × 9check_circle450 kg × 8check_circleVolumen efectivo: 0 kg"
+
+ ❯ src/app/features/mi/mi-historial.spec.ts:144:15
+    142|   it('4 series con objetivo 3: "Series: 4 de 3", sin marcarlo como inc…
+    143|     const t = await textoDetalle([[50, 10], [50, 10], [50, 9], [50, 8]…
+    144|     expect(t).toContain('Series: 4 de 3');
+       |               ^
+    145|     expect(t).toContain('Repeticiones en rango: 4 de 4 series');
+    146|     expect(t).not.toMatch(/excedieron|no cumple|cumple objetivo/i);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/6]⎯
+
+ FAIL   gymbro-web  src/app/features/mi/mi-historial.spec.ts > MiSesionDetalle (Socio): indicadores de cumplimiento (Etapa 8d) > 2 series con objetivo 3: "Series: 2 de 3"
+AssertionError: expected 'arrow_back HistorialTue 17/11/2026 15…' to contain 'Series: 2 de 3'
+
+Expected: "Series: 2 de 3"
+Received: "arrow_back HistorialTue 17/11/2026 15:00Sesión de tu rutina: objetivo vs. lo que hiciste.1. Prensa de piernasObjetivo: 3 × 8–12 reps · RIR 2 · 90 sCumple objetivo150 kg × 10check_circle250 kg × 9check_circleVolumen efectivo: 0 kg"
+
+ ❯ src/app/features/mi/mi-historial.spec.ts:151:15
+    149|   it('2 series con objetivo 3: "Series: 2 de 3"', async () => {
+    150|     const t = await textoDetalle([[50, 10], [50, 9]]);
+    151|     expect(t).toContain('Series: 2 de 3');
+       |               ^
+    152|     expect(t).toContain('Repeticiones en rango: 2 de 2 series');
+    153|     expect(t).not.toMatch(/faltaron|cumple objetivo/i);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/6]⎯
+
+ FAIL   gymbro-web  src/app/features/mi/mi-historial.spec.ts > MiSesionDetalle (Socio): indicadores de cumplimiento (Etapa 8d) > ejercicio sin series registradas: "Series: 0 de 3" y sin indicador de repeticiones
+AssertionError: expected 'arrow_back HistorialTue 17/11/2026 15…' to contain 'Series: 0 de 3'
+
+Expected: "Series: 0 de 3"
+Received: "arrow_back HistorialTue 17/11/2026 15:00Sesión de tu rutina: objetivo vs. lo que hiciste.1. Prensa de piernasObjetivo: 3 × 8–12 reps · RIR 2 · 90 sCumple objetivoNo registraste series de este ejercicio."
+
+ ❯ src/app/features/mi/mi-historial.spec.ts:158:15
+    156|   it('ejercicio sin series registradas: "Series: 0 de 3" y sin indicad…
+    157|     const t = await textoDetalle(null);
+    158|     expect(t).toContain('Series: 0 de 3');
+       |               ^
+    159|     expect(t).not.toContain('en rango');
+    160|     expect(t).toContain('No registraste series de este ejercicio.');
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/6]⎯
+
+ FAIL   gymbro-web  src/app/features/mi/mi-historial.spec.ts > MiSesionDetalle (Socio): indicadores de cumplimiento (Etapa 8d) > las series de calentamiento no cuentan en ninguno de los dos indicadores
+AssertionError: expected 'arrow_back HistorialTue 17/11/2026 15…' to contain 'Series: 2 de 3'
+
+Expected: "Series: 2 de 3"
+Received: "arrow_back HistorialTue 17/11/2026 15:00Sesión de tu rutina: objetivo vs. lo que hiciste.1. Prensa de piernasObjetivo: 3 × 8–12 reps · RIR 2 · 90 sCumple objetivo130 kg × 15220 kg × 10360 kg × 9check_circle460 kg × 6errorVolumen efectivo: 0 kg"
+
+ ❯ src/app/features/mi/mi-historial.spec.ts:166:15
+    164|     // Calentamiento 30 x 15 (fuera de rango) y 20 x 10 (dentro): ning…
+    165|     const t = await textoDetalle([[30, 15, true], [20, 10, true], [60,…
+    166|     expect(t).toContain('Series: 2 de 3');
+       |               ^
+    167|     expect(t).toContain('Repeticiones en rango: 1 de 2 series');
+    168|   });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[5/6]⎯
+
+ FAIL   gymbro-web  src/app/features/mi/mi-historial.spec.ts > MiSesionDetalle (Socio): indicadores de cumplimiento (Etapa 8d) > en ejercicios por tiempo el indicador dice "Segundos en rango"
+AssertionError: expected 'arrow_back HistorialTue 17/11/2026 15…' to contain 'Segundos en rango: 1 de 2 series'
+
+Expected: "Segundos en rango: 1 de 2 series"
+Received: "arrow_back HistorialTue 17/11/2026 15:00Sesión de tu rutina: objetivo vs. lo que hiciste.1. Prensa de piernasObjetivo: 3 × 8–12 s · RIR 2 · 90 sCumple objetivo10 kg × 10 s check_circle20 kg × 30 s error"
+
+ ❯ src/app/features/mi/mi-historial.spec.ts:172:15
+    170|   it('en ejercicios por tiempo el indicador dice "Segundos en rango"',…
+    171|     const t = await textoDetalle([[0, 10], [0, 30]], 'Segundos');
+    172|     expect(t).toContain('Segundos en rango: 1 de 2 series');
+       |               ^
+    173|   });
+    174| });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[6/6]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  6 failed | 2 passed (8)
+   Start at  14:04:23
+   Duration  1.96s (environment 57%, setup 18%, tests 11%, import 8%, transform 5%)
+
+============================================================
+2) CON la Etapa 8d. Mismo comando.
+Codigo de salida: 0 (se espera 0)
+------------------------------------------------------------
+❯ Building...
+✔ Building...
+Application bundle generation complete. [1.884 seconds] - 2026-11-25T17:04:29.310Z
+
+
+ RUN  v5.1.0 C:/Users/miguel/source/repos/GymBro/GymBro.Web
+
+
+ Test Files  1 passed (1)
+      Tests  8 passed (8)
+   Start at  14:04:29
+   Duration  1.96s (environment 59%, setup 18%, tests 10%, import 8%, transform 5%, worker 1%)
+

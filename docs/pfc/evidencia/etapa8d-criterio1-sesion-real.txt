@@ -1,0 +1,27 @@
+Etapa 8d - criterio de aceptacion 1: sesion real del 25/11/2026 11:50, Prensa de piernas
+Comando: docker exec gymbro-db psql -U postgres -d gymbro_db (consultas abajo). Solo datos de entrenamiento de ese ejercicio; sin datos personales del socio.
+Commit: a17a7f26c114ebf691307cfbac6a0e0cef5d50da (rama etapa8d, creada desde etapa7d en 08e5dc21b6f3e5494c6a40977bfc6b5c58f90e59). Arbol sin cambios en archivos de codigo; unico archivo rastreado marcado como modificado: GymBro.Web/angular.json, con git diff vacio (contenido identico al commit).
+Fecha: 2026-11-25 14:04:31 -03:00
+============================================================
+1) Series registradas
+select s.id as sesion, to_char(s.inicio at time zone 'America/Argentina/Buenos_Aires','DD/MM/YYYY HH24:MI') as inicio_local, e.nombre as ejercicio, pe.series_objetivo as objetivo_series, pe.repeticiones_minimas as rep_min, pe.repeticiones_maximas as rep_max, sr.orden_serie, sr.peso_levantado_kg as kg, sr.repeticiones as reps, sr.es_calentamiento as calentamiento from sesiones s join sesiones_ejercicios se on se.sesion_id = s.id and se.fecha_baja is null join ejercicios e on e.id = se.ejercicio_id left join prescripciones_ejercicios pe on pe.id = se.prescripcion_ejercicio_id join series_realizadas sr on sr.sesion_ejercicio_id = se.id and sr.fecha_baja is null where s.fecha_baja is null and to_char(s.inicio at time zone 'America/Argentina/Buenos_Aires','YYYY-MM-DD HH24:MI') = '2026-11-25 11:50' and e.nombre like 'Prensa%' order by sr.orden_serie;
+------------------------------------------------------------
+                sesion                |   inicio_local   |          ejercicio          | objetivo_series | rep_min | rep_max | orden_serie | kg | reps | calentamiento 
+--------------------------------------+------------------+-----------------------------+-----------------+---------+---------+-------------+----+------+---------------
+ ea693593-370d-43d8-b517-36476f414912 | 25/11/2026 11:50 | Prensa de piernas 45 grados |               3 |       8 |      12 |           1 | 58 |    8 | f
+ ea693593-370d-43d8-b517-36476f414912 | 25/11/2026 11:50 | Prensa de piernas 45 grados |               3 |       8 |      12 |           2 | 59 |    8 | f
+ ea693593-370d-43d8-b517-36476f414912 | 25/11/2026 11:50 | Prensa de piernas 45 grados |               3 |       8 |      12 |           3 | 75 |    5 | f
+(3 rows)
+
+============================================================
+2) Indicadores con la regla de la Etapa 8d (efectivas = sin calentamiento; en rango = min <= reps <= max)
+select count(*) filter (where not sr.es_calentamiento) as series_efectivas, max(pe.series_objetivo) as objetivo, count(*) filter (where not sr.es_calentamiento and sr.repeticiones between pe.repeticiones_minimas and pe.repeticiones_maximas) as en_rango from sesiones s join sesiones_ejercicios se on se.sesion_id = s.id and se.fecha_baja is null join ejercicios e on e.id = se.ejercicio_id join prescripciones_ejercicios pe on pe.id = se.prescripcion_ejercicio_id join series_realizadas sr on sr.sesion_ejercicio_id = se.id and sr.fecha_baja is null where s.fecha_baja is null and to_char(s.inicio at time zone 'America/Argentina/Buenos_Aires','YYYY-MM-DD HH24:MI') = '2026-11-25 11:50' and e.nombre like 'Prensa%';
+------------------------------------------------------------
+ series_efectivas | objetivo | en_rango 
+------------------+----------+----------
+                3 |        3 |        2
+(1 row)
+
+Resultado esperado en pantalla: "Series: 3 de 3" y "Repeticiones en rango: 2 de 3 series".
+La misma combinacion (objetivo 3 x 8-12; 58x8, 59x8, 75x5) es el primer caso de mi-historial.spec.ts (etapa8d-ng-test.txt).
+La pantalla real no se abrio en el navegador desde Claude Code.

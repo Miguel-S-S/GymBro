@@ -1,0 +1,44 @@
+Etapa 8d - indicadores de cumplimiento del entrenamiento, build y pruebas
+Comando: npx ng build
+Commit: a17a7f26c114ebf691307cfbac6a0e0cef5d50da (rama etapa8d, creada desde etapa7d en 08e5dc21b6f3e5494c6a40977bfc6b5c58f90e59). Arbol sin cambios en archivos de codigo; unico archivo rastreado marcado como modificado: GymBro.Web/angular.json, con git diff vacio (contenido identico al commit).
+Fecha: 2026-11-25 14:04:02 -03:00
+Codigo de salida: 0
+Archivos del commit respecto de la base 08e5dc21b6f3e5494c6a40977bfc6b5c58f90e59:
+  M	GymBro.Application/DTOs/Comparacion/ComparacionSesionResponseDto.cs
+  M	GymBro.Application/Services/SesionEntrenamientoService.cs
+  M	GymBro.Web/src/app/core/models/sesion.models.ts
+  M	GymBro.Web/src/app/features/mi/mi-entrenar.spec.ts
+  M	GymBro.Web/src/app/features/mi/mi-historial.spec.ts
+  M	GymBro.Web/src/app/features/mi/mi-historial.ts
+------------------------------------------------------------
+❯ Building...
+✔ Building...
+Initial chunk files | Names               |  Raw size | Estimated transfer size
+main-VSQWPT4X.js    | main                | 362.03 kB |                70.31 kB
+chunk-8VrOvRrD.js   | -                   | 338.27 kB |                86.79 kB
+styles-56MVVM6I.css | styles              |  25.10 kB |                 3.46 kB
+
+                    | Initial total       | 725.39 kB |               160.56 kB
+
+Lazy chunk files    | Names               |  Raw size | Estimated transfer size
+chunk-CpNxGM3k.js   | -                   |  44.69 kB |                 9.54 kB
+chunk-B4fLxs6F.js   | ejercicios-catalogo |  42.59 kB |                10.55 kB
+chunk-Cd9xKz1s.js   | -                   |  41.04 kB |                 8.71 kB
+chunk-bHYc6FUg.js   | -                   |  35.88 kB |                 8.83 kB
+chunk-BNxEa5_Z.js   | socio-detalle       |  35.15 kB |                 8.64 kB
+chunk-DU65STE0.js   | sesion-registro     |  34.48 kB |                 9.89 kB
+chunk-D8s90Vag.js   | -                   |  30.08 kB |                 7.09 kB
+chunk-BnFZQkvs.js   | -                   |  29.39 kB |                 4.91 kB
+chunk-MXJIiQyE.js   | mi-layout           |  29.18 kB |                 8.00 kB
+chunk-CE3Vt7-p.js   | -                   |  26.53 kB |                 4.48 kB
+chunk-BrA1oAKb.js   | -                   |  15.21 kB |                 4.17 kB
+chunk-ClAc1xeK.js   | mi-bienestar        |  14.15 kB |                 4.51 kB
+chunk-_v6HT3tL.js   | socios-lista        |  12.91 kB |                 4.01 kB
+chunk-BB6aS12n.js   | -                   |  12.05 kB |                 2.55 kB
+chunk-CvWw8g_Y.js   | equipamiento        |  11.38 kB |                 3.58 kB
+...and 33 more lazy chunks files. Use "--verbose" to show all the files.
+
+Application bundle generation complete. [5.069 seconds] - 2026-11-25T17:04:01.767Z
+
+Output location: C:\Users\miguel\source\repos\GymBro\GymBro.Web\dist\gymbro-web
+

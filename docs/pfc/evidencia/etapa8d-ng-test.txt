@@ -1,0 +1,26 @@
+Etapa 8d - indicadores de cumplimiento del entrenamiento, build y pruebas
+Comando: npx ng test --watch=false
+Commit: a17a7f26c114ebf691307cfbac6a0e0cef5d50da (rama etapa8d, creada desde etapa7d en 08e5dc21b6f3e5494c6a40977bfc6b5c58f90e59). Arbol sin cambios en archivos de codigo; unico archivo rastreado marcado como modificado: GymBro.Web/angular.json, con git diff vacio (contenido identico al commit).
+Fecha: 2026-11-25 14:04:17 -03:00
+Codigo de salida: 0
+Archivos del commit respecto de la base 08e5dc21b6f3e5494c6a40977bfc6b5c58f90e59:
+  M	GymBro.Application/DTOs/Comparacion/ComparacionSesionResponseDto.cs
+  M	GymBro.Application/Services/SesionEntrenamientoService.cs
+  M	GymBro.Web/src/app/core/models/sesion.models.ts
+  M	GymBro.Web/src/app/features/mi/mi-entrenar.spec.ts
+  M	GymBro.Web/src/app/features/mi/mi-historial.spec.ts
+  M	GymBro.Web/src/app/features/mi/mi-historial.ts
+------------------------------------------------------------
+❯ Building...
+✔ Building...
+Application bundle generation complete. [4.199 seconds] - 2026-11-25T17:04:08.522Z
+
+
+ RUN  v5.1.0 C:/Users/miguel/source/repos/GymBro/GymBro.Web
+
+
+ Test Files  33 passed (33)
+      Tests  220 passed (220)
+   Start at  14:04:09
+   Duration  8.53s (environment 69%, tests 16%, import 7%, setup 5%, transform 3%)
+

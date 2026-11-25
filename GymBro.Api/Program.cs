@@ -101,6 +101,20 @@ builder.Services.AddScoped<ICuotaRepository, CuotaRepository>();
 builder.Services.AddScoped<IAsistenciaService, AsistenciaService>();
 builder.Services.AddScoped<ICuotaService, CuotaService>();
 
+// Etapa 7e: modo generador sintético (herramienta de desarrollo). Solo con la opción explícita y en Development; en ese
+// modo la API no atiende pedidos HTTP: reemplaza la identidad y el reloj por los simulados, genera o elimina y termina.
+var modoSintetico = GymBro.Infrastructure.Sintetico.ModoSintetico.Solicitado(args);
+if (modoSintetico)
+{
+    if (!builder.Environment.IsDevelopment())
+    {
+        Console.Error.WriteLine("El generador sintético solo se ejecuta en el entorno Development.");
+        Environment.ExitCode = 2;
+        return;
+    }
+    GymBro.Infrastructure.Sintetico.ModoSintetico.AgregarModoSintetico(builder.Services);
+}
+
 builder.Services.Configure<JwtOptions>(builder.Configuration.GetSection(JwtOptions.Seccion));
 var jwt = builder.Configuration.GetSection(JwtOptions.Seccion).Get<JwtOptions>() ?? new JwtOptions();
 if (string.IsNullOrWhiteSpace(jwt.Key) || Encoding.UTF8.GetByteCount(jwt.Key) < 32)
@@ -200,6 +214,12 @@ using (var scope = app.Services.CreateScope())
             app.Configuration["DemoData:UrlFront"] ?? "http://localhost:4200",
             app.Configuration[DemoSeeder.ClavePassword]); // secreto: user-secrets (Etapa 8c, T9)
     }
+}
+
+if (modoSintetico)
+{
+    Environment.ExitCode = await GymBro.Infrastructure.Sintetico.ModoSintetico.EjecutarAsync(app.Services, args, Console.WriteLine);
+    return;
 }
 
 // Configure the HTTP request pipeline.

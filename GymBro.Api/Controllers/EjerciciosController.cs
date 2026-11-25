@@ -94,6 +94,18 @@ namespace GymBro.Api.Controllers
         public async Task<IActionResult> CambiarEstado(Guid id, [FromBody] EstadoEjercicioRequest request) =>
             Ok(await _propios.CambiarEstadoAsync(id, request.Activo));
 
+        /// <summary>
+        /// Etapa 9b-1: búsqueda semántica con la consulta en el cuerpo y filtros duros (activos, del gimnasio, con
+        /// equipamiento disponible; zona y equipamiento opcionales). Sin resultados responde 200 con una lista vacía.
+        /// </summary>
+        [HttpPost("busqueda-inteligente")]
+        public async Task<ActionResult<List<EjercicioBuscadoDto>>> BuscarConIAPost([FromBody] BusquedaSemanticaRequest request) =>
+            Ok(await _buscadorSemantico.BuscarAsync(request));
+
+        /// <summary>
+        /// Forma anterior, con la consulta en la URL. Se conserva por compatibilidad con los llamadores existentes; desde la
+        /// Etapa 9b-1 aplica los mismos filtros duros. Usar POST.
+        /// </summary>
         [HttpGet("busqueda-inteligente")]
         public async Task<IActionResult> BuscarConIA([FromQuery] string consulta, [FromQuery] int cantidad = 5)
         {

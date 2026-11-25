@@ -23,4 +23,13 @@
     {
         public RecursoNoEncontradoException(string mensaje) : base(mensaje) { }
     }
+
+    /// <summary>
+    /// Etapa 9b-1: un servicio externo (GymBro.IA u Ollama) no respondió o respondió con error (HTTP 503). El mensaje es
+    /// propio y no incluye el detalle técnico; la operación no produce efectos.
+    /// </summary>
+    public class ServicioExternoNoDisponibleException : Exception
+    {
+        public ServicioExternoNoDisponibleException(string mensaje, Exception? causa = null) : base(mensaje, causa) { }
+    }
 }

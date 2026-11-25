@@ -2,6 +2,8 @@
 fastapi==0.141.1
 uvicorn==0.52.4
 ollama==0.6.2
+# Pruebas del microservicio (fastapi.testclient); ya llega como dependencia de ollama, se fija explicitamente (Etapa 9b-1)
+httpx==0.28.1
 
 # Script de embeddings (generador_embeddings.py)
 psycopg2-binary==2.9.12

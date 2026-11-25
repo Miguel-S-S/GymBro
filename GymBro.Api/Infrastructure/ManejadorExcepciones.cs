@@ -19,12 +19,18 @@ namespace GymBro.Api.Infrastructure
                 NoAutenticadoException => (StatusCodes.Status401Unauthorized, "No autenticado"),
                 AccesoDenegadoException => (StatusCodes.Status403Forbidden, "Acceso denegado"),
                 RecursoNoEncontradoException => (StatusCodes.Status404NotFound, "No encontrado"),
+                // Etapa 9b-1: GymBro.IA u Ollama no disponibles; mensaje propio, sin detalle interno.
+                ServicioExternoNoDisponibleException => (StatusCodes.Status503ServiceUnavailable, "Servicio no disponible"),
                 // Etapa 10a: problema de datos o configuración del sistema; el mensaje es propio (sin detalle interno).
                 CatalogosIncompletosException => (StatusCodes.Status500InternalServerError, "Catálogo incompleto"),
                 _ => (StatusCodes.Status500InternalServerError, "Error interno")
             };
 
-            if (ex is CatalogosIncompletosException)
+            if (ex is ServicioExternoNoDisponibleException)
+            {
+                _logger.LogWarning(ex, "Servicio externo no disponible");
+            }
+            else if (ex is CatalogosIncompletosException)
             {
                 _logger.LogError(ex, "Catalogo incompleto");
             }

@@ -151,6 +151,10 @@ namespace GymBro.Tests.Integration
             Fila("GET", "/api/Ejercicios/zonas", "EjerciciosController: FallbackPolicy (usuario autenticado)",
                 (Anonimo, 401, Fallback), (SuperAdmin, 200, null));
 
+            // ---- Etapa 9b-1: búsqueda semántica por POST (sin datos de salud). Cuerpo vacío -> 400 sin llamar a la IA. ----
+            Fila("POST", "/api/Ejercicios/busqueda-inteligente", "EjerciciosController.BuscarConIAPost: FallbackPolicy (usuario autenticado)",
+                (Anonimo, 401, Fallback), (SuperAdmin, 400, CuerpoInvalido), (Dueno, 400, CuerpoInvalido), (Trainer, 400, CuerpoInvalido), (Socio, 400, CuerpoInvalido));
+
             // ---- Etapa 9a-2 y 9a-2b: ejercicios propios (D2: plataforma; D4: el Personal Trainer propone) ----
             // Solo celdas sin efectos: cuerpo vacío (400) o recurso inexistente (404). Los flujos permitidos los cubren
             // CatalogoGimnasioTests y AdministracionCatalogoTests.

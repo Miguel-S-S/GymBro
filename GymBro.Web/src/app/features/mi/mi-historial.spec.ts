@@ -90,3 +90,85 @@ describe('MiHistorial (Socio): conteos del listado', () => {
     expect(meta).toContain('2 ejercicios · 4 series');
   });
 });
+
+// Etapa 8d: dos indicadores independientes por ejercicio, sin veredicto global. Datos sinteticos; el primer caso
+// reproduce el de la Prensa de piernas del 25/11/2026 (objetivo 3 x 8-12; 58x8, 59x8, 75x5).
+type SerieDato = [peso: number, reps: number, calentamiento?: boolean];
+const PRENSA = { seriesObjetivo: 3, repeticionesMinimas: 8, repeticionesMaximas: 12, rirObjetivo: 2, descansoObjetivoSegundos: 90 };
+
+function ejercicioComparado(series: SerieDato[] | null, tipoMedida: 'Repeticiones' | 'Segundos' = 'Repeticiones') {
+  const detalles = (series ?? []).map(([peso, reps, cal = false], i) => ({
+    ordenSerie: i + 1, pesoLevantadoKg: peso, repeticiones: reps, rir: null, esCalentamiento: cal,
+    tiempoDescansoSegundos: null, volumen: peso * reps,
+    repeticionesComparacion: cal ? null
+      : { cumpleObjetivo: reps >= 8 && reps <= 12, desviacion: 0, mensaje: reps >= 8 && reps <= 12 ? 'Dentro del rango' : 'Fuera' },
+    rirComparacion: null,
+  }));
+  const efectivas = detalles.filter((d) => !d.esCalentamiento).length;
+  return {
+    ejercicioId: 'ej-prensa', orden: 1, tipoMedida, prescripcion: PRENSA,
+    // El veredicto anterior sigue en el contrato (obsoleto); la pantalla no debe mostrarlo.
+    comparacion: { series: { prescritas: 3, realizadasEfectivas: efectivas, diferencia: efectivas - 3, mensaje: 'Cumple objetivo' } },
+    ejecucion: series === null ? null : {
+      cantidadSeriesTotales: detalles.length, cantidadSeriesEfectivas: efectivas, cantidadSeriesCalentamiento: detalles.length - efectivas,
+      volumenTotalKg: 0, volumenEfectivoKg: 0, volumenCalentamientoKg: 0, detallesSeries: detalles,
+    },
+  };
+}
+
+async function textoDetalle(series: SerieDato[] | null, tipoMedida: 'Repeticiones' | 'Segundos' = 'Repeticiones') {
+  const comparacion: ComparacionSesion = { sesionId: 'ses1', prescripcionEntrenamientoId: 'p1', ejercicios: [ejercicioComparado(series, tipoMedida)] };
+  TestBed.configureTestingModule({
+    providers: [provideRouter([]),
+      { provide: SesionesApi, useValue: { obtener: () => of(SESION), comparacion: () => of(comparacion) } },
+      { provide: EjerciciosApi, useValue: { nombres: () => of({ 'ej-prensa': 'Prensa de piernas' }) } }],
+  });
+  const fixture = TestBed.createComponent(MiSesionDetalle);
+  fixture.componentRef.setInput('id', 'ses1');
+  fixture.detectChanges();
+  await fixture.whenStable();
+  fixture.detectChanges();
+  return ((fixture.nativeElement as HTMLElement).textContent ?? '').replace(/\s+/g, ' ');
+}
+
+describe('MiSesionDetalle (Socio): indicadores de cumplimiento (Etapa 8d)', () => {
+  it('3 de 3 series con 8, 8 y 5 (rango 8-12): dos de tres en rango y sin "Cumple objetivo"', async () => {
+    const t = await textoDetalle([[58, 8], [59, 8], [75, 5]]);
+    expect(t).toContain('Series: 3 de 3');
+    expect(t).toContain('Repeticiones en rango: 2 de 3 series');
+    expect(t).not.toMatch(/cumple objetivo/i);
+  });
+
+  it('4 series con objetivo 3: "Series: 4 de 3", sin marcarlo como incumplimiento', async () => {
+    const t = await textoDetalle([[50, 10], [50, 10], [50, 9], [50, 8]]);
+    expect(t).toContain('Series: 4 de 3');
+    expect(t).toContain('Repeticiones en rango: 4 de 4 series');
+    expect(t).not.toMatch(/excedieron|no cumple|cumple objetivo/i);
+  });
+
+  it('2 series con objetivo 3: "Series: 2 de 3"', async () => {
+    const t = await textoDetalle([[50, 10], [50, 9]]);
+    expect(t).toContain('Series: 2 de 3');
+    expect(t).toContain('Repeticiones en rango: 2 de 2 series');
+    expect(t).not.toMatch(/faltaron|cumple objetivo/i);
+  });
+
+  it('ejercicio sin series registradas: "Series: 0 de 3" y sin indicador de repeticiones', async () => {
+    const t = await textoDetalle(null);
+    expect(t).toContain('Series: 0 de 3');
+    expect(t).not.toContain('en rango');
+    expect(t).toContain('No registraste series de este ejercicio.');
+  });
+
+  it('las series de calentamiento no cuentan en ninguno de los dos indicadores', async () => {
+    // Calentamiento 30 x 15 (fuera de rango) y 20 x 10 (dentro): ninguno debe sumar.
+    const t = await textoDetalle([[30, 15, true], [20, 10, true], [60, 9], [60, 6]]);
+    expect(t).toContain('Series: 2 de 3');
+    expect(t).toContain('Repeticiones en rango: 1 de 2 series');
+  });
+
+  it('en ejercicios por tiempo el indicador dice "Segundos en rango"', async () => {
+    const t = await textoDetalle([[0, 10], [0, 30]], 'Segundos');
+    expect(t).toContain('Segundos en rango: 1 de 2 series');
+  });
+});

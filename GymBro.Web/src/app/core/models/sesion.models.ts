@@ -105,6 +105,11 @@ export interface EjercicioComparado {
       prescritas: number;
       realizadasEfectivas: number;
       diferencia: number;
+      /**
+       * @deprecated Etapa 8d: veredicto "Cumple objetivo" / "Faltaron N" / "Excedieron N". La interfaz del Socio ya no
+       * lo muestra (usa indicadoresCumplimiento). Se conserva en el contrato; hoy lo sigue usando la vista del
+       * Personal Trainer (sesiones/sesion-detalle.ts).
+       */
       mensaje: string;
     };
   };

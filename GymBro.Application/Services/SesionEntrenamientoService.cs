@@ -300,6 +300,8 @@ namespace GymBro.Application.Services
                 if (pres != null)
                 {
                     int realizadasEfectivas = ejec?.SeriesRealizadas.Count(s => !s.EsCalentamiento) ?? 0;
+                    // Etapa 8d: Mensaje queda obsoleto pero se sigue llenando para no cambiar el contrato.
+#pragma warning disable CS0618
                     dto.Comparacion.Series = new ComparacionSeriesDto
                     {
                         Prescritas = pres.SeriesObjetivo,
@@ -307,6 +309,7 @@ namespace GymBro.Application.Services
                         Diferencia = realizadasEfectivas - pres.SeriesObjetivo,
                         Mensaje = realizadasEfectivas == pres.SeriesObjetivo ? "Cumple objetivo" : $"{(realizadasEfectivas < pres.SeriesObjetivo ? "Faltaron" : "Excedieron")} {Math.Abs(realizadasEfectivas - pres.SeriesObjetivo)} series"
                     };
+#pragma warning restore CS0618
                 }
 
                 comparacionDto.Ejercicios.Add(dto);

@@ -137,3 +137,65 @@ describe('MiEntrenar: tipo de medida', () => {
     fixture.destroy();
   });
 });
+
+// Etapa 8d: autocompletado de "ultimas series" (columna "Anterior" y precarga), que depende del listado
+// GET /api/Sesiones corregido en la Etapa 8 (antes llegaba sin ejercicios). Datos sinteticos.
+describe('MiEntrenar: autocompletado con la sesion anterior', () => {
+  let http: HttpTestingController;
+
+  const SESION_PREVIA = {
+    id: 'ses-prev', socioId: 's1', prescripcionEntrenamientoId: 'p1', inicio: '2026-11-20T18:00:00Z', fin: '2026-11-20T19:00:00Z',
+    caloriasQuemadas: 0, frecuenciaCardiacaMaxima: 0, frecuenciaCardiacaPromedio: 0,
+    ejercicios: [{
+      id: 'se1', ejercicioId: 'ej-press', orden: 1, observaciones: null, prescripcionEjercicioId: 'pe1',
+      seriesRealizadas: [
+        { id: 'a', ordenSerie: 1, pesoLevantadoKg: 20, repeticiones: 15, rir: null, esCalentamiento: true, tiempoDescansoSegundos: null },
+        { id: 'b', ordenSerie: 2, pesoLevantadoKg: 40, repeticiones: 10, rir: 2, esCalentamiento: false, tiempoDescansoSegundos: 90 },
+        { id: 'c', ordenSerie: 3, pesoLevantadoKg: 42.5, repeticiones: 9, rir: 1, esCalentamiento: false, tiempoDescansoSegundos: 90 },
+      ],
+    }],
+  };
+
+  beforeEach(() => {
+    localStorage.clear();
+    localStorage.setItem('gymbro.sesion', JSON.stringify({
+      token: 't', rol: 'Socio', nombreCompleto: 'Ana', gimnasioId: null, socioId: 's1',
+      expiraUtc: new Date(Date.now() + 3_600_000).toISOString(),
+    }));
+    TestBed.configureTestingModule({ providers: [provideHttpClient(), provideHttpClientTesting(), provideRouter([])] });
+    http = TestBed.inject(HttpTestingController);
+  });
+  afterEach(() => { http.verify(); localStorage.clear(); });
+
+  async function abrirCon(historial: unknown[]) {
+    const fixture = TestBed.createComponent(MiEntrenar);
+    http.expectOne('/api/Socio/s1/prescripciones').flush([RUTINA]);
+    http.expectOne((r) => r.method === 'GET' && r.url === '/api/Sesiones').flush(historial);
+    fixture.detectChanges();
+    await fixture.whenStable();
+    fixture.detectChanges();
+    const el = fixture.nativeElement as HTMLElement;
+    const filas = Array.from(el.querySelectorAll('section.ejercicio .fila:not(.encabezado-fila)'));
+    const fila = (j: number) => ({
+      anterior: filas[j].querySelector('.anterior')!.textContent!.trim(),
+      peso: (filas[j].querySelector(`input[aria-label="Peso serie ${j + 1}"]`) as HTMLInputElement).value,
+      reps: (filas[j].querySelector(`input[aria-label="Repeticiones serie ${j + 1}"]`) as HTMLInputElement).value,
+    });
+    return { fixture, fila };
+  }
+
+  it('con sesion previa: "Anterior" y la precarga traen peso y repeticiones de las series efectivas', async () => {
+    const { fixture, fila } = await abrirCon([SESION_PREVIA]);
+    expect(fila(0)).toEqual({ anterior: '40 kg × 10', peso: '40', reps: '10' }); // el calentamiento no cuenta
+    expect(fila(1)).toEqual({ anterior: '42.5 kg × 9', peso: '42.5', reps: '9' });
+    // La rutina pide 3 series y la vez anterior hubo 2 efectivas: la tercera queda sin peso y con el minimo.
+    expect(fila(2)).toEqual({ anterior: '–', peso: '', reps: '8' });
+    fixture.destroy();
+  });
+
+  it('sin sesion previa: peso vacio y el minimo del rango de repeticiones', async () => {
+    const { fixture, fila } = await abrirCon([]);
+    for (const j of [0, 1, 2]) expect(fila(j)).toEqual({ anterior: '–', peso: '', reps: '8' });
+    fixture.destroy();
+  });
+});

@@ -8,9 +8,32 @@ import { forkJoin } from 'rxjs';
 import { EjerciciosApi } from '../../core/api/ejercicios.api';
 import { SesionesApi } from '../../core/api/sesiones.api';
 import { AuthService } from '../../core/auth/auth.service';
-import { ComparacionSesion, Sesion } from '../../core/models/sesion.models';
+import { ComparacionSesion, EjercicioComparado, Sesion } from '../../core/models/sesion.models';
 import { mensajeDeError } from '../../core/util/api-error';
 import { enSegundos, rangoConUnidad } from '../../core/util/rutina-formato';
+
+/** Etapa 8d: indicadores de cumplimiento de un ejercicio, sin veredicto global. */
+export interface IndicadoresCumplimiento {
+  /** Series efectivas registradas (sin calentamiento). Más series que el objetivo no es incumplimiento. */
+  series: number;
+  /** Series efectivas con minimo <= valor <= maximo (extremos incluidos). */
+  enRango: number;
+  /** "Repeticiones" o "Segundos", segun el tipo de medida del ejercicio (Etapa 9a-1). */
+  etiquetaRango: string;
+}
+
+/**
+ * Etapa 8d: calcula "Series: N de M" y "Repeticiones en rango: K de N series" con los datos que ya devuelve
+ * GET /api/Sesiones/{id}/comparacion (sin cambiar el contrato). El RIR no participa.
+ */
+export function indicadoresCumplimiento(e: EjercicioComparado): IndicadoresCumplimiento {
+  const efectivas = (e.ejecucion?.detallesSeries ?? []).filter((s) => !s.esCalentamiento);
+  const p = e.prescripcion;
+  const enRango = p
+    ? efectivas.filter((s) => s.repeticiones >= p.repeticionesMinimas && s.repeticiones <= p.repeticionesMaximas).length
+    : 0;
+  return { series: efectivas.length, enRango, etiquetaRango: enSegundos(e.tipoMedida) ? 'Segundos' : 'Repeticiones' };
+}
 
 /** Historial del Socio: sesiones registradas, de la más reciente a la más antigua. */
 @Component({
@@ -96,7 +119,13 @@ export class MiHistorial {
           @if (e.prescripcion; as p) {
             <p class="meta">Objetivo: {{ p.seriesObjetivo }} × {{ rango(p.repeticionesMinimas, p.repeticionesMaximas, e.tipoMedida) }}
               @if (p.rirObjetivo !== null) { · RIR {{ p.rirObjetivo }} } · {{ p.descansoObjetivoSegundos }} s</p>
-            <p class="resultado" [class.ok]="e.comparacion.series.diferencia === 0">{{ e.comparacion.series.mensaje }}</p>
+            @let ind = indicadores(e);
+            <p class="indicadores">
+              <span class="indicador">Series: {{ ind.series }} de {{ p.seriesObjetivo }}</span>
+              @if (ind.series > 0) {
+                <span class="indicador">{{ ind.etiquetaRango }} en rango: {{ ind.enRango }} de {{ ind.series }} series</span>
+              }
+            </p>
           }
           @if (e.ejecucion; as x) {
             @for (d of x.detallesSeries; track d.ordenSerie) {
@@ -123,8 +152,8 @@ export class MiHistorial {
     .meta { margin: 2px 0; color: var(--mat-sys-on-surface-variant); font: var(--mat-sys-body-small); }
     .ejercicio { border: 1px solid var(--mat-sys-outline-variant); border-radius: 16px; padding: 12px; margin: 12px 0; }
     .ejercicio h2 { margin: 0 0 4px; font: var(--mat-sys-title-medium); }
-    .resultado { margin: 4px 0 8px; font: var(--mat-sys-label-large); color: var(--mat-sys-error); }
-    .resultado.ok, mat-icon.ok { color: var(--mat-sys-primary); }
+    .indicadores { display: flex; flex-wrap: wrap; gap: 4px 16px; margin: 4px 0 8px; font: var(--mat-sys-label-large); }
+    mat-icon.ok { color: var(--mat-sys-primary); }
     .serie { display: grid; grid-template-columns: 24px 1fr 24px; gap: 8px; align-items: center; padding: 4px 0; font: var(--mat-sys-body-medium); }
     mat-icon { color: var(--mat-sys-error); font-size: 20px; width: 20px; height: 20px; }
   `,
@@ -133,6 +162,7 @@ export class MiSesionDetalle {
   /** Etapa 9a-1: unidad según el tipo de medida del ejercicio (sin temporizador). */
   readonly rango = rangoConUnidad;
   readonly segundos = enSegundos;
+  readonly indicadores = indicadoresCumplimiento;
   private readonly api = inject(SesionesApi);
   private readonly ejercicios = inject(EjerciciosApi);
 

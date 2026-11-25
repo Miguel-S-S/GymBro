@@ -1,0 +1,30 @@
+﻿Etapa 7e - generador sintetico reproducible, build y pruebas
+Comando: npx ng test --watch=false
+Commit: f8b2293cb854050ff9315c8bbc4b8fff798285b6 (rama cierre-pfc)
+Estado del arbol de trabajo (git status --short):
+M GymBro.Web/angular.json
+?? CLAUDE.md
+?? docs/pfc/etapas/etapa-7e-informe.md
+?? docs/pfc/evidencia/etapa7e-corrida-60x12.txt
+?? docs/pfc/evidencia/etapa7e-dotnet-build.txt
+?? docs/pfc/evidencia/etapa7e-dotnet-test.txt
+?? docs/pfc/evidencia/etapa7e-ng-build.txt
+?? docs/pfc/evidencia/etapa7e-ng-test.txt
+Fecha: 2026-11-25 18:32:42 -03:00
+Codigo de salida: 0
+Nota: Codigo en d82bb44 y f8b2293 (origen heredado). Cambios de la 9b-1 en curso guardados con git stash durante esta verificacion. GymBro.Web/angular.json modificado solo por fin de linea (git diff vacio); CLAUDE.md no rastreado por decision del desarrollador
+------------------------------------------------------------
+> Building...
+√ Building...
+Application bundle generation complete. [5.351 seconds] - 2026-11-25T21:32:50.573Z
+
+
+ RUN  v5.1.0 C:/Users/miguel/source/repos/GymBro/GymBro.Web
+
+
+ Test Files  36 passed (36)
+      Tests  250 passed (250)
+   Start at  18:32:51
+   Duration  10.41s (environment 67%, tests 17%, import 8%, setup 6%, transform 3%)
+
+

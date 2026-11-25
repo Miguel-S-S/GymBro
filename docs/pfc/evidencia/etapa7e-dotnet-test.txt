@@ -1,0 +1,25 @@
+﻿Etapa 7e - generador sintetico reproducible, build y pruebas
+Comando: dotnet test GymBro.slnx --artifacts-path .tmp-artifacts --no-build
+Commit: f8b2293cb854050ff9315c8bbc4b8fff798285b6 (rama cierre-pfc)
+Estado del arbol de trabajo (git status --short):
+M GymBro.Web/angular.json
+?? CLAUDE.md
+?? docs/pfc/etapas/etapa-7e-informe.md
+?? docs/pfc/evidencia/etapa7e-corrida-60x12.txt
+?? docs/pfc/evidencia/etapa7e-dotnet-build.txt
+?? docs/pfc/evidencia/etapa7e-dotnet-test.txt
+?? docs/pfc/evidencia/etapa7e-ng-build.txt
+?? docs/pfc/evidencia/etapa7e-ng-test.txt
+Fecha: 2026-11-25 18:31:17 -03:00
+Codigo de salida: 0
+Nota: Codigo en d82bb44 y f8b2293 (origen heredado). Cambios de la 9b-1 en curso guardados con git stash durante esta verificacion. GymBro.Web/angular.json modificado solo por fin de linea (git diff vacio); CLAUDE.md no rastreado por decision del desarrollador
+------------------------------------------------------------
+Serie de pruebas para C:\Users\miguel\source\repos\GymBro\.tmp-artifacts\bin\GymBro.Tests.Integration\debug\GymBro.Tests.Integration.dll (.NETCoreApp,Version=v10.0)
+Serie de pruebas para C:\Users\miguel\source\repos\GymBro\.tmp-artifacts\bin\GymBro.Tests\debug\GymBro.Tests.dll (.NETCoreApp,Version=v10.0)
+1 archivos de prueba en total coincidieron con el patrón especificado.
+1 archivos de prueba en total coincidieron con el patrón especificado.
+
+Correctas! - Con error:     0, Superado:   370, Omitido:     0, Total:   370, Duración: 347 ms - GymBro.Tests.dll (net10.0)
+
+Correctas! - Con error:     0, Superado:   543, Omitido:     0, Total:   543, Duración: 1 m 9 s - GymBro.Tests.Integration.dll (net10.0)
+

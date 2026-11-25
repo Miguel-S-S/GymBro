@@ -1,0 +1,11 @@
+﻿Etapa 7e - reproducibilidad entre procesos: la misma prueba (semilla 7, 12 socios, 8 semanas) en dos procesos dotnet test distintos, cada uno con su PostgreSQL descartable
+Commit: f8b2293cb854050ff9315c8bbc4b8fff798285b6
+Fecha: 2026-11-25 18:40:25 -03:00
+Datos sinteticos (Sintetico).
+------------------------------------------------------------
+Proceso 1 (codigo 0):
+ Semilla 7, primera: ResumenSintetico { Sha256 = 41a7b5c75c6a771e49e309d148f5f3e63f296853ac91c5b08412fcd0d8147505, Socios = 12, Sesiones = 144, Series = 2392, Prescripciones = 89, Bienestar = 364, Asistencias = 144, Cuotas = 36, Alertas = 21 }
+ Semilla 7, segunda: ResumenSintetico { Sha256 = 41a7b5c75c6a771e49e309d148f5f3e63f296853ac91c5b08412fcd0d8147505, Socios = 12, Sesiones = 144, Series = 2392, Prescripciones = 89, Bienestar = 364, Asistencias = 144, Cuotas = 36, Alertas = 21 }
+Proceso 2 (codigo 0):
+ Semilla 7, primera: ResumenSintetico { Sha256 = 41a7b5c75c6a771e49e309d148f5f3e63f296853ac91c5b08412fcd0d8147505, Socios = 12, Sesiones = 144, Series = 2392, Prescripciones = 89, Bienestar = 364, Asistencias = 144, Cuotas = 36, Alertas = 21 }
+ Semilla 7, segunda: ResumenSintetico { Sha256 = 41a7b5c75c6a771e49e309d148f5f3e63f296853ac91c5b08412fcd0d8147505, Socios = 12, Sesiones = 144, Series = 2392, Prescripciones = 89, Bienestar = 364, Asistencias = 144, Cuotas = 36, Alertas = 21 }

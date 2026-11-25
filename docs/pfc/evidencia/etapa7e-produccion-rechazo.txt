@@ -1,0 +1,7 @@
+﻿Etapa 7e - el modo generador fuera de Development
+Comando: ASPNETCORE_ENVIRONMENT=Production dotnet .tmp-artifacts/bin/GymBro.Api/debug/GymBro.Api.dll --generar-sintetico --semilla 1
+Commit: f8b2293cb854050ff9315c8bbc4b8fff798285b6
+Fecha: 2026-11-25 18:40:26 -03:00
+Codigo de salida: 2 (esperado 2; el proceso termina antes de leer la configuracion de la base: no hay conexion ni migraciones)
+------------------------------------------------------------
+El generador sintético solo se ejecuta en el entorno Development.

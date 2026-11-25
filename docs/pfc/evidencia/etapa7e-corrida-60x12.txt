@@ -1,0 +1,26 @@
+﻿Etapa 7e - corrida con el tamano por defecto del generador (60 socios, 12 semanas) contra PostgreSQL descartable (Testcontainers)
+Comando: GYMBRO_SINTETICO_SOCIOS=60 GYMBRO_SINTETICO_SEMANAS=12 dotnet test --filter GeneradorSinteticoTests (verbosidad detallada; se conservan las lineas de resultados)
+Commit: f8b2293cb854050ff9315c8bbc4b8fff798285b6
+Fecha: 2026-11-25 18:33:01 -03:00
+Codigo de salida: 0
+Datos sinteticos (Sintetico): las metricas verifican el procedimiento y no el desempeno con personas.
+Nota: 'Failed executing DbCommand' en el registro detallado, si aparece, es la consulta inicial de __EFMigrationsHistory sobre una base nueva (comportamiento normal de EF al migrar).
+------------------------------------------------------------
+      Failed executing DbCommand (21ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+  Correctas GymBro.Tests.Integration.GeneradorSinteticoTests.K1_recupera_la_ganancia_semanal_de_carga_por_nivel [10 ms]
+ K1 Principiante: ganancia semanal observada 0,0201 vs parametro 0,0200 (n = 171 pendientes)
+ K1 Avanzado: ganancia semanal observada 0,0049 vs parametro 0,0050 (n = 100 pendientes)
+ K1 Intermedio: ganancia semanal observada 0,0101 vs parametro 0,0100 (n = 208 pendientes)
+  Correctas GymBro.Tests.Integration.GeneradorSinteticoTests.K3_recupera_el_porcentaje_en_rango_y_el_sesgo_de_RIR [< 1 ms]
+ K3: en rango observado 0,8227 vs esperado 0,8219 (n = 15089); desvio RIR observado 0,5546 vs esperado 0,5575 (n = 15089)
+  Correctas GymBro.Tests.Integration.GeneradorSinteticoTests.Misma_semilla_y_parametros_producen_el_mismo_resumen [19 ms]
+ Semilla 7, primera: ResumenSintetico { Sha256 = 8fa319a996e6fcdfc9cd4b5586a1ef9e58b094b519fb6f29decaaf2214cf6cb2, Socios = 60, Sesiones = 951, Series = 16040, Prescripciones = 592, Bienestar = 2494, Asistencias = 951, Cuotas = 180, Alertas = 137 }
+ Semilla 7, segunda: ResumenSintetico { Sha256 = 8fa319a996e6fcdfc9cd4b5586a1ef9e58b094b519fb6f29decaaf2214cf6cb2, Socios = 60, Sesiones = 951, Series = 16040, Prescripciones = 592, Bienestar = 2494, Asistencias = 951, Cuotas = 180, Alertas = 137 }
+  Correctas GymBro.Tests.Integration.GeneradorSinteticoTests.Otra_semilla_produce_otros_datos_y_otros_ids [4 ms]
+ Semilla 8: ResumenSintetico { Sha256 = 06afb8c5c4c1ff4aad64605f1bd0d4130dfea02733d5abf543f6fdbb7ac169e3, Socios = 60, Sesiones = 928, Series = 15281, Prescripciones = 614, Bienestar = 2600, Asistencias = 928, Cuotas = 180, Alertas = 143 }
+  Correctas GymBro.Tests.Integration.GeneradorSinteticoTests.La_eliminacion_borra_solo_lo_sintetico_de_gimnasios_sinteticos [6 ms]
+ Eliminacion intermedia: EliminacionSintetica { Gimnasios = 1, Socios = 60, Sesiones = 951, Asistencias = 951, Cuotas = 180, Usuarios = 61 }; final: EliminacionSintetica { Gimnasios = 2, Socios = 120, Sesiones = 1879, Asistencias = 1879, Cuotas = 360, Usuarios = 122 }
+  Correctas GymBro.Tests.Integration.GeneradorSinteticoTests.K4_recupera_la_probabilidad_de_completar_las_series_y_K2_coincide_con_las_series [3 ms]
+ K4: series completas observadas 0,8496 vs parametro 0,8500 (n = 951); indice de seguridad agregado 0,7992
+  Correctas GymBro.Tests.Integration.GeneradorSinteticoTests.El_generador_crea_solo_datos_Sintetico_socios_rutinas_asistencias_y_cuotas [< 1 ms]
+ Tiempo total: 4,2669 Minutos

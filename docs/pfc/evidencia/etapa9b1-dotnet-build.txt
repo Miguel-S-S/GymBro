@@ -1,0 +1,32 @@
+﻿Etapa 9b-1 - recuperacion medible (filtros y evaluacion), build y pruebas
+Comando: dotnet build GymBro.slnx --artifacts-path .tmp-artifacts
+Commit: c04bb143e53592c1b871a2f7fdddd3811ad2a4b4 (rama cierre-pfc)
+Estado del arbol de trabajo (git status --short):
+M GymBro.Web/angular.json
+?? CLAUDE.md
+?? docs/pfc/etapas/etapa-9b1-informe.md
+Fecha: 2026-11-25 18:42:33 -03:00
+Codigo de salida: 0
+Nota: Trabajo en curso de la 9b-2 guardado con git stash durante esta verificacion. GymBro.Web/angular.json modificado solo por fin de linea (git diff vacio); CLAUDE.md no rastreado por decision del desarrollador
+------------------------------------------------------------
+  Determinando los proyectos que se van a restaurar...
+  Todos los proyectos están actualizados para la restauración.
+  WorkingDirectory: C:\Users\miguel\source\repos\GymBro\GymBro.Web
+  ProcessStartInfo.WorkingDirectory: C:\Users\miguel\source\repos\GymBro\GymBro.Web\
+CSC : warning CS2008: No se especificaron archivos de código fuente. [C:\Users\miguel\source\repos\GymBro\GymBro.IA\GymBro.IA.csproj]
+  GymBro.IA -> C:\Users\miguel\source\repos\GymBro\.tmp-artifacts\bin\GymBro.IA\debug\GymBro.IA.dll
+  GymBro.Domain -> C:\Users\miguel\source\repos\GymBro\.tmp-artifacts\bin\GymBro.Domain\debug\GymBro.Domain.dll
+  GymBro.Application -> C:\Users\miguel\source\repos\GymBro\.tmp-artifacts\bin\GymBro.Application\debug\GymBro.Application.dll
+  GymBro.Infrastructure -> C:\Users\miguel\source\repos\GymBro\.tmp-artifacts\bin\GymBro.Infrastructure\debug\GymBro.Infrastructure.dll
+  GymBro.Tests -> C:\Users\miguel\source\repos\GymBro\.tmp-artifacts\bin\GymBro.Tests\debug\GymBro.Tests.dll
+  GymBro.Api -> C:\Users\miguel\source\repos\GymBro\.tmp-artifacts\bin\GymBro.Api\debug\GymBro.Api.dll
+  GymBro.Tests.Integration -> C:\Users\miguel\source\repos\GymBro\.tmp-artifacts\bin\GymBro.Tests.Integration\debug\GymBro.Tests.Integration.dll
+
+Compilación correcta.
+
+CSC : warning CS2008: No se especificaron archivos de código fuente. [C:\Users\miguel\source\repos\GymBro\GymBro.IA\GymBro.IA.csproj]
+    1 Advertencia(s)
+    0 Errores
+
+Tiempo transcurrido 00:00:08.35
+

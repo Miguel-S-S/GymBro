@@ -1,0 +1,43 @@
+﻿Etapa 9b-1 - recuperacion medible (filtros y evaluacion), build y pruebas
+Comando: npx ng build
+Commit: c04bb143e53592c1b871a2f7fdddd3811ad2a4b4 (rama cierre-pfc)
+Estado del arbol de trabajo (git status --short):
+M GymBro.Web/angular.json
+?? CLAUDE.md
+?? docs/pfc/etapas/etapa-9b1-informe.md
+Fecha: 2026-11-25 18:44:32 -03:00
+Codigo de salida: 0
+Nota: Trabajo en curso de la 9b-2 guardado con git stash durante esta verificacion. GymBro.Web/angular.json modificado solo por fin de linea (git diff vacio); CLAUDE.md no rastreado por decision del desarrollador
+------------------------------------------------------------
+> Building...
+√ Building...
+Initial chunk files | Names               |  Raw size | Estimated transfer size
+main-WRRACQMI.js    | main                | 363.65 kB |                70.36 kB
+chunk-BsuPhRNV.js   | -                   | 342.59 kB |                88.05 kB
+styles-56MVVM6I.css | styles              |  25.10 kB |                 3.46 kB
+
+                    | Initial total       | 731.34 kB |               161.86 kB
+
+Lazy chunk files    | Names               |  Raw size | Estimated transfer size
+chunk-D8SSa9rq.js   | -                   |  44.68 kB |                 9.55 kB
+chunk-7E2Ow7xV.js   | ejercicios-catalogo |  42.37 kB |                10.58 kB
+chunk-BUXj3BmI.js   | -                   |  41.07 kB |                 8.70 kB
+chunk-pnx1TOGs.js   | -                   |  35.86 kB |                 8.84 kB
+chunk-CmGr5Lnv.js   | socio-detalle       |  35.14 kB |                 8.65 kB
+chunk-DQ08LUqX.js   | sesion-registro     |  34.37 kB |                 9.93 kB
+chunk-qPWvvfNS.js   | cuotas              |  32.76 kB |                 7.61 kB
+chunk-CF301s7x.js   | -                   |  30.09 kB |                 7.11 kB
+chunk-BxFWbFJc.js   | -                   |  29.39 kB |                 4.91 kB
+chunk-CViQj9iS.js   | mi-layout           |  29.35 kB |                 8.06 kB
+chunk-Dmav7TCW.js   | mi-asistencia       |  26.64 kB |                 8.93 kB
+chunk-Du5m4SBv.js   | -                   |  26.53 kB |                 4.49 kB
+chunk-49fhaPRH.js   | -                   |  15.21 kB |                 4.18 kB
+chunk-QfHpjEua.js   | mi-bienestar        |  14.16 kB |                 4.52 kB
+chunk-170-GDXe.js   | socios-lista        |  12.91 kB |                 4.01 kB
+...and 38 more lazy chunks files. Use "--verbose" to show all the files.
+
+Application bundle generation complete. [10.751 seconds] - 2026-11-25T21:44:46.425Z
+
+Output location: C:\Users\miguel\source\repos\GymBro\GymBro.Web\dist\gymbro-web
+
+

@@ -1,0 +1,25 @@
+﻿Etapa 9b-1 - recuperacion medible (filtros y evaluacion), build y pruebas
+Comando: npx ng test --watch=false
+Commit: c04bb143e53592c1b871a2f7fdddd3811ad2a4b4 (rama cierre-pfc)
+Estado del arbol de trabajo (git status --short):
+M GymBro.Web/angular.json
+?? CLAUDE.md
+?? docs/pfc/etapas/etapa-9b1-informe.md
+Fecha: 2026-11-25 18:44:46 -03:00
+Codigo de salida: 0
+Nota: Trabajo en curso de la 9b-2 guardado con git stash durante esta verificacion. GymBro.Web/angular.json modificado solo por fin de linea (git diff vacio); CLAUDE.md no rastreado por decision del desarrollador
+------------------------------------------------------------
+> Building...
+√ Building...
+Application bundle generation complete. [8.091 seconds] - 2026-11-25T21:44:57.889Z
+
+
+ RUN  v5.1.0 C:/Users/miguel/source/repos/GymBro/GymBro.Web
+
+
+ Test Files  36 passed (36)
+      Tests  250 passed (250)
+   Start at  18:44:58
+   Duration  16.56s (environment 72%, tests 14%, import 6%, setup 6%, transform 2%)
+
+

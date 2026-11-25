@@ -1,0 +1,20 @@
+﻿Etapa 9b-2 - sustitutos con modelo de lenguaje local, build y pruebas
+Comando: dotnet test GymBro.slnx --artifacts-path .tmp-artifacts --no-build
+Commit: 8b7fcf0d0bdee0dff0fa0b1591bef4c919b4da8f (rama cierre-pfc)
+Estado del arbol de trabajo (git status --short):
+M GymBro.Web/angular.json
+?? CLAUDE.md
+?? GymBro.Analytics/
+Fecha: 2026-11-25 18:49:15 -03:00
+Codigo de salida: 0
+Nota: GymBro.Analytics/ sin rastrear (trabajo de la 10b-1 en curso, fuera de la solucion .NET y del cliente). GymBro.Web/angular.json modificado solo por fin de linea (git diff vacio); CLAUDE.md no rastreado por decision del desarrollador
+------------------------------------------------------------
+Serie de pruebas para C:\Users\miguel\source\repos\GymBro\.tmp-artifacts\bin\GymBro.Tests\debug\GymBro.Tests.dll (.NETCoreApp,Version=v10.0)
+Serie de pruebas para C:\Users\miguel\source\repos\GymBro\.tmp-artifacts\bin\GymBro.Tests.Integration\debug\GymBro.Tests.Integration.dll (.NETCoreApp,Version=v10.0)
+1 archivos de prueba en total coincidieron con el patrón especificado.
+1 archivos de prueba en total coincidieron con el patrón especificado.
+
+Correctas! - Con error:     0, Superado:   382, Omitido:     0, Total:   382, Duración: 350 ms - GymBro.Tests.dll (net10.0)
+
+Correctas! - Con error:     0, Superado:   575, Omitido:     0, Total:   575, Duración: 1 m 24 s - GymBro.Tests.Integration.dll (net10.0)
+

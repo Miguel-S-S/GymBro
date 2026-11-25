@@ -1,0 +1,36 @@
+﻿Etapa 9b-2 - pruebas de Python (unittest), con Ollama reemplazado por un doble
+Commit: 8b7fcf0d0bdee0dff0fa0b1591bef4c919b4da8f
+Fecha: 2026-11-25 18:51:18 -03:00
+Interprete: Python 3.14.6 (GymBro.IA/venv)
+------------------------------------------------------------
+Comando: python -m unittest discover -s GymBro.IA -p test_*.py -v  (codigo 0)
+C:\Users\miguel\source\repos\GymBro\GymBro.IA\venv\Lib\site-packages\fastapi\testclient.py:1: StarletteDeprecationWarning: Using `httpx` with `starlette.testclient` is deprecated; install `httpx2` instead.
+  from starlette.testclient import TestClient as TestClient  # noqa
+test_ollama_caido_responde_503 (test_main.GenerarEmbeddingTests.test_ollama_caido_responde_503) ... ok
+test_sin_texto_responde_400 (test_main.GenerarEmbeddingTests.test_sin_texto_responde_400) ... ok
+test_texto_en_el_cuerpo (test_main.GenerarEmbeddingTests.test_texto_en_el_cuerpo) ... ok
+test_texto_en_la_cadena_de_consulta_sigue_funcionando (test_main.GenerarEmbeddingTests.test_texto_en_la_cadena_de_consulta_sigue_funcionando) ... ok
+test_devuelve_el_texto_del_modelo_y_pide_json_con_temperatura_0 (test_sustitutos.SustitutosTests.test_devuelve_el_texto_del_modelo_y_pide_json_con_temperatura_0) ... ok
+test_el_mensaje_de_sistema_prohibe_inventar (test_sustitutos.SustitutosTests.test_el_mensaje_de_sistema_prohibe_inventar) ... ok
+test_ollama_caido_responde_503 (test_sustitutos.SustitutosTests.test_ollama_caido_responde_503) ... ok
+test_respeta_conjunto (test_sustitutos.SustitutosTests.test_respeta_conjunto) ... ok
+test_sin_candidatos_o_motivo_responde_422 (test_sustitutos.SustitutosTests.test_sin_candidatos_o_motivo_responde_422) ... ok
+test_sin_modelo_configurado_responde_503 (test_sustitutos.SustitutosTests.test_sin_modelo_configurado_responde_503) ... ok
+System.Management.Automation.RemoteException
+----------------------------------------------------------------------
+Ran 10 tests in 0.051s
+System.Management.Automation.RemoteException
+OK
+------------------------------------------------------------
+Comando: python -m unittest discover -s GymBro.IA/evaluacion -v  (codigo 0)
+test_el_banco_tiene_al_menos_30_consultas_y_etiquetas_con_formato_valido (test_metricas.MetricasTests.test_el_banco_tiene_al_menos_30_consultas_y_etiquetas_con_formato_valido) ... ok
+test_rango_reciproco (test_metricas.MetricasTests.test_rango_reciproco) ... ok
+test_recall_en_k (test_metricas.MetricasTests.test_recall_en_k) ... ok
+test_resumen_con_valores_conocidos (test_metricas.MetricasTests.test_resumen_con_valores_conocidos) ... ok
+test_separar_ids (test_metricas.MetricasTests.test_separar_ids) ... ok
+test_sin_etiquetas_no_hay_metricas (test_metricas.MetricasTests.test_sin_etiquetas_no_hay_metricas) ... ok
+System.Management.Automation.RemoteException
+----------------------------------------------------------------------
+Ran 6 tests in 0.004s
+System.Management.Automation.RemoteException
+OK

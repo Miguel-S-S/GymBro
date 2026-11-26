@@ -1,0 +1,67 @@
+﻿Etapa 10b-1 - SQL de la migracion Etapa10b1_PrediccionAbandono (dotnet ef migrations script --idempotent, sin conexion a ninguna base)
+Commit: 8c8b2cd0d752e1a2994028c289196ae552ee9d8f
+Fecha: 2026-11-25 21:35:16 -03:00
+Codigos de salida: Up=0 Down=0
+Base local gymbro-db: NO se aplico desde Claude Code (se aplica al levantar GymBro.Api). Up y Down verificados contra PostgreSQL descartable: MigracionPrediccionAbandonoTests.
+============================== UP ==============================
+START TRANSACTION;
+
+DO $EF$
+BEGIN
+    IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "migration_id" = '20261125215213_Etapa10b1_PrediccionAbandono') THEN
+    CREATE TABLE prediccion_abandono (
+        id uuid NOT NULL,
+        socio_id uuid NOT NULL,
+        fecha date NOT NULL,
+        puntaje numeric(5,4) NOT NULL,
+        version_modelo character varying(80) NOT NULL,
+        origen_datos character varying(30) NOT NULL,
+        fecha_alta timestamp with time zone NOT NULL,
+        usuario_alta integer NOT NULL,
+        fecha_modificacion timestamp with time zone,
+        usuario_modificacion integer,
+        fecha_baja timestamp with time zone,
+        usuario_baja integer,
+        CONSTRAINT pk_prediccion_abandono PRIMARY KEY (id),
+        CONSTRAINT "CK_PrediccionAbandono_OrigenDatos" CHECK (origen_datos IN ('Sintetico', 'ValidacionFuncional', 'DatasetExterno', 'Real')),
+        CONSTRAINT "CK_PrediccionAbandono_Puntaje" CHECK (puntaje >= 0 AND puntaje <= 1),
+        CONSTRAINT fk_prediccion_abandono_socios_socio_id FOREIGN KEY (socio_id) REFERENCES socios (id) ON DELETE RESTRICT
+    );
+    END IF;
+END $EF$;
+
+DO $EF$
+BEGIN
+    IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "migration_id" = '20261125215213_Etapa10b1_PrediccionAbandono') THEN
+    CREATE UNIQUE INDEX ix_prediccion_abandono_socio_id_fecha_version_modelo ON prediccion_abandono (socio_id, fecha, version_modelo);
+    END IF;
+END $EF$;
+
+DO $EF$
+BEGIN
+    IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "migration_id" = '20261125215213_Etapa10b1_PrediccionAbandono') THEN
+    INSERT INTO "__EFMigrationsHistory" (migration_id, product_version)
+    VALUES ('20261125215213_Etapa10b1_PrediccionAbandono', '10.0.11');
+    END IF;
+END $EF$;
+COMMIT;
+
+
+============================== DOWN ==============================
+START TRANSACTION;
+DO $EF$
+BEGIN
+    IF EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "migration_id" = '20261125215213_Etapa10b1_PrediccionAbandono') THEN
+    DROP TABLE prediccion_abandono;
+    END IF;
+END $EF$;
+DO $EF$
+BEGIN
+    IF EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "migration_id" = '20261125215213_Etapa10b1_PrediccionAbandono') THEN
+    DELETE FROM "__EFMigrationsHistory"
+    WHERE migration_id = '20261125215213_Etapa10b1_PrediccionAbandono';
+    END IF;
+END $EF$;
+COMMIT;
+
+

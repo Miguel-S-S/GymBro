@@ -1,0 +1,43 @@
+﻿Etapa 10b-1 - modelo de abandono, build y pruebas
+Comando: npx ng test --watch=false
+Commit: 8c8b2cd0d752e1a2994028c289196ae552ee9d8f (rama cierre-pfc)
+Estado del arbol de trabajo (git status --short):
+M GymBro.Web/angular.json
+?? .dockerignore
+?? .github/
+?? CLAUDE.md
+?? GymBro.Analytics/.dockerignore
+?? GymBro.Analytics/Dockerfile
+?? GymBro.Analytics/app/
+?? GymBro.Analytics/gymbro_analytics/estadistica.py
+?? GymBro.Analytics/tests/test_app.py
+?? GymBro.Analytics/tests/test_estadistica.py
+?? GymBro.Api/Dockerfile
+?? GymBro.IA/.dockerignore
+?? GymBro.IA/Dockerfile
+?? GymBro.IA/requirements-servicio.txt
+?? GymBro.Web/.dockerignore
+?? GymBro.Web/Dockerfile
+?? GymBro.Web/nginx.conf
+?? docker-compose.full.env.example
+?? docker-compose.full.yml
+?? docs/despliegue.md
+?? docs/pfc/analitica/
+Fecha: 2026-11-25 21:34:39 -03:00
+Codigo de salida: 0
+Nota: Archivos sin rastrear de las etapas 12 y 13 (GymBro.Analytics/app, Dockerfiles, compose, CI) presentes pero fuera de la solucion .NET y del cliente; cambios de la 13 en Program.cs y la matriz guardados con git stash. GymBro.Web/angular.json modificado solo por fin de linea; CLAUDE.md no rastreado por decision del desarrollador
+------------------------------------------------------------
+> Building...
+√ Building...
+Application bundle generation complete. [5.602 seconds] - 2026-11-26T00:34:47.312Z
+
+
+ RUN  v5.1.0 C:/Users/miguel/source/repos/GymBro/GymBro.Web
+
+
+ Test Files  37 passed (37)
+      Tests  253 passed (253)
+   Start at  21:34:48
+   Duration  11.25s (environment 77%, tests 10%, import 6%, setup 4%, transform 2%)
+
+

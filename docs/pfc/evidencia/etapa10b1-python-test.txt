@@ -1,0 +1,59 @@
+﻿Etapa 10b-1 - pruebas de Python de GymBro.Analytics (unittest)
+Commit: 8c8b2cd0d752e1a2994028c289196ae552ee9d8f
+Fecha: 2026-11-25 21:35:27 -03:00
+Interprete: Python 3.14.6 (GymBro.Analytics/.venv, requirements.txt fijado)
+------------------------------------------------------------
+1) Sin base configurada (la prueba contra la base se omite):
+test_la_base_solo_devuelve_datos_sinteticos_y_la_sesion_es_de_solo_lectura (test_abandono.ExtraccionRealTests.test_la_base_solo_devuelve_datos_sinteticos_y_la_sesion_es_de_solo_lectura) ... skipped 'sin base de analitica configurada (ANALITICA_PG_CLAVE)'
+test_cuotas_convierte_fechas_y_montos (test_abandono.ExtraccionTests.test_cuotas_convierte_fechas_y_montos) ... ok
+test_socios_normaliza_tipos_y_usa_parametros_sin_sql_dinamico (test_abandono.ExtraccionTests.test_socios_normaliza_tipos_y_usa_parametros_sin_sql_dinamico) ... ok
+test_los_modelos_superan_a_la_linea_base_en_datos_con_senal_conocida (test_abandono.SeparacionTests.test_los_modelos_superan_a_la_linea_base_en_datos_con_senal_conocida) ... ok
+test_metricas_con_valores_conocidos (test_abandono.SeparacionTests.test_metricas_con_valores_conocidos) ... ok
+test_sin_fuga_temporal_la_prueba_es_posterior_y_la_ventana_de_entrenamiento_no_la_alcanza (test_abandono.SeparacionTests.test_sin_fuga_temporal_la_prueba_es_posterior_y_la_ventana_de_entrenamiento_no_la_alcanza) ... ok
+test_etiqueta_abandono_y_poblacion_activa (test_abandono.VariablesTests.test_etiqueta_abandono_y_poblacion_activa) ... ok
+test_los_cortes_son_lunes_con_ventana_completa (test_abandono.VariablesTests.test_los_cortes_son_lunes_con_ventana_completa) ... ok
+test_sin_fuga_las_variables_no_cambian_con_eventos_posteriores_al_corte (test_abandono.VariablesTests.test_sin_fuga_las_variables_no_cambian_con_eventos_posteriores_al_corte) ... ok
+test_variables_con_valores_conocidos (test_abandono.VariablesTests.test_variables_con_valores_conocidos) ... ok
+System.Management.Automation.RemoteException
+----------------------------------------------------------------------
+Ran 10 tests in 1.954s
+System.Management.Automation.RemoteException
+OK (skipped=1)
+------------------------------------------------------------
+2) Con el rol gymbro_analitica_lectura contra PostgreSQL DESCARTABLE (contenedor gymbro-analitica-tmp, puerto 5544, base gymbro_tmp; credenciales temporales no registradas):
+..........2026-11-25 21:35:25.110 WARNING streamlit.runtime.scriptrunner_utils.script_run_context: Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+2026-11-25 21:35:25.110 WARNING streamlit.runtime.scriptrunner_utils.script_run_context: Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+2026-11-25 21:35:26.889 Please replace `use_container_width` with `width`.
+System.Management.Automation.RemoteException
+`use_container_width` will be removed after 2025-12-31.
+System.Management.Automation.RemoteException
+For `use_container_width=True`, use `width='stretch'`. For `use_container_width=False`, use `width='content'` or specify an integer width.
+2026-11-25 21:35:26.979 Please replace `use_container_width` with `width`.
+System.Management.Automation.RemoteException
+`use_container_width` will be removed after 2025-12-31.
+System.Management.Automation.RemoteException
+For `use_container_width=True`, use `width='stretch'`. For `use_container_width=False`, use `width='content'` or specify an integer width.
+C:\Users\miguel\source\repos\GymBro\GymBro.Analytics\.venv\Lib\site-packages\streamlit\dataframe_util.py:967: UserWarning: The DataFrame has column names of mixed type. They will be converted to strings and not roundtrip correctly.
+  return pa.Table.from_pandas(df, preserve_index=preserve_index)
+2026-11-25 21:35:27.063 Please replace `use_container_width` with `width`.
+System.Management.Automation.RemoteException
+`use_container_width` will be removed after 2025-12-31.
+System.Management.Automation.RemoteException
+For `use_container_width=True`, use `width='stretch'`. For `use_container_width=False`, use `width='content'` or specify an integer width.
+2026-11-25 21:35:27.072 Please replace `use_container_width` with `width`.
+System.Management.Automation.RemoteException
+`use_container_width` will be removed after 2025-12-31.
+System.Management.Automation.RemoteException
+For `use_container_width=True`, use `width='stretch'`. For `use_container_width=False`, use `width='content'` or specify an integer width.
+2026-11-25 21:35:27.077 Please replace `use_container_width` with `width`.
+System.Management.Automation.RemoteException
+`use_container_width` will be removed after 2025-12-31.
+System.Management.Automation.RemoteException
+For `use_container_width=True`, use `width='stretch'`. For `use_container_width=False`, use `width='content'` or specify an integer width.
+.2026-11-25 21:35:27.088 Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+.2026-11-25 21:35:27.232 Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+.............
+----------------------------------------------------------------------
+Ran 25 tests in 4.020s
+System.Management.Automation.RemoteException
+OK

@@ -1,0 +1,21 @@
+﻿Etapa 10b-1 - ejecucion real de punta a punta contra PostgreSQL DESCARTABLE (nunca gymbro_db)
+Contenedor: gymbro-analitica-tmp (pgvector/pgvector:pg16), puerto 5544, base gymbro_tmp; contrasenas temporales generadas al azar y no registradas
+Fecha: 2026-11-25
+Datos sinteticos (Sintetico): las metricas verifican el procedimiento y no el desempeno con personas.
+------------------------------------------------------------
+1) Migraciones: GymBro.Api (commit con la migracion Etapa10b1) en modo --eliminar-sintetico aplico las 18 migraciones a la base vacia.
+2) Catalogo del protocolo: 10 ejercicios con la forma de la siembra piernas-1.0 (como en las pruebas de integracion), tipo de equipamiento MAQUINA_OTRA.
+3) Generador de la Etapa 7e: --generar-sintetico --semilla 42 --socios 150 --semanas 26
+Creados 150 socios sinteticos en SINT0000002A.
+Listo: 4464 sesiones, 75380 series, 12060 registros de bienestar, 4464 asistencias, 1050 cuotas, 74 abandonos. SHA-256 3c7632e02f6ac0b77dde208a481f91a49cb39c4b17d84bdc90542e746b3629ec
+Gimnasio SINT0000002A (13da22ff-e800-86b2-be85-310cb020e387). Resumen SHA-256: 3c7632e02f6ac0b77dde208a481f91a49cb39c4b17d84bdc90542e746b3629ec
+codigo: 0; duracion: 390 s
+4) docs/pfc/scripts/rol-analitica.sql (copia local con las contrasenas temporales), ejecutado con el usuario administrador: COMMIT sin errores.
+5) entrenar_abandono.py --semilla 42 --repeticiones 1000 con gymbro_analitica_lectura: reporte docs/pfc/analitica/reporte-abandono-20261125-213201.md (y .json).
+6) puntuar_abandono.py dos veces con gymbro_analitica_puntuacion: 83 socios activos al 2026-07-05; la segunda corrida no agrego filas (ON CONFLICT DO NOTHING).
+Estado final de public.prediccion_abandono:
+              version_modelo              |   fecha    | socios | media |  min   |  max   |  origen   
+------------------------------------------+------------+--------+-------+--------+--------+-----------
+ abandono-bosque-v1-20261125-f7ee4d45c307 | 2026-07-05 |     83 | 0.154 | 0.0037 | 0.9504 | Sintetico
+(1 row)
+

@@ -1,0 +1,50 @@
+﻿Etapa 10b-1 - modelo de abandono, build y pruebas
+Comando: dotnet build GymBro.slnx --artifacts-path .tmp-artifacts
+Commit: 8c8b2cd0d752e1a2994028c289196ae552ee9d8f (rama cierre-pfc)
+Estado del arbol de trabajo (git status --short):
+M GymBro.Web/angular.json
+?? .dockerignore
+?? .github/
+?? CLAUDE.md
+?? GymBro.Analytics/.dockerignore
+?? GymBro.Analytics/Dockerfile
+?? GymBro.Analytics/app/
+?? GymBro.Analytics/gymbro_analytics/estadistica.py
+?? GymBro.Analytics/tests/test_app.py
+?? GymBro.Analytics/tests/test_estadistica.py
+?? GymBro.Api/Dockerfile
+?? GymBro.IA/.dockerignore
+?? GymBro.IA/Dockerfile
+?? GymBro.IA/requirements-servicio.txt
+?? GymBro.Web/.dockerignore
+?? GymBro.Web/Dockerfile
+?? GymBro.Web/nginx.conf
+?? docker-compose.full.env.example
+?? docker-compose.full.yml
+?? docs/despliegue.md
+?? docs/pfc/analitica/
+Fecha: 2026-11-25 21:32:56 -03:00
+Codigo de salida: 0
+Nota: Archivos sin rastrear de las etapas 12 y 13 (GymBro.Analytics/app, Dockerfiles, compose, CI) presentes pero fuera de la solucion .NET y del cliente; cambios de la 13 en Program.cs y la matriz guardados con git stash. GymBro.Web/angular.json modificado solo por fin de linea; CLAUDE.md no rastreado por decision del desarrollador
+------------------------------------------------------------
+  Determinando los proyectos que se van a restaurar...
+  Todos los proyectos están actualizados para la restauración.
+  WorkingDirectory: C:\Users\miguel\source\repos\GymBro\GymBro.Web
+  ProcessStartInfo.WorkingDirectory: C:\Users\miguel\source\repos\GymBro\GymBro.Web\
+CSC : warning CS2008: No se especificaron archivos de código fuente. [C:\Users\miguel\source\repos\GymBro\GymBro.IA\GymBro.IA.csproj]
+  GymBro.IA -> C:\Users\miguel\source\repos\GymBro\.tmp-artifacts\bin\GymBro.IA\debug\GymBro.IA.dll
+  GymBro.Domain -> C:\Users\miguel\source\repos\GymBro\.tmp-artifacts\bin\GymBro.Domain\debug\GymBro.Domain.dll
+  GymBro.Application -> C:\Users\miguel\source\repos\GymBro\.tmp-artifacts\bin\GymBro.Application\debug\GymBro.Application.dll
+  GymBro.Tests -> C:\Users\miguel\source\repos\GymBro\.tmp-artifacts\bin\GymBro.Tests\debug\GymBro.Tests.dll
+  GymBro.Infrastructure -> C:\Users\miguel\source\repos\GymBro\.tmp-artifacts\bin\GymBro.Infrastructure\debug\GymBro.Infrastructure.dll
+  GymBro.Api -> C:\Users\miguel\source\repos\GymBro\.tmp-artifacts\bin\GymBro.Api\debug\GymBro.Api.dll
+  GymBro.Tests.Integration -> C:\Users\miguel\source\repos\GymBro\.tmp-artifacts\bin\GymBro.Tests.Integration\debug\GymBro.Tests.Integration.dll
+
+Compilación correcta.
+
+CSC : warning CS2008: No se especificaron archivos de código fuente. [C:\Users\miguel\source\repos\GymBro\GymBro.IA\GymBro.IA.csproj]
+    1 Advertencia(s)
+    0 Errores
+
+Tiempo transcurrido 00:00:15.48
+

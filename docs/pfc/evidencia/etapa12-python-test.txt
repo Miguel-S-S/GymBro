@@ -1,0 +1,43 @@
+﻿Etapa 12 - pruebas de Python de GymBro.Analytics (unittest)
+Commit: 28192b589ab1154a458ee13efc651190bb747d54
+Fecha: 2026-11-25 21:38:39 -03:00
+Interprete: Python 3.14.6
+------------------------------------------------------------
+1) Sin base configurada (las pruebas que necesitan la base se omiten):
+test_la_base_solo_devuelve_datos_sinteticos_y_la_sesion_es_de_solo_lectura (test_abandono.ExtraccionRealTests.test_la_base_solo_devuelve_datos_sinteticos_y_la_sesion_es_de_solo_lectura) ... skipped 'sin base de analitica configurada (ANALITICA_PG_CLAVE)'
+test_cuotas_convierte_fechas_y_montos (test_abandono.ExtraccionTests.test_cuotas_convierte_fechas_y_montos) ... ok
+test_socios_normaliza_tipos_y_usa_parametros_sin_sql_dinamico (test_abandono.ExtraccionTests.test_socios_normaliza_tipos_y_usa_parametros_sin_sql_dinamico) ... ok
+test_los_modelos_superan_a_la_linea_base_en_datos_con_senal_conocida (test_abandono.SeparacionTests.test_los_modelos_superan_a_la_linea_base_en_datos_con_senal_conocida) ... ok
+test_metricas_con_valores_conocidos (test_abandono.SeparacionTests.test_metricas_con_valores_conocidos) ... ok
+test_sin_fuga_temporal_la_prueba_es_posterior_y_la_ventana_de_entrenamiento_no_la_alcanza (test_abandono.SeparacionTests.test_sin_fuga_temporal_la_prueba_es_posterior_y_la_ventana_de_entrenamiento_no_la_alcanza) ... ok
+test_etiqueta_abandono_y_poblacion_activa (test_abandono.VariablesTests.test_etiqueta_abandono_y_poblacion_activa) ... ok
+test_los_cortes_son_lunes_con_ventana_completa (test_abandono.VariablesTests.test_los_cortes_son_lunes_con_ventana_completa) ... ok
+test_sin_fuga_las_variables_no_cambian_con_eventos_posteriores_al_corte (test_abandono.VariablesTests.test_sin_fuga_las_variables_no_cambian_con_eventos_posteriores_al_corte) ... ok
+test_variables_con_valores_conocidos (test_abandono.VariablesTests.test_variables_con_valores_conocidos) ... ok
+test_arranca_con_datos_sinteticos_y_recorre_las_pestanias (test_app.AppConDatosTests.test_arranca_con_datos_sinteticos_y_recorre_las_pestanias) ... skipped 'sin base de analitica configurada (ANALITICA_PG_CLAVE)'
+ok
+ok
+test_descarta_pares_incompletos_y_n_insuficiente (test_estadistica.CorrelacionTests.test_descarta_pares_incompletos_y_n_insuficiente) ... ok
+test_monotona_no_lineal_spearman_1_pearson_menor (test_estadistica.CorrelacionTests.test_monotona_no_lineal_spearman_1_pearson_menor) ... ok
+test_relacion_lineal_perfecta (test_estadistica.CorrelacionTests.test_relacion_lineal_perfecta) ... ok
+test_valor_de_referencia (test_estadistica.CorrelacionTests.test_valor_de_referencia) ... ok
+test_conteos_faltantes_y_cuartiles (test_estadistica.DescriptivaTests.test_conteos_faltantes_y_cuartiles) ... ok
+test_asistencia_vs_antiguedad (test_estadistica.GestionTests.test_asistencia_vs_antiguedad) ... ok
+test_horas_pico_en_hora_local (test_estadistica.GestionTests.test_horas_pico_en_hora_local) ... ok
+test_morosidad_derivada (test_estadistica.GestionTests.test_morosidad_derivada) ... ok
+test_retencion_por_cohorte (test_estadistica.GestionTests.test_retencion_por_cohorte) ... ok
+test_agregacion_por_socio_una_fila_por_socio_con_su_categoria_modal (test_estadistica.GruposTests.test_agregacion_por_socio_una_fila_por_socio_con_su_categoria_modal) ... ok
+test_anova_de_libro (test_estadistica.GruposTests.test_anova_de_libro) ... ok
+test_varianzas_muy_distintas_recomiendan_kruskal (test_estadistica.GruposTests.test_varianzas_muy_distintas_recomiendan_kruskal) ... ok
+System.Management.Automation.RemoteException
+----------------------------------------------------------------------
+Ran 25 tests in 3.376s
+System.Management.Automation.RemoteException
+OK (skipped=2)
+------------------------------------------------------------
+2) Con el rol gymbro_analitica_lectura contra PostgreSQL DESCARTABLE (gymbro-analitica-tmp, puerto 5544, datos del generador: semilla 42, 150 socios, 26 semanas):
+.............
+----------------------------------------------------------------------
+Ran 25 tests in 4.514s
+System.Management.Automation.RemoteException
+OK

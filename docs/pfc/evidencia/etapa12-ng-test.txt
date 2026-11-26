@@ -1,0 +1,38 @@
+﻿Etapa 12 - aplicacion de analisis y tableros, build y pruebas
+Comando: npx ng test --watch=false
+Commit: 28192b589ab1154a458ee13efc651190bb747d54 (rama cierre-pfc)
+Estado del arbol de trabajo (git status --short):
+M GymBro.Web/angular.json
+?? .dockerignore
+?? .github/
+?? CLAUDE.md
+?? GymBro.Analytics/.dockerignore
+?? GymBro.Analytics/Dockerfile
+?? GymBro.Api/Dockerfile
+?? GymBro.IA/.dockerignore
+?? GymBro.IA/Dockerfile
+?? GymBro.IA/requirements-servicio.txt
+?? GymBro.Web/.dockerignore
+?? GymBro.Web/Dockerfile
+?? GymBro.Web/nginx.conf
+?? docker-compose.full.env.example
+?? docker-compose.full.yml
+?? docs/despliegue.md
+Fecha: 2026-11-25 21:38:05 -03:00
+Codigo de salida: 0
+Nota: Sin cambios en .NET ni en el cliente en esta etapa (se repite por el protocolo). Archivos sin rastrear de la etapa 13; cambios de la 13 en Program.cs y la matriz guardados con git stash. GymBro.Web/angular.json modificado solo por fin de linea; CLAUDE.md no rastreado
+------------------------------------------------------------
+> Building...
+√ Building...
+Application bundle generation complete. [5.654 seconds] - 2026-11-26T00:38:13.670Z
+
+
+ RUN  v5.1.0 C:/Users/miguel/source/repos/GymBro/GymBro.Web
+
+
+ Test Files  37 passed (37)
+      Tests  253 passed (253)
+   Start at  21:38:14
+   Duration  10.39s (environment 70%, tests 14%, import 7%, setup 5%, transform 3%)
+
+

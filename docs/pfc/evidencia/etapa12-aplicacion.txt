@@ -1,0 +1,71 @@
+﻿Etapa 12 - la aplicacion con los datos del generador sintetico (base descartable gymbro-analitica-tmp)
+Commit: 28192b589ab1154a458ee13efc651190bb747d54
+Fecha: 2026-11-25 21:38:46 -03:00
+------------------------------------------------------------
+A) streamlit run GymBro.Analytics/app/principal.py (sin interfaz, puerto 8599), salud y pagina inicial, luego se detiene:
+health: True
+pagina: 200, 7863 bytes
+
+  You can now view your Streamlit app in your browser.
+
+------------------------------------------------------------
+B) Mismas funciones que usa la aplicacion, sobre la base descartable, y AppTest de Streamlit con sesion autenticada:
+Datos sintéticos (Sintetico): las métricas verifican el procedimiento y no el desempeño con personas.
+Origenes: ['Sintetico']
+
+== Descriptiva (series efectivas) ==
+    variable     n  faltantes  faltantes_%  media  desvio  minimo  p25  mediana  p75  maximo
+     peso_kg 70916          0          0.0 60.177  24.879    15.0 41.0     56.0 76.0   141.0
+repeticiones 70916          0          0.0 11.941   3.426     2.0 10.0     11.0 14.0    25.0
+         rir 70916          0          0.0  2.280   1.161     0.0  1.0      2.0  3.0     5.0
+  desvio_rir 70916          0          0.0  0.569   1.071    -2.0  0.0      1.0  1.0     4.0
+
+== Descriptiva (bienestar) ==
+                  variable     n  faltantes  faltantes_%  media  desvio  minimo  p25  mediana  p75  maximo
+               horas_sueno 12060          0          0.0  6.993   1.003     3.0  6.5      7.0  7.5    11.0
+                    estres 12060          0          0.0  3.517   1.217     1.0  3.0      4.0  4.0     7.0
+                    fatiga 12060          0          0.0  3.989   1.214     1.0  3.0      4.0  5.0     7.0
+frecuencia_cardiaca_reposo 12060          0          0.0 62.157   6.024    40.0 58.0     62.0 66.0    83.0
+
+== Correlacion con el desvio RIR medio del dia (n = dias socio-fecha) ==
+horas_sueno                  n=2727 r=-0.007 p=0.729 rho=-0.007 p=0.729
+estres                       n=2727 r=+0.016 p=0.398 rho=+0.011 p=0.573
+fatiga                       n=2727 r=+0.564 p=9.88e-229 rho=+0.542 p=1.1e-207
+frecuencia_cardiaca_reposo   n=2727 r=-0.000 p=0.986 rho=+0.003 p=0.893
+fatiga (por socio, medias)    n=146 r=+0.615 p=1.58e-16
+
+== ANOVA: categoria de ingesta mas frecuente por socio contra desvio RIR medio del socio ==
+   grupo   n  media  desvio  shapiro_p
+    Alta   5 0.5293  0.2605     0.8819
+    Baja   4 0.7160  0.1301     0.3561
+Habitual 137 0.5681  0.1224     0.0000
+Levene p=0.0241; ANOVA F=2.849 p=0.0612 eta2=0.038; Kruskal H=5.498 p=0.064 eps2=0.024; prueba que corresponde: Kruskal-Wallis
+
+== Gestion ==
+Retencion por cohorte (%):
+         socios  mes 0  mes 1  mes 2  mes 3  mes 4  mes 5  mes 6
+cohorte                                                         
+2026-01     148  100.0   85.1   80.4   73.6   65.5   58.1   43.9
+Morosidad por periodo:
+periodo  cuotas  vencidas  pagadas_tarde  vencidas_%  pagadas_tarde_%
+2026-01     150        20             13        13.3              8.7
+2026-02     150        40             23        26.7             15.3
+2026-03     150        41             16        27.3             10.7
+2026-04     150        50             10        33.3              6.7
+2026-05     150        65             12        43.3              8.0
+2026-06     150        76             13        50.7              8.7
+2026-07     150         0              0         0.0              0.0
+Horas con mas asistencias:
+ dia  hora  asistencias
+   1     7          186
+   1     8          168
+   0    19          162
+   0    18          159
+   3     7          153
+
+== AppTest con datos ==
+excepciones: []
+pestanias: ['Descriptiva', 'Correlación', 'ANOVA', 'Gestión']
+rotulo: ['**Origen de los datos: Sintetico.** Datos sintéticos (Sintet']
+avisos: ['Correlación no implica causalidad.']
+tablas renderizadas: 7

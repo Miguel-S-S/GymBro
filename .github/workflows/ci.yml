@@ -1,0 +1,68 @@
+# Etapa 13: integracion continua. Compila y prueba; NO despliega.
+name: CI
+
+on:
+  push:
+    branches: [main, "etapa*", "cierre-pfc"]
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  dotnet:
+    name: ".NET (build, unitarias e integracion con Testcontainers)"
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: "10.0.x"
+      - name: Restaurar
+        run: dotnet restore GymBro.slnx
+      - name: Compilar
+        run: dotnet build GymBro.slnx --no-restore -c Release
+      - name: Pruebas unitarias
+        run: dotnet test GymBro.Tests/GymBro.Tests.csproj --no-build -c Release
+      - name: "Pruebas de integracion (PostgreSQL + pgvector descartable con Testcontainers; Docker del runner)"
+        run: dotnet test GymBro.Tests.Integration/GymBro.Tests.Integration.csproj --no-build -c Release
+
+  web:
+    name: Cliente Angular (build y pruebas)
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    defaults:
+      run:
+        working-directory: GymBro.Web
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+          cache: npm
+          cache-dependency-path: GymBro.Web/package-lock.json
+      - run: npm ci --no-audit --no-fund
+      - run: npx ng build
+      - run: npx ng test --watch=false
+
+  python:
+    name: Python (GymBro.IA y GymBro.Analytics)
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.14"
+      - name: Dependencias
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r GymBro.IA/requirements-servicio.txt -r GymBro.Analytics/requirements.txt
+      - name: Pruebas del microservicio de IA (Ollama reemplazado por dobles)
+        run: python -m unittest discover -s GymBro.IA -p "test_*.py" -v
+      - name: Pruebas de evaluacion (metricas y banco de consultas)
+        run: python -m unittest discover -s GymBro.IA/evaluacion -v
+      - name: "Pruebas de analitica (sin base: las que la necesitan se omiten)"
+        run: python -m unittest discover -s GymBro.Analytics/tests -v

@@ -269,6 +269,10 @@ namespace GymBro.Tests.Integration
             Fila("GET", "/api/cuotas/mias", AttrCuotasSocio,
                 (Anonimo, 401, Fallback), (SuperAdmin, 403, null), (Dueno, 403, null), (Trainer, 403, null), (Socio, 200, null));
 
+            // ---- Etapa 13: comprobación de salud de los contenedores (anónima, sin datos) ----
+            Fila("GET", "/salud", "Program.cs: MapHealthChecks(\"/salud\").AllowAnonymous()",
+                (Anonimo, 200, null), (Socio, 200, null));
+
             // ---- Auditoría ----
             Fila("GET", "/api/auditoria", AttrAuditoria,
                 (Anonimo, 401, Fallback), (SuperAdmin, 200, null), (Dueno, 403, null), (Trainer, 403, null), (Socio, 403, null));

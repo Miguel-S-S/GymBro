@@ -165,6 +165,9 @@ builder.Services.AddRateLimiter(o =>
 builder.Services.AddExceptionHandler<ManejadorExcepciones>();
 builder.Services.AddProblemDetails();
 
+// Etapa 13: comprobacion de salud anonima para los contenedores (GET /salud; sin datos).
+builder.Services.AddHealthChecks();
+
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
@@ -246,6 +249,7 @@ app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
+app.MapHealthChecks("/salud").AllowAnonymous();
 
 app.Run();
 

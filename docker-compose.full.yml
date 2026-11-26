@@ -1,0 +1,90 @@
+# GymBro - despliegue completo con contenedores (Etapa 13). Ver docs/despliegue.md.
+#   docker compose -f docker-compose.full.yml --env-file docker-compose.full.env up -d --build
+#   Con Ollama en contenedor:  ... --profile ollama up -d --build
+# Variables: copiar docker-compose.full.env.example a docker-compose.full.env (no versionado) y completar los secretos.
+# docker-compose.yml (solo la base, puerto 5433) sigue siendo el entorno de desarrollo; este archivo no lo reemplaza.
+name: gymbro
+
+services:
+  db:
+    image: pgvector/pgvector:pg16
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Definir POSTGRES_PASSWORD}
+      POSTGRES_DB: gymbro_db
+    volumes:
+      - gymbro_full_db:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d gymbro_db"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+    restart: unless-stopped
+
+  api:
+    build:
+      context: .
+      dockerfile: GymBro.Api/Dockerfile
+    environment:
+      ConnectionStrings__DefaultConnection: "Host=db;Port=5432;Database=gymbro_db;Username=postgres;Password=${POSTGRES_PASSWORD}"
+      Jwt__Key: ${JWT_KEY:?Definir JWT_KEY (al menos 32 caracteres)}
+      Asistencia__ClaveQr: ${ASISTENCIA_CLAVE_QR:-}
+      SuperAdmin__Email: ${SUPERADMIN_EMAIL:-}
+      SuperAdmin__Password: ${SUPERADMIN_PASSWORD:-}
+      Ia__UrlBase: http://ia:8000
+    depends_on:
+      db:
+        condition: service_healthy
+    restart: unless-stopped
+
+  ia:
+    build:
+      context: GymBro.IA
+    environment:
+      OLLAMA_HOST: ${OLLAMA_HOST:-http://ollama:11434}
+      OLLAMA_MODELO_GENERACION: ${OLLAMA_MODELO_GENERACION:-}
+    restart: unless-stopped
+
+  web:
+    build:
+      context: GymBro.Web
+    ports:
+      - "${PUERTO_WEB:-8080}:80"
+    depends_on:
+      api:
+        condition: service_healthy
+    restart: unless-stopped
+
+  analitica:
+    build:
+      context: GymBro.Analytics
+    environment:
+      ANALITICA_PG_HOST: db
+      ANALITICA_PG_PORT: "5432"
+      ANALITICA_PG_DB: gymbro_db
+      ANALITICA_PG_USUARIO: gymbro_analitica_lectura
+      ANALITICA_PG_CLAVE: ${ANALITICA_PG_CLAVE:-}
+      ANALITICA_APP_USUARIO: ${ANALITICA_APP_USUARIO:-}
+      ANALITICA_APP_CLAVE: ${ANALITICA_APP_CLAVE:-}
+    ports:
+      - "${PUERTO_ANALITICA:-8501}:8501"
+    depends_on:
+      db:
+        condition: service_healthy
+    restart: unless-stopped
+
+  ollama:
+    image: ollama/ollama:${OLLAMA_VERSION:-latest}
+    profiles: ["ollama"]
+    volumes:
+      - gymbro_full_ollama:/root/.ollama
+    healthcheck:
+      test: ["CMD", "ollama", "list"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+    restart: unless-stopped
+
+volumes:
+  gymbro_full_db:
+  gymbro_full_ollama:

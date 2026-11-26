@@ -1,0 +1,16 @@
+# Etapa 13: contexto de construccion de GymBro.Api (raiz del repositorio). Solo hacen falta los proyectos .NET.
+**/bin/
+**/obj/
+.tmp-artifacts/
+.git/
+.vs/
+.claude/
+docs/
+GymBro.Web/
+GymBro.IA/
+GymBro.Analytics/
+GymBro.Tests/
+GymBro.Tests.Integration/
+**/*.user
+.env
+.env.*

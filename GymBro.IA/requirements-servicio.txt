@@ -1,0 +1,6 @@
+# Etapa 13: dependencias del microservicio solo (main.py y sustitutos.py), para la imagen de contenedor y la CI.
+# requirements.txt agrega las del ETL y los notebooks, que el servicio no necesita.
+fastapi==0.141.1
+uvicorn==0.52.4
+ollama==0.6.2
+httpx==0.28.1

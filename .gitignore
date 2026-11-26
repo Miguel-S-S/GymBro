@@ -502,3 +502,6 @@ GymBro.slnLaunch
 
 # Etapa 10b-1: modelos entrenados de GymBro.Analytics (se regeneran; no se versionan)
 GymBro.Analytics/modelos/
+
+# Etapa 13: variables reales del despliegue con contenedores (la plantilla es docker-compose.full.env.example)
+docker-compose.full.env

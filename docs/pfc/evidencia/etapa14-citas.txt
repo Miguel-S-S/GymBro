@@ -1,0 +1,7 @@
+﻿Etapa 14 - comprobacion de las citas de docs/arquitectura
+Commit: 79dbe09d4e90d5bdd8475b3ede7ea84d02882585
+Fecha: 2026-11-25 21:48:15 -03:00
+Criterio: cada texto entre comillas invertidas que parece un archivo (tiene extension conocida) debe existir como archivo versionado (por nombre o ruta); cada nombre terminado en Tests o Service debe existir como clase en el codigo C#.
+------------------------------------------------------------
+------------------------------------------------------------
+Citas comprobadas: 182; no encontradas: 0

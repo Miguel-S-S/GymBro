@@ -43,7 +43,7 @@ Sobre el commit `fbc918b` (`etapa13-*.txt`):
 | `ng build` / pruebas del cliente | correcto / 253 |
 | `docker compose config` con variables ficticias | válido (código 0); con `--profile ollama` lista los seis servicios; sin variables falla por las obligatorias, como se espera (`etapa13-compose-config.txt`) |
 | `ci.yml` contra el esquema de GitHub Actions (`check-jsonschema` 0.39.0) | válido (`etapa13-ci-validacion.txt`) |
-| `docker build` (`etapa13-docker-build.txt`) | API 74 s, 104 MB comprimidos (365 MB en disco); IA 16 s, 206 MB; cliente 49 s, 85 MB; analítica 87 s; las cuatro con código 0 |
+| `docker build` (`etapa13-docker-build.txt`) | las cuatro con código 0. Tiempo y tamaño (contenido según `docker image inspect` / en disco según `docker images`): API 74 s, 104 MB / 365 MB; IA 16 s, 50 MB / 206 MB; cliente 49 s, 26 MB / 85 MB; analítica 87 s, 248 MB / 1.08GB |
 | Prueba de humo de la imagen de la API (`etapa13-humo-api.txt`) | `/salud` 200, ruta protegida sin token 401, `HEALTHCHECK` en `healthy`, proceso con el usuario `app` |
 
 ## Desvíos y limitaciones

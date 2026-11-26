@@ -1,0 +1,25 @@
+﻿Etapa 13 - contenedores, CI y manual de despliegue, build y pruebas
+Comando: npx ng test --watch=false
+Commit: fbc918b7728af5a5910dcf423e16d7f1854c31d8 (rama cierre-pfc)
+Estado del arbol de trabajo (git status --short):
+M GymBro.Web/angular.json
+?? CLAUDE.md
+?? docs/arquitectura/
+Fecha: 2026-11-25 21:42:17 -03:00
+Codigo de salida: 0
+Nota: docs/arquitectura/ sin rastrear (Etapa 14 en curso). GymBro.Web/angular.json modificado solo por fin de linea; CLAUDE.md no rastreado
+------------------------------------------------------------
+> Building...
+√ Building...
+Application bundle generation complete. [6.688 seconds] - 2026-11-26T00:42:27.344Z
+
+
+ RUN  v5.1.0 C:/Users/miguel/source/repos/GymBro/GymBro.Web
+
+
+ Test Files  37 passed (37)
+      Tests  253 passed (253)
+   Start at  21:42:27
+   Duration  12.63s (environment 72%, tests 13%, import 7%, setup 5%, transform 3%)
+
+

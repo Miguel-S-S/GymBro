@@ -1,0 +1,8 @@
+﻿Etapa 13 - validacion de .github/workflows/ci.yml
+Herramienta: check-jsonschema check-jsonschema, version 0.39.0 con --builtin-schema vendor.github-workflows (esquema de SchemaStore incluido en la herramienta), instalada en un entorno temporal fuera del repositorio
+Commit: fbc918b7728af5a5910dcf423e16d7f1854c31d8
+Fecha: 2026-11-25 21:42:42 -03:00
+Codigo de salida: 0
+Nota: la validacion detecto antes del commit un error real de YAML (dos puntos sin comillas en un nombre de paso), corregido en el mismo commit.
+------------------------------------------------------------
+ok -- validation done

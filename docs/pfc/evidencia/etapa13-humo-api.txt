@@ -1,0 +1,9 @@
+﻿Etapa 13 - prueba de humo de la imagen gymbro-api:verificacion
+Commit: fbc918b7728af5a5910dcf423e16d7f1854c31d8
+Fecha: 2026-11-25 21:47:44 -03:00
+Contenedor efimero gymbro-api-humo (eliminado al terminar) contra el PostgreSQL DESCARTABLE gymbro-analitica-tmp (host.docker.internal:5544), con Jwt__Key temporal
+------------------------------------------------------------
+GET /salud (anonimo): 200
+GET /api/Socio sin token: 401 (politica de autenticacion por defecto)
+Estado del HEALTHCHECK de la imagen tras el periodo inicial: healthy
+Usuario del proceso en el contenedor: app (sin privilegios)

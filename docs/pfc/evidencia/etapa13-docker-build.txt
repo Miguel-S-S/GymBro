@@ -1,0 +1,76 @@
+﻿Etapa 13 - docker build de las cuatro imagenes
+Commit: fbc918b7728af5a5910dcf423e16d7f1854c31d8
+Fecha: 2026-11-25 21:42:42 -03:00
+------------------------------------------------------------
+== docker build --progress=plain -t gymbro-api:verificacion -f GymBro.Api/Dockerfile .  (codigo 0, 74 s)
+System.Management.Automation.RemoteException
+#21 exporting to image
+#21 exporting layers
+#21 exporting layers 1.0s done
+#21 exporting manifest sha256:e939656df7f1a074e206429372f4b47f194398955ab96868b5cdffdf749108d0 0.0s done
+#21 exporting config sha256:90250361ee640506345e41edd5ed83ca426323992409af91aeb38eff8beaff4a 0.0s done
+#21 exporting attestation manifest sha256:fed50b4f60279340229f499f4dacfb61fe33ed226c1a54736e7f44ce202fe878 0.0s done
+#21 exporting manifest list sha256:c08f65fb58d0e0b327ec2d4664855001dbaf9b3267e54b53c26bd6432ff16a62
+#21 exporting manifest list sha256:c08f65fb58d0e0b327ec2d4664855001dbaf9b3267e54b53c26bd6432ff16a62 0.0s done
+#21 naming to docker.io/library/gymbro-api:verificacion done
+#21 unpacking to docker.io/library/gymbro-api:verificacion
+#21 unpacking to docker.io/library/gymbro-api:verificacion 0.2s done
+#21 DONE 1.3s
+System.Management.Automation.RemoteException
+View build details: docker-desktop://dashboard/build/desktop-linux/desktop-linux/w9xsowj6r4to1fdeol4tssk19
+Imagen: sha256:c08f65fb58d0e0b327ec2d4664855001dbaf9b3267e54b53c26bd6432ff16a62 104309133 bytes
+------------------------------------------------------------
+== docker build --progress=plain -t gymbro-ia:verificacion GymBro.IA  (codigo 0, 16 s)
+System.Management.Automation.RemoteException
+#11 exporting to image
+#11 exporting layers
+#11 exporting layers 1.1s done
+#11 exporting manifest sha256:6f3a9a153a37c777233b78e5153a51eedcce83a34aabc4a23386853c4d5616c5 0.0s done
+#11 exporting config sha256:2789697a6343d54286a6074b167f834b45e085d2891656f7aa03e442857dd043 0.0s done
+#11 exporting attestation manifest sha256:2975b144246c8214e87d70e9b2ea5b79e66d1d7fcdf7d9db5b61fcf7a6c06b22 0.0s done
+#11 exporting manifest list sha256:822023a327f1e825961b9ecb11609e63cad26279b31a2b3878830b6e96ce994d 0.0s done
+#11 naming to docker.io/library/gymbro-ia:verificacion
+#11 naming to docker.io/library/gymbro-ia:verificacion done
+#11 unpacking to docker.io/library/gymbro-ia:verificacion
+#11 unpacking to docker.io/library/gymbro-ia:verificacion 0.4s done
+#11 DONE 1.5s
+System.Management.Automation.RemoteException
+View build details: docker-desktop://dashboard/build/desktop-linux/desktop-linux/njal300coewro1gfq6bve8lw7
+Imagen: sha256:822023a327f1e825961b9ecb11609e63cad26279b31a2b3878830b6e96ce994d 49780346 bytes
+------------------------------------------------------------
+== docker build --progress=plain -t gymbro-web:verificacion GymBro.Web  (codigo 0, 49 s)
+#14 [ejecucion 3/3] COPY --from=compilacion /src/dist/gymbro-web/browser /usr/share/nginx/html
+#14 DONE 0.1s
+System.Management.Automation.RemoteException
+#15 exporting to image
+#15 exporting layers
+#15 exporting layers 0.3s done
+#15 exporting manifest sha256:63322e6f292da8ac4492ef99feaa24a80f679c7d353f89583cf7203cba7caf54 0.0s done
+#15 exporting config sha256:d298599a5cac4ca89f7b3fcfe7f04fcac35d8199df95bf5051086985ee8ed66d 0.0s done
+#15 exporting attestation manifest sha256:f5fbe26e8ef6d225b7f0243f77e4ac052c592419f9fff589f56851c093bccafe 0.0s done
+#15 exporting manifest list sha256:408b46fe867c89c0224363abe942d2a7d59fab0e9a853fc260c5948451b92ceb 0.0s done
+#15 naming to docker.io/library/gymbro-web:verificacion done
+#15 unpacking to docker.io/library/gymbro-web:verificacion 0.1s done
+#15 DONE 0.6s
+System.Management.Automation.RemoteException
+View build details: docker-desktop://dashboard/build/desktop-linux/desktop-linux/7hbkxtsrd4cj1lnpyj40qzors
+Imagen: sha256:408b46fe867c89c0224363abe942d2a7d59fab0e9a853fc260c5948451b92ceb 26081740 bytes
+------------------------------------------------------------
+== docker build --progress=plain -t gymbro-analitica:verificacion GymBro.Analytics  (codigo 0, 87 s)
+System.Management.Automation.RemoteException
+#13 exporting to image
+#13 exporting layers
+#13 exporting layers 28.5s done
+#13 exporting manifest sha256:c632991a62f471082d363f5b70fd4c486b96341f82f2b8c7340f6da37f97b2fc 0.0s done
+#13 exporting config sha256:3fbf964fb81041aca773f53744938772b7eb9cb3a4460dcd040d814fd940ba07 0.0s done
+#13 exporting attestation manifest sha256:194563af2af5c23958c40615f71d015f30b7884a160c26b409f1c5368ad37694 0.1s done
+#13 exporting manifest list sha256:691be7f66726127833c9498e17914969bb517a62d6957e7e490046c0ad7da06c
+#13 exporting manifest list sha256:691be7f66726127833c9498e17914969bb517a62d6957e7e490046c0ad7da06c 0.0s done
+#13 naming to docker.io/library/gymbro-analitica:verificacion done
+#13 unpacking to docker.io/library/gymbro-analitica:verificacion
+#13 unpacking to docker.io/library/gymbro-analitica:verificacion 8.2s done
+#13 DONE 36.9s
+System.Management.Automation.RemoteException
+View build details: docker-desktop://dashboard/build/desktop-linux/desktop-linux/djr3zvc12h6cur3hh9vakxcgl
+Imagen: sha256:691be7f66726127833c9498e17914969bb517a62d6957e7e490046c0ad7da06c 248344724 bytes
+------------------------------------------------------------

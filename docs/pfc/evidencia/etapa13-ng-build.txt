@@ -1,0 +1,43 @@
+﻿Etapa 13 - contenedores, CI y manual de despliegue, build y pruebas
+Comando: npx ng build
+Commit: fbc918b7728af5a5910dcf423e16d7f1854c31d8 (rama cierre-pfc)
+Estado del arbol de trabajo (git status --short):
+M GymBro.Web/angular.json
+?? CLAUDE.md
+?? docs/arquitectura/
+Fecha: 2026-11-25 21:42:06 -03:00
+Codigo de salida: 0
+Nota: docs/arquitectura/ sin rastrear (Etapa 14 en curso). GymBro.Web/angular.json modificado solo por fin de linea; CLAUDE.md no rastreado
+------------------------------------------------------------
+> Building...
+√ Building...
+Initial chunk files | Names                 |  Raw size | Estimated transfer size
+main-23WALZR4.js    | main                  | 363.65 kB |                70.43 kB
+chunk-BsuPhRNV.js   | -                     | 342.59 kB |                88.05 kB
+styles-56MVVM6I.css | styles                |  25.10 kB |                 3.46 kB
+
+                    | Initial total         | 731.34 kB |               161.94 kB
+
+Lazy chunk files    | Names                 |  Raw size | Estimated transfer size
+chunk-BNkvczJR.js   | -                     |  44.68 kB |                 9.56 kB
+chunk-DC_dM67p.js   | ejercicios-catalogo   |  42.37 kB |                10.56 kB
+chunk-DCr-_Hzl.js   | -                     |  41.07 kB |                 8.71 kB
+chunk-DMJ_ax-t.js   | -                     |  35.86 kB |                 8.83 kB
+chunk-DdCUTnJS.js   | socio-detalle         |  35.14 kB |                 8.66 kB
+chunk-DQiy82Uv.js   | sesion-registro       |  34.37 kB |                 9.91 kB
+chunk-HUMluU_C.js   | cuotas                |  32.76 kB |                 7.63 kB
+chunk-CQpKb5Th.js   | -                     |  30.09 kB |                 7.11 kB
+chunk-BHOl9M1r.js   | -                     |  29.39 kB |                 4.91 kB
+chunk-Da1EKW0Q.js   | mi-layout             |  29.35 kB |                 8.07 kB
+chunk-Dmav7TCW.js   | mi-asistencia         |  26.64 kB |                 8.93 kB
+chunk-9Ww2GJs-.js   | -                     |  26.53 kB |                 4.48 kB
+chunk-Be0G5VZV.js   | -                     |  15.21 kB |                 4.19 kB
+chunk-BrlxwrIl.js   | mi-bienestar          |  14.16 kB |                 4.51 kB
+chunk-W-3bw_60.js   | revisiones-pendientes |  13.03 kB |                 4.10 kB
+...and 38 more lazy chunks files. Use "--verbose" to show all the files.
+
+Application bundle generation complete. [9.061 seconds] - 2026-11-26T00:42:17.632Z
+
+Output location: C:\Users\miguel\source\repos\GymBro\GymBro.Web\dist\gymbro-web
+
+

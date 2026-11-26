@@ -1,0 +1,114 @@
+﻿Etapa 13 - docker compose config
+Commit: fbc918b7728af5a5910dcf423e16d7f1854c31d8
+Fecha: 2026-11-25 21:42:41 -03:00
+Docker: 29.6.2; Docker Compose version v5.3.1
+------------------------------------------------------------
+1) docker compose -f docker-compose.full.yml --env-file <variables ficticias> config  (codigo 0)
+name: gymbro
+services:
+  analitica:
+    build:
+      context: C:\Users\miguel\source\repos\GymBro\GymBro.Analytics
+      dockerfile: Dockerfile
+    depends_on:
+      db:
+        condition: service_healthy
+        required: true
+    environment:
+      ANALITICA_APP_CLAVE: ""
+      ANALITICA_APP_USUARIO: ""
+      ANALITICA_PG_CLAVE: <valor ficticio>
+      ANALITICA_PG_DB: gymbro_db
+      ANALITICA_PG_HOST: db
+      ANALITICA_PG_PORT: "5432"
+      ANALITICA_PG_USUARIO: gymbro_analitica_lectura
+    networks:
+      default: null
+    ports:
+      - mode: ingress
+        target: 8501
+        published: "8501"
+        protocol: tcp
+    restart: unless-stopped
+  api:
+    build:
+      context: C:\Users\miguel\source\repos\GymBro
+      dockerfile: GymBro.Api/Dockerfile
+    depends_on:
+      db:
+        condition: service_healthy
+        required: true
+    environment:
+      Asistencia__ClaveQr: ""
+      ConnectionStrings__DefaultConnection: Host=db;Port=5432;Database=gymbro_db;Username=postgres;Password=<valor ficticio>
+      Ia__UrlBase: http://ia:8000
+      Jwt__Key: <valor ficticio>
+      SuperAdmin__Email: ""
+      SuperAdmin__Password: ""
+    networks:
+      default: null
+    restart: unless-stopped
+  db:
+    environment:
+      POSTGRES_DB: gymbro_db
+      POSTGRES_PASSWORD: <valor ficticio>
+      POSTGRES_USER: postgres
+    healthcheck:
+      test:
+        - CMD-SHELL
+        - pg_isready -U postgres -d gymbro_db
+      timeout: 5s
+      interval: 10s
+      retries: 10
+    image: pgvector/pgvector:pg16
+    networks:
+      default: null
+    restart: unless-stopped
+    volumes:
+      - type: volume
+        source: gymbro_full_db
+        target: /var/lib/postgresql/data
+        volume: {}
+  ia:
+    build:
+      context: C:\Users\miguel\source\repos\GymBro\GymBro.IA
+      dockerfile: Dockerfile
+    environment:
+      OLLAMA_HOST: http://ollama:11434
+      OLLAMA_MODELO_GENERACION: ""
+    networks:
+      default: null
+    restart: unless-stopped
+  web:
+    build:
+      context: C:\Users\miguel\source\repos\GymBro\GymBro.Web
+      dockerfile: Dockerfile
+    depends_on:
+      api:
+        condition: service_healthy
+        required: true
+    networks:
+      default: null
+    ports:
+      - mode: ingress
+        target: 80
+        published: "8080"
+        protocol: tcp
+    restart: unless-stopped
+networks:
+  default:
+    name: gymbro_default
+volumes:
+  gymbro_full_db:
+    name: gymbro_gymbro_full_db
+------------------------------------------------------------
+2) con --profile ollama, servicios (codigo 0):
+db
+analitica
+api
+ia
+ollama
+web
+------------------------------------------------------------
+3) sin variables: debe fallar por POSTGRES_PASSWORD obligatoria (codigo 1):
+error while interpolating services.api.environment.Jwt__Key: required variable JWT_KEY is missing a value: Definir JWT_KEY (al menos 32 caracteres)

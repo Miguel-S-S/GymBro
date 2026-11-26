@@ -1,0 +1,20 @@
+﻿Etapa 13 - contenedores, CI y manual de despliegue, build y pruebas
+Comando: dotnet test GymBro.slnx --artifacts-path .tmp-artifacts --no-build
+Commit: fbc918b7728af5a5910dcf423e16d7f1854c31d8 (rama cierre-pfc)
+Estado del arbol de trabajo (git status --short):
+M GymBro.Web/angular.json
+?? CLAUDE.md
+?? docs/arquitectura/
+Fecha: 2026-11-25 21:40:22 -03:00
+Codigo de salida: 0
+Nota: docs/arquitectura/ sin rastrear (Etapa 14 en curso). GymBro.Web/angular.json modificado solo por fin de linea; CLAUDE.md no rastreado
+------------------------------------------------------------
+Serie de pruebas para C:\Users\miguel\source\repos\GymBro\.tmp-artifacts\bin\GymBro.Tests\debug\GymBro.Tests.dll (.NETCoreApp,Version=v10.0)
+Serie de pruebas para C:\Users\miguel\source\repos\GymBro\.tmp-artifacts\bin\GymBro.Tests.Integration\debug\GymBro.Tests.Integration.dll (.NETCoreApp,Version=v10.0)
+1 archivos de prueba en total coincidieron con el patrón especificado.
+1 archivos de prueba en total coincidieron con el patrón especificado.
+
+Correctas! - Con error:     0, Superado:   382, Omitido:     0, Total:   382, Duración: 408 ms - GymBro.Tests.dll (net10.0)
+
+Correctas! - Con error:     0, Superado:   585, Omitido:     0, Total:   585, Duración: 1 m 23 s - GymBro.Tests.Integration.dll (net10.0)
+

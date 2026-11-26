@@ -1134,6 +1134,77 @@ namespace GymBro.Infrastructure.Migrations
                         });
                 });
 
+            modelBuilder.Entity("GymBro.Domain.Entities.PrediccionAbandono", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<DateOnly>("Fecha")
+                        .HasColumnType("date")
+                        .HasColumnName("fecha");
+
+                    b.Property<DateTime>("FechaAlta")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("fecha_alta");
+
+                    b.Property<DateTime?>("FechaBaja")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("fecha_baja");
+
+                    b.Property<DateTime?>("FechaModificacion")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("fecha_modificacion");
+
+                    b.Property<string>("OrigenDatos")
+                        .IsRequired()
+                        .HasMaxLength(30)
+                        .HasColumnType("character varying(30)")
+                        .HasColumnName("origen_datos");
+
+                    b.Property<decimal>("Puntaje")
+                        .HasPrecision(5, 4)
+                        .HasColumnType("numeric(5,4)")
+                        .HasColumnName("puntaje");
+
+                    b.Property<Guid>("SocioId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("socio_id");
+
+                    b.Property<int>("UsuarioAlta")
+                        .HasColumnType("integer")
+                        .HasColumnName("usuario_alta");
+
+                    b.Property<int?>("UsuarioBaja")
+                        .HasColumnType("integer")
+                        .HasColumnName("usuario_baja");
+
+                    b.Property<int?>("UsuarioModificacion")
+                        .HasColumnType("integer")
+                        .HasColumnName("usuario_modificacion");
+
+                    b.Property<string>("VersionModelo")
+                        .IsRequired()
+                        .HasMaxLength(80)
+                        .HasColumnType("character varying(80)")
+                        .HasColumnName("version_modelo");
+
+                    b.HasKey("Id")
+                        .HasName("pk_prediccion_abandono");
+
+                    b.HasIndex("SocioId", "Fecha", "VersionModelo")
+                        .IsUnique()
+                        .HasDatabaseName("ix_prediccion_abandono_socio_id_fecha_version_modelo");
+
+                    b.ToTable("prediccion_abandono", null, t =>
+                        {
+                            t.HasCheckConstraint("CK_PrediccionAbandono_OrigenDatos", "origen_datos IN ('Sintetico', 'ValidacionFuncional', 'DatasetExterno', 'Real')");
+
+                            t.HasCheckConstraint("CK_PrediccionAbandono_Puntaje", "puntaje >= 0 AND puntaje <= 1");
+                        });
+                });
+
             modelBuilder.Entity("GymBro.Domain.Entities.PrescripcionEjercicio", b =>
                 {
                     b.Property<Guid>("Id")
@@ -2252,6 +2323,18 @@ namespace GymBro.Infrastructure.Migrations
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired()
                         .HasConstraintName("fk_mediciones_fisicas_socios_socio_id");
+
+                    b.Navigation("Socio");
+                });
+
+            modelBuilder.Entity("GymBro.Domain.Entities.PrediccionAbandono", b =>
+                {
+                    b.HasOne("GymBro.Domain.Entities.Socio", "Socio")
+                        .WithMany()
+                        .HasForeignKey("SocioId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired()
+                        .HasConstraintName("fk_prediccion_abandono_socios_socio_id");
 
                     b.Navigation("Socio");
                 });

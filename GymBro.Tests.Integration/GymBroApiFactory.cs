@@ -28,6 +28,9 @@ namespace GymBro.Tests.Integration
 
         private readonly string _datasetsVacios = Directory.CreateTempSubdirectory("gymbro-tests-").FullName;
 
+        /// <summary>Etapa 10b-1: cadena del PostgreSQL descartable con el usuario administrador (para probar scripts y roles).</summary>
+        public string CadenaConexionAdmin => _db.GetConnectionString();
+
         /// <summary>Carpeta de datasets de la API levantada (por defecto, vacía). Las subclases pueden copiar CSV acá.</summary>
         protected string CarpetaDatasets => _datasetsVacios;
 

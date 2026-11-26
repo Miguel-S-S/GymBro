@@ -1,0 +1,11 @@
+﻿# GymBro.Analytics (Etapas 10b-1 y 12). Versiones fijadas; verificadas con Python 3.14.6.
+# Datos y modelos
+numpy==2.5.2
+pandas==3.0.5
+scipy==1.18.1
+scikit-learn==1.9.1
+joblib==1.6.0
+# Acceso a PostgreSQL (rol de solo lectura del esquema analitica)
+psycopg2-binary==2.9.12
+# Aplicacion de analisis y tableros
+streamlit==1.67.0

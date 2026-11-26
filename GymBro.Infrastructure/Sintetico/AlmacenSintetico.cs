@@ -158,6 +158,8 @@ namespace GymBro.Infrastructure.Sintetico
         }
 
         /// <summary>Tablas agregadas por etapas posteriores que referencian al socio (por ejemplo, prediccion_abandono).</summary>
-        private Task EliminarExtraPorSocioAsync(List<Guid> socios) => Task.CompletedTask;
+        private Task EliminarExtraPorSocioAsync(List<Guid> socios) =>
+            // Etapa 10b-1: puntajes de abandono de los socios sinteticos.
+            _db.PrediccionesAbandono.IgnoreQueryFilters().Where(p => socios.Contains(p.SocioId)).ExecuteDeleteAsync();
     }
 }

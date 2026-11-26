@@ -40,6 +40,7 @@ namespace GymBro.Infrastructure.Persistence
         public DbSet<EjercicioProtocolo> EjerciciosProtocolo { get; set; }
         public DbSet<Asistencia> Asistencias { get; set; }
         public DbSet<CuotaSocio> CuotasSocio { get; set; }
+        public DbSet<PrediccionAbandono> PrediccionesAbandono { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -430,7 +431,27 @@ namespace GymBro.Infrastructure.Persistence
                 e.HasIndex(c => new { c.GimnasioId, c.Anio, c.Mes });
                 e.HasIndex(c => new { c.GimnasioId, c.Estado, c.Vencimiento });
             });
-        }
+
+            // Etapa 10b-1: puntajes de riesgo de abandono (los escribe GymBro.Analytics con su propio rol; sin endpoint).
+            modelBuilder.Entity<PrediccionAbandono>(e =>
+            {
+                e.ToTable("prediccion_abandono", t =>
+                {
+                    t.HasCheckConstraint("CK_PrediccionAbandono_Puntaje", "puntaje >= 0 AND puntaje <= 1");
+                    t.HasCheckConstraint("CK_PrediccionAbandono_OrigenDatos", GuardaEnums.CondicionTexto<OrigenDatos>("origen_datos"));
+                });
+                e.HasQueryFilter(p => p.FechaBaja == null && (
+                    _actual.EsProcesoDeSistema
+                    || _actual.Rol == RolUsuario.SuperAdministrador
+                    || (_actual.GimnasioId != null && p.Socio.GimnasioId == _actual.GimnasioId)));
+                e.Property(p => p.Fecha).HasColumnType("date");
+                e.Property(p => p.Puntaje).HasPrecision(5, 4);
+                e.Property(p => p.VersionModelo).HasMaxLength(80).IsRequired();
+                e.Property(p => p.OrigenDatos).HasConversion<string>().HasMaxLength(30);
+                e.HasOne(p => p.Socio).WithMany().HasForeignKey(p => p.SocioId).OnDelete(DeleteBehavior.Restrict);
+                // Un puntaje por socio, fecha y version (la puntuacion por lotes es idempotente).
+                e.HasIndex(p => new { p.SocioId, p.Fecha, p.VersionModelo }).IsUnique();
+            });        }
 
         /// <summary>
         /// Alertas de las reglas de seguridad (Etapa 10a). Datos de salud: mismo alcance que las sesiones (el propio socio o
